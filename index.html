@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#4d17d6">
+  <title>Vacantes by AryC // ATS Personal</title>
+  <meta name="description" content="Sistema de gestión personal de vacantes y postulaciones de inicio a fin. Ingesta inteligente con IA, tablero Kanban y generador dinámico de CVs.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Site Header
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="#" class="brand-wrapper" id="brandLink">
+        <div class="brand-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
+        <div class="brand-text-col">
+          <div class="brand-title">
+            Vacantes <span class="accent-text">by AryC</span>
+          </div>
+          <div class="brand-subtitle">
+            <span class="live-pulse">
+              <span class="live-pulse-ring"></span>
+              <span class="live-pulse-core"></span>
+            </span>
+            <span>Búsqueda Activa // 2026</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btnOpenIntake">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Nueva Vacante</span>
+        </button>
+        <button class="btn btn-outline btn-icon-only" id="btnSettings" title="Configuración">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       KPI Banner
+       ======================================================================== -->
+  <section class="kpi-section">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-value" id="kpiTotal">16</span>
+          <span class="kpi-label">Total Vacantes</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon pink">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-value" id="kpiApplied">10</span>
+          <span class="kpi-label">Postuladas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-value" id="kpiInterviews">4</span>
+          <span class="kpi-label">En Entrevistas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon yellow">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-value" id="kpiResponseRate">25%</span>
+          <span class="kpi-label">Tasa Conversión</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Nav Controls & Filters
+       ======================================================================== -->
+  <section class="nav-controls-section">
+    <div class="tabs-wrapper">
+      <button class="tab-btn active" data-view="kanban">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+          <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+          <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+        </svg>
+        <span>Tablero Kanban</span>
+      </button>
+
+      <button class="tab-btn" data-view="list">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>Vista Lista</span>
+      </button>
+
+      <button class="tab-btn" data-view="intake">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span>Smart Intake (IA)</span>
+      </button>
+
+      <button class="tab-btn" data-view="cv">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Generador CV</span>
+      </button>
+    </div>
+
+    <div class="filter-search-wrapper">
+      <div class="search-input-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología...">
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Main Content Views
+       ======================================================================== -->
+  <main class="main-content">
+    
+    <!-- View 1: Kanban Board -->
+    <div class="view-panel active" id="view-kanban">
+      <div class="kanban-board" id="kanbanBoard">
+        <!-- Columns will be injected by JavaScript -->
+      </div>
+    </div>
+
+    <!-- View 2: List View -->
+    <div class="view-panel" id="view-list">
+      <div class="table-container">
+        <table class="data-table" id="vacanciesTable">
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Puesto</th>
+              <th>Modalidad</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="vacanciesTableBody">
+            <!-- Rows injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- View 3: Smart Intake (AI Multimodal) -->
+    <div class="view-panel" id="view-intake">
+      <div class="intake-card">
+        <div class="intake-header">
+          <h2>Módulo de Ingesta Inteligente</h2>
+          <p>Pega la descripción de la vacante, notas o una <strong>captura de pantalla</strong> (Ctrl + V). La IA extraerá los datos sin formularios manuales.</p>
+        </div>
+
+        <div class="dropzone-box" id="intakeDropzone">
+          <input type="file" id="fileInput" accept="image/*" style="display:none">
+          <div class="dropzone-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <div class="dropzone-title">Pega una captura de pantalla (Ctrl+V) o haz clic para subir</div>
+          <div class="dropzone-hint">Soporta capturas de LinkedIn, correos o portales de empleo</div>
+
+          <div class="image-preview-area" id="imagePreviewArea">
+            <img id="previewImg" src="" alt="Captura de pantalla">
+            <button class="remove-img-btn" id="btnRemoveImg" type="button">&times;</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">URL de la Vacante (Opcional)</label>
+          <input type="url" id="intakeUrl" class="form-control" placeholder="https://www.linkedin.com/jobs/view/...">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descripción Masiva o Chat del Empleo</label>
+          <textarea id="intakeText" class="form-control" placeholder="Pega aquí el texto completo de la vacante, requisitos, salario o mensajes del reclutador..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content: flex-end; gap:0.75rem;">
+          <button class="btn btn-outline" id="btnClearIntake" type="button">Limpiar</button>
+          <button class="btn btn-primary" id="btnProcessIntake" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+            </svg>
+            <span>Extraer y Guardar con IA</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 4: CV Generator -->
+    <div class="view-panel" id="view-cv">
+      <div class="cv-container">
+        <div class="cv-toolbar">
+          <div style="display:flex; align-items:center; gap: 0.75rem;">
+            <label class="form-label" style="margin:0;">Adaptar para vacante:</label>
+            <select id="cvVacancySelect" class="form-control" style="width: auto; padding: 0.4rem 0.8rem;">
+              <option value="general">CV Perfil General (Tech & Banking)</option>
+              <!-- Filled dynamically with vacancies -->
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btnPrintCv">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Descargar PDF</span>
+          </button>
+        </div>
+
+        <!-- Rendered CV Paper for ATS -->
+        <div class="cv-paper" id="cvPaper">
+          <div class="cv-header">
+            <div>
+              <div class="cv-name">Arianna Clemente</div>
+              <div class="cv-role" id="cvHeaderRole">Full Stack Developer & TI Specialist</div>
+            </div>
+            <div class="cv-contacts">
+              <div>Caracas, Venezuela &bull; Remoto Internacional</div>
+              <div>github.com/aryclemente</div>
+              <div>linkedin.com/in/aryclemente</div>
+            </div>
+          </div>
+
+          <div class="cv-section">
+            <div class="cv-section-title">Resumen Profesional</div>
+            <p id="cvSummaryText" style="font-size:0.875rem;">
+              Especialista en Desarrollo de Soluciones Tecnológicas, aplicaciones web escalables y optimización de plataformas de gestión. Amplia experiencia en desarrollo Frontend y Backend, integración de APIs de Inteligencia Artificial, y diseño de flujos operativos para plataformas educativas y bancarias.
+            </p>
+          </div>
+
+          <div class="cv-section">
+            <div class="cv-section-title">Experiencia Destacada</div>
+            <div class="cv-job">
+              <div class="cv-job-header">
+                <span>Especialista de Desarrollo TI & Soluciones Web</span>
+                <span>2023 &ndash; Presente</span>
+              </div>
+              <div class="cv-job-sub">
+                <span>Proyectos de Modernización & Consultoría Técnica</span>
+                <span>Remoto</span>
+              </div>
+              <ul class="cv-bullets" id="cvExperienceBullets">
+                <li>Diseño e implementación de arquitecturas web modernas con optimización de rendimiento y SEO técnico.</li>
+                <li>Desarrollo de integraciones automatizadas con modelos de IA para ingesta de datos y aceleración de flujos.</li>
+                <li>Gestión de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="cv-section">
+            <div class="cv-section-title">Competencias Clave</div>
+            <div style="font-size:0.875rem; color:#334155;" id="cvSkillsList">
+              <strong>Frontend & Web:</strong> JavaScript (ES6+), HTML5, CSS3 Moderno, Responsive Design, React, WordPress.<br>
+              <strong>Backend & Datos:</strong> PHP, Python, REST APIs, JSON, SQL, Optimización de Rendimiento.<br>
+              <strong>Especialidades:</strong> Integración IA (Gemini API), SEO Técnico, Git/GitHub, Netlify, ModernCV / ATS Optimization.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       Mobile Bottom Navigation
+       ======================================================================== -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-view="kanban">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+        <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+        <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+      </svg>
+      <span>Kanban</span>
+    </button>
+    <button class="mobile-nav-item" data-view="list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Lista</span>
+    </button>
+    <button class="mobile-nav-item" data-view="intake">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      <span>Ingesta IA</span>
+    </button>
+    <button class="mobile-nav-item" data-view="cv">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+      <span>Mi CV</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================================
+       Vacancy Detail Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="vacancyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalJobTitle">Detalle de la Vacante</h3>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseModal">&times;</button>
+      </div>
+      <div class="modal-body" id="modalJobContent">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnDeleteVacancy" style="color:var(--error); margin-right:auto;">Eliminar</button>
+        <button class="btn btn-purple" id="btnOpenUrl" target="_blank">Visitar Oferta</button>
+        <button class="btn btn-primary" id="btnSaveModalChanges">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

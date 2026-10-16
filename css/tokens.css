@@ -1,0 +1,101 @@
+:root {
+  /* ==========================================================================
+     Electric Neo-Architect Design Tokens (DESIGN.md)
+     ========================================================================== */
+
+  /* Palette */
+  --surface: #f8f9fd;
+  --surface-dim: #d9dade;
+  --surface-bright: #f8f9fd;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f3f7;
+  --surface-container: #edeef2;
+  --surface-container-high: #e7e8ec;
+  --surface-container-highest: #e1e2e6;
+  
+  --on-surface: #191c1f;
+  --on-surface-variant: #484455;
+  --inverse-surface: #2e3134;
+  --inverse-on-surface: #eff1f5;
+  --outline: #797487;
+  --outline-variant: #c9c3d8;
+
+  /* Primary Accent: Electric Purple */
+  --primary: #4d17d6;
+  --primary-dark: #3600a5;
+  --on-primary: #ffffff;
+  --primary-container: #4d17d6;
+  --on-primary-container: #bfb1ff;
+  --inverse-primary: #cabeff;
+
+  /* Secondary Accent: Cyan / Deep Teal */
+  --secondary: #00e3fd;
+  --on-secondary: #001f24;
+  --secondary-container: #01e3fd;
+  --on-secondary-container: #00616d;
+  --deep-teal: #006875;
+  --deep-teal-dark: #004f58;
+
+  /* Tertiary / CTA: Vibrant Hot Pink */
+  --tertiary: #FF2E93;
+  --tertiary-hover: #E00070;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #960051;
+  --on-tertiary-container: #ff9fbf;
+
+  /* Status Accents */
+  --mint-turquoise: #00D2B4;
+  --mint-turquoise-bg: rgba(0, 210, 180, 0.12);
+  --dark-violet: #2A0845;
+  --darkest-violet: #19022c;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error: #ffffff;
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.12);
+
+  /* Neutrals & Borders */
+  --border-slate: #E2E8F0;
+  --border-light: rgba(226, 232, 240, 0.8);
+  --text-dark-primary: #0F172A;
+  --text-dark-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* Typography */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Corner Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;   /* Buttons & Inputs */
+  --radius-xl: 1rem;      /* Content Cards */
+  --radius-2xl: 1.5rem;   /* Major Sections */
+  --radius-full: 9999px;  /* Pills & Badges */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px 0 rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 30px -10px rgba(15, 23, 42, 0.12);
+  --shadow-primary: 0 8px 20px -4px rgba(77, 23, 214, 0.35);
+  --shadow-pink: 0 8px 18px -4px rgba(255, 46, 147, 0.4);
+  --shadow-cyan: 0 8px 18px -4px rgba(0, 227, 253, 0.35);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-dark-bg: rgba(42, 8, 69, 0.92);
+  --glass-dark-border: rgba(255, 255, 255, 0.12);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
