@@ -538,6 +538,54 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.25rem;
 }
 
+.job-card[draggable="true"] {
+  cursor: grab;
+}
+
+.job-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.job-card.dragging {
+  opacity: 0.35;
+  transform: scale(0.96);
+  border-color: var(--primary);
+}
+
+.col-cards-list.drag-over-col {
+  background: rgba(77, 23, 214, 0.06);
+  border-radius: var(--radius-lg);
+  outline: 2px dashed var(--primary);
+  outline-offset: -2px;
+}
+
+.card-quick-move {
+  background: var(--surface-container-low);
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-dark-secondary);
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.card-quick-move:hover {
+  border-color: var(--primary);
+}
+
+.cv-paper.editing-mode {
+  outline: 2px dashed var(--primary);
+  box-shadow: 0 0 0 6px rgba(77, 23, 214, 0.1);
+}
+
+.cv-paper.editing-mode [contenteditable="true"]:focus {
+  outline: 1px solid var(--tertiary);
+  background: rgba(255, 46, 147, 0.05);
+  border-radius: 4px;
+}
+
 .card-footer {
   display: flex;
   align-items: center;
@@ -547,6 +595,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
 
 /* ==========================================================================
    Table List View

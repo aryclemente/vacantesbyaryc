@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentView = 'kanban';
   let searchQuery = '';
+  let selectedPriorityFilter = 'all';
+  let selectedModalityFilter = 'all';
   let activeModalVacancyId = null;
   let intakePastedImageBase64 = null;
   let pendingExtractedJob = null;
+  let isCvEditMode = false;
 
   // Cache DOM elements
   const kanbanBoardEl = document.getElementById('kanbanBoard');
   const tableBodyEl = document.getElementById('vacanciesTableBody');
   const searchInputEl = document.getElementById('searchInput');
+  const filterPriorityEl = document.getElementById('filterPriority');
+  const filterModalityEl = document.getElementById('filterModality');
   const tabBtns = document.querySelectorAll('.tab-btn');
   const mobileNavBtns = document.querySelectorAll('.mobile-nav-item');
   const viewPanels = document.querySelectorAll('.view-panel');
@@ -81,11 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnResetSeed = document.getElementById('btnResetSeed');
 
   // CV elements
+  const cvPaper = document.getElementById('cvPaper');
   const cvVacancySelect = document.getElementById('cvVacancySelect');
   const btnPrintCv = document.getElementById('btnPrintCv');
+  const btnToggleEditCv = document.getElementById('btnToggleEditCv');
+  const editCvBtnText = document.getElementById('editCvBtnText');
+  const btnResetCvContent = document.getElementById('btnResetCvContent');
   const cvHeaderRole = document.getElementById('cvHeaderRole');
   const cvSummaryText = document.getElementById('cvSummaryText');
   const cvExperienceBullets = document.getElementById('cvExperienceBullets');
+  const cvSkillsList = document.getElementById('cvSkillsList');
 
   // =========================================================================
   // Toast Notification System
@@ -115,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    }, 3200);
   }
 
   // =========================================================================
@@ -155,22 +165,47 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // Render Kanban Board
+  // Filter Logic
+  // =========================================================================
+  function getFilteredVacancies() {
+    const all = window.appStorage.getVacancies();
+    return all.filter(v => {
+      // Search query
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = (
+          v.puesto.toLowerCase().includes(q) ||
+          v.empresa.toLowerCase().includes(q) ||
+          (v.modalidad && v.modalidad.toLowerCase().includes(q)) ||
+          (v.notas && v.notas.toLowerCase().includes(q)) ||
+          (v.requisitos && v.requisitos.some(r => r.toLowerCase().includes(q)))
+        );
+        if (!matchesSearch) return false;
+      }
+
+      // Priority filter
+      if (selectedPriorityFilter !== 'all') {
+        if (v.prioridad !== selectedPriorityFilter) return false;
+      }
+
+      // Modality filter
+      if (selectedModalityFilter !== 'all') {
+        if (!v.modalidad || !v.modalidad.toLowerCase().includes(selectedModalityFilter.toLowerCase())) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  // =========================================================================
+  // Render Kanban Board with Drag & Drop & Quick Status
   // =========================================================================
   function renderKanban() {
     if (!kanbanBoardEl) return;
     const allVacancies = window.appStorage.getVacancies();
-
-    const filtered = allVacancies.filter(v => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        v.puesto.toLowerCase().includes(q) ||
-        v.empresa.toLowerCase().includes(q) ||
-        (v.modalidad && v.modalidad.toLowerCase().includes(q)) ||
-        (v.notas && v.notas.toLowerCase().includes(q))
-      );
-    });
+    const filtered = getFilteredVacancies();
 
     kanbanBoardEl.innerHTML = COLUMNS.map(col => {
       const colVacancies = filtered.filter(v => v.estado === col.id);
@@ -191,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
 
     attachCardClickEvents();
+    attachDragAndDropEvents();
     updateKpis(allVacancies);
   }
 
@@ -199,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const priorityLabel = v.prioridad === 'high' ? 'Alta' : v.prioridad === 'med' ? 'Media' : 'Baja';
 
     return `
-      <div class="job-card" data-id="${v.id}">
+      <div class="job-card" draggable="true" data-id="${v.id}">
         <div class="card-top">
           <span class="company-badge">${escapeHtml(v.empresa)}</span>
           <span class="priority-pill ${priorityClass}">${priorityLabel}</span>
@@ -217,30 +253,78 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
           ` : ''}
         </div>
+        
         <div class="card-footer">
-          <span>${v.fecha || 'Reciente'}</span>
-          <span style="color:var(--primary); font-weight:700;">Ver detalle &rarr;</span>
+          <!-- Quick Status Select for Mobile & 1-tap Changes -->
+          <select class="card-quick-move" onclick="event.stopPropagation();" onchange="window.moveVacancyStatus('${v.id}', this.value)">
+            ${COLUMNS.map(c => `
+              <option value="${c.id}" ${v.estado === c.id ? 'selected' : ''}>Mover: ${c.label.split('/')[0].trim()}</option>
+            `).join('')}
+          </select>
+          <span style="color:var(--primary); font-weight:700;">Ver &rarr;</span>
         </div>
       </div>
     `;
   }
 
   // =========================================================================
+  // Drag and Drop (Native HTML5)
+  // =========================================================================
+  function attachDragAndDropEvents() {
+    const cards = document.querySelectorAll('.job-card[draggable="true"]');
+    const lists = document.querySelectorAll('.col-cards-list');
+
+    cards.forEach(card => {
+      card.addEventListener('dragstart', (e) => {
+        card.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        lists.forEach(l => l.classList.remove('drag-over-col'));
+      });
+    });
+
+    lists.forEach(list => {
+      list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        list.classList.add('drag-over-col');
+      });
+
+      list.addEventListener('dragleave', () => {
+        list.classList.remove('drag-over-col');
+      });
+
+      list.addEventListener('drop', (e) => {
+        e.preventDefault();
+        list.classList.remove('drag-over-col');
+        const vacancyId = e.dataTransfer.getData('text/plain');
+        const targetStatus = list.dataset.status;
+
+        if (vacancyId && targetStatus) {
+          window.moveVacancyStatus(vacancyId, targetStatus);
+        }
+      });
+    });
+  }
+
+  window.moveVacancyStatus = function(vacancyId, newStatus) {
+    const vacancy = window.appStorage.updateVacancy(vacancyId, { estado: newStatus });
+    if (vacancy) {
+      const col = COLUMNS.find(c => c.id === newStatus);
+      showToast(`Movida a: ${col ? col.label : newStatus}`);
+    }
+  };
+
+  // =========================================================================
   // Render Table List
   // =========================================================================
   function renderTable() {
     if (!tableBodyEl) return;
-    const allVacancies = window.appStorage.getVacancies();
-
-    const filtered = allVacancies.filter(v => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        v.puesto.toLowerCase().includes(q) ||
-        v.empresa.toLowerCase().includes(q) ||
-        (v.modalidad && v.modalidad.toLowerCase().includes(q))
-      );
-    });
+    const filtered = getFilteredVacancies();
 
     tableBodyEl.innerHTML = filtered.map(v => {
       const col = COLUMNS.find(c => c.id === v.estado) || COLUMNS[0];
@@ -285,11 +369,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // Search Filter
+  // Filters and Search Listener
   // =========================================================================
   if (searchInputEl) {
     searchInputEl.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim();
+      renderKanban();
+      renderTable();
+    });
+  }
+
+  if (filterPriorityEl) {
+    filterPriorityEl.addEventListener('change', (e) => {
+      selectedPriorityFilter = e.target.value;
+      renderKanban();
+      renderTable();
+    });
+  }
+
+  if (filterModalityEl) {
+    filterModalityEl.addEventListener('change', (e) => {
+      selectedModalityFilter = e.target.value;
       renderKanban();
       renderTable();
     });
@@ -300,7 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   function attachCardClickEvents() {
     document.querySelectorAll('.job-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        // Prevent opening if clicking on status move select
+        if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
         const id = card.dataset.id;
         openVacancyModal(id);
       });
@@ -368,8 +470,22 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <div class="form-group">
+        <label class="form-label">Requisitos & Tecnologías</label>
+        <div style="margin-bottom:0.4rem;">
+          ${(vacancy.requisitos || []).map(r => `<span class="tag-pill">${escapeHtml(r)}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Notas de Seguimiento & Estrategia</label>
         <textarea id="mNotas" class="form-control" rows="3">${escapeHtml(vacancy.notas || '')}</textarea>
+      </div>
+
+      <div style="background:var(--surface-container-low); padding:0.75rem 1rem; border-radius:var(--radius-lg); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.8125rem; font-weight:600; color:var(--text-dark-secondary);">¿Generar CV adaptado para esta vacante?</span>
+        <button class="btn btn-purple" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="window.generateCvForVacancy('${vacancy.id}')">
+          Adaptar CV &rarr;
+        </button>
       </div>
     `;
 
@@ -381,6 +497,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     vacancyModal.classList.add('open');
+  };
+
+  window.generateCvForVacancy = function(id) {
+    closeModal();
+    switchView('cv');
+    cvVacancySelect.value = id;
+    updateCvPreview();
   };
 
   function closeModal() {
@@ -491,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
     imagePreviewArea.style.display = 'none';
   });
 
-  // Procesamiento con IA / Heurístico
   btnProcessIntake.addEventListener('click', async () => {
     const text = intakeText.value.trim();
     const url = intakeUrl.value.trim();
@@ -505,7 +627,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnProcessIntake.innerHTML = '<span>Extrayendo información con IA...</span>';
 
     try {
-      // Llamada al motor de extracción
       const extracted = await window.aiJobParser.extractJobDetails({
         text,
         imageBase64: intakePastedImageBase64,
@@ -545,9 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ? 'Extracción multimodal exitosa vía Google Gemini API' 
       : 'Extracción inteligente local (Heurística)';
 
-    // Render chips
     renderRequisitosChips(job.requisitos || []);
-
     intakeConfirmModal.classList.add('open');
   }
 
@@ -568,7 +687,6 @@ document.addEventListener('DOMContentLoaded', () => {
   btnSaveConfirmedJob.addEventListener('click', () => {
     if (!pendingExtractedJob) return;
 
-    // Additional techs from input
     const extraTechs = confirmRequisitosInput.value
       .split(',')
       .map(t => t.trim())
@@ -656,7 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // CV Generator
+  // CV Generator (Tailored Content & Inline Edit)
   // =========================================================================
   function populateCvSelector() {
     const vacancies = window.appStorage.getVacancies();
@@ -681,23 +799,78 @@ document.addEventListener('DOMContentLoaded', () => {
         <li>Diseño e implementación de arquitecturas web modernas con optimización de rendimiento y SEO técnico.</li>
         <li>Desarrollo de integraciones automatizadas con modelos de IA para ingesta de datos y aceleración de flujos.</li>
         <li>Gestión de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript).</li>
+        <li>Liderazgo en resolución de incidentes técnicos y despliegue ágil con Git y CI/CD.</li>
+      `;
+      cvSkillsList.innerHTML = `
+        <strong>Frontend & Web:</strong> JavaScript (ES6+), HTML5 Semántico, CSS3 Moderno, Responsive Design, React, WordPress.<br>
+        <strong>Backend & Datos:</strong> PHP, Python, REST APIs, JSON, SQL, Optimización de Rendimiento.<br>
+        <strong>Especialidades:</strong> Integración IA (Gemini API), SEO Técnico, Git/GitHub, Netlify, ModernCV / ATS Optimization.
       `;
     } else {
       const vacancies = window.appStorage.getVacancies();
       const vacancy = vacancies.find(v => v.id === selectedId);
       if (vacancy) {
         cvHeaderRole.textContent = `${vacancy.puesto} | Arianna Clemente`;
-        cvSummaryText.textContent = `Especialista en ${vacancy.puesto} orientada a resultados para ${vacancy.empresa}. Sólida trayectoria optimizando procesos tecnológicos, desarrollo de plataformas de alta disponibilidad y soluciones adaptadas a los estándares de la industria.`;
+        
+        // Auto-tailored summary
+        cvSummaryText.textContent = `Especialista en ${vacancy.puesto} con enfoque orientado a resultados para ${vacancy.empresa}. Sólida trayectoria optimizando procesos tecnológicos, desarrollo de plataformas de alta disponibilidad y soluciones adaptadas a los estándares de ${vacancy.empresa}. Dominio comprobado en trabajo en equipo ágil y entrega continua.`;
+
+        // Highlight company requirements in bullets
+        const reqsText = (vacancy.requisitos && vacancy.requisitos.length > 0)
+          ? vacancy.requisitos.slice(0, 3).join(', ')
+          : 'desarrollo full stack y metodologías ágiles';
+
         cvExperienceBullets.innerHTML = `
-          <li>Adaptación directa para los requerimientos de <strong>${escapeHtml(vacancy.empresa)}</strong> (${escapeHtml(vacancy.puesto)}).</li>
-          <li>Desarrollo de integraciones eficientes, APIs y modernización de interfaces web.</li>
-          <li>Estrategias de despliegue continuo, buenas prácticas de desarrollo ágil y testing.</li>
+          <li>Adaptación y entrega de soluciones para <strong>${escapeHtml(vacancy.empresa)}</strong> aplicando ${escapeHtml(reqsText)}.</li>
+          <li>Desarrollo de integraciones eficientes, APIs y modernización de interfaces web de alto rendimiento.</li>
+          <li>Estrategias de despliegue continuo, buenas prácticas de desarrollo ágil y aseguramiento de calidad.</li>
+          <li>Optimización de flujos de trabajo con automatizaciones y resolución proactiva de incidentes.</li>
+        `;
+
+        // Tailored skills
+        const topSkills = (vacancy.requisitos || []).join(', ');
+        cvSkillsList.innerHTML = `
+          <strong>Tecnologías Relevantes para ${escapeHtml(vacancy.empresa)}:</strong> ${topSkills ? topSkills + ', ' : ''}JavaScript, PHP, React, REST APIs, SQL.<br>
+          <strong>Habilidades Clave:</strong> Desarrollo Web Ágil, Integración de IA, Optimización SEO, Git, Trabajo Remoto Internacional.<br>
+          <strong>Metodologías:</strong> SCRUM, Testing, Documentación Técnica, Enfoque en Escalabilidad.
         `;
       }
     }
   }
 
+  // Toggle inline editing on the CV paper
+  btnToggleEditCv.addEventListener('click', () => {
+    isCvEditMode = !isCvEditMode;
+    cvPaper.classList.toggle('editing-mode', isCvEditMode);
+
+    const editableElements = [cvHeaderRole, cvSummaryText, cvExperienceBullets, cvSkillsList];
+    editableElements.forEach(el => {
+      el.setAttribute('contenteditable', isCvEditMode ? 'true' : 'false');
+    });
+
+    if (isCvEditMode) {
+      editCvBtnText.textContent = 'Terminar Edición';
+      btnToggleEditCv.classList.add('btn-purple');
+      btnToggleEditCv.classList.remove('btn-outline');
+      showToast('Modo edición activado: haz clic en cualquier texto del CV para cambiarlo.', 'info');
+    } else {
+      editCvBtnText.textContent = 'Editar Texto';
+      btnToggleEditCv.classList.remove('btn-purple');
+      btnToggleEditCv.classList.add('btn-outline');
+      showToast('Texto guardado temporalmente para descargar en PDF.', 'success');
+    }
+  });
+
+  btnResetCvContent.addEventListener('click', () => {
+    updateCvPreview();
+    showToast('CV restablecido a la plantilla original.', 'info');
+  });
+
   btnPrintCv.addEventListener('click', () => {
+    // If edit mode was on, turn it off for a pristine print
+    if (isCvEditMode) {
+      btnToggleEditCv.click();
+    }
     window.print();
   });
 
