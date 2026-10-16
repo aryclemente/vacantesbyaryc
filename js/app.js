@@ -93,13 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const headerCloudLabel = document.getElementById('headerCloudLabel');
   const modalCloudDot = document.getElementById('modalCloudDot');
   const modalCloudSubtext = document.getElementById('modalCloudSubtext');
-  const tabBtnAccount = document.getElementById('tabBtnAccount');
-  const tabBtnConfig = document.getElementById('tabBtnConfig');
-  const cloudTabAccount = document.getElementById('cloudTabAccount');
-  const cloudTabConfig = document.getElementById('cloudTabConfig');
   const cloudAuthLoggedOut = document.getElementById('cloudAuthLoggedOut');
   const cloudAuthLoggedIn = document.getElementById('cloudAuthLoggedIn');
-  const cloudSetupWarning = document.getElementById('cloudSetupWarning');
   const btnToggleMagicLink = document.getElementById('btnToggleMagicLink');
   const btnTogglePassword = document.getElementById('btnTogglePassword');
   const formMagicLink = document.getElementById('formMagicLink');
@@ -114,9 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSignOut = document.getElementById('btnSignOut');
   const btnMigrateSeedToCloud = document.getElementById('btnMigrateSeedToCloud');
   const btnManualSync = document.getElementById('btnManualSync');
-  const inputSupabaseUrl = document.getElementById('inputSupabaseUrl');
-  const inputSupabaseKey = document.getElementById('inputSupabaseKey');
-  const btnSaveSupabaseConfig = document.getElementById('btnSaveSupabaseConfig');
 
   // CV elements
   const cvPaper = document.getElementById('cvPaper');
@@ -953,16 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateAuthUI() {
     if (!window.appSupabase) return;
 
-    const isConfig = window.appSupabase.isConfigured();
     const isAuth = window.appSupabase.isAuthenticated();
-    const config = window.appSupabase.getConfig();
-
-    if (inputSupabaseUrl && config.url) inputSupabaseUrl.value = config.url;
-    if (inputSupabaseKey && config.anonKey) inputSupabaseKey.value = config.anonKey;
-
-    if (cloudSetupWarning) {
-      cloudSetupWarning.style.display = isConfig ? 'none' : 'block';
-    }
 
     if (isAuth) {
       const user = window.appSupabase.getUser();
@@ -990,37 +973,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   cloudModal.addEventListener('click', (e) => {
     if (e.target === cloudModal) cloudModal.classList.remove('open');
-  });
-
-  // Cloud Tab Switching
-  tabBtnAccount.addEventListener('click', () => {
-    tabBtnAccount.classList.add('active');
-    tabBtnAccount.style.borderBottomColor = 'var(--primary)';
-    tabBtnAccount.style.color = 'var(--primary)';
-    tabBtnAccount.style.fontWeight = '700';
-
-    tabBtnConfig.classList.remove('active');
-    tabBtnConfig.style.borderBottomColor = 'transparent';
-    tabBtnConfig.style.color = 'var(--text-muted)';
-    tabBtnConfig.style.fontWeight = '600';
-
-    cloudTabAccount.style.display = 'block';
-    cloudTabConfig.style.display = 'none';
-  });
-
-  tabBtnConfig.addEventListener('click', () => {
-    tabBtnConfig.classList.add('active');
-    tabBtnConfig.style.borderBottomColor = 'var(--primary)';
-    tabBtnConfig.style.color = 'var(--primary)';
-    tabBtnConfig.style.fontWeight = '700';
-
-    tabBtnAccount.classList.remove('active');
-    tabBtnAccount.style.borderBottomColor = 'transparent';
-    tabBtnAccount.style.color = 'var(--text-muted)';
-    tabBtnAccount.style.fontWeight = '600';
-
-    cloudTabAccount.style.display = 'none';
-    cloudTabConfig.style.display = 'block';
   });
 
   // Toggle Magic Link vs Password Forms
@@ -1060,12 +1012,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = inputMagicEmail.value.trim();
     if (!email) return;
 
-    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
-      showToast('Primero debes configurar Supabase en la pestaña "Configurar Supabase".', 'error');
-      tabBtnConfig.click();
-      return;
-    }
-
     try {
       btnSendMagicLink.disabled = true;
       btnSendMagicLink.innerHTML = '<span>Enviando enlace...</span>';
@@ -1092,12 +1038,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
-      showToast('Primero configura Supabase en la pestaña "Configurar Supabase".', 'error');
-      tabBtnConfig.click();
-      return;
-    }
-
     try {
       btnSignInPassword.disabled = true;
       btnSignInPassword.textContent = 'Iniciando...';
@@ -1121,23 +1061,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
-      showToast('Primero configura Supabase en la pestaña "Configurar Supabase".', 'error');
-      tabBtnConfig.click();
-      return;
-    }
-
     try {
       btnSignUpPassword.disabled = true;
-      btnSignUpPassword.textContent = 'Registrando...';
+      btnSignUpPassword.textContent = 'Creando cuenta...';
       await window.appSupabase.signUp(email, password);
-      showToast('¡Registro completado! Si requiere confirmación revisa tu correo, o inicia sesión.', 'success');
+      showToast('¡Cuenta creada! Revisa tu correo de confirmación o inicia sesión.', 'success');
       updateAuthUI();
     } catch (err) {
-      showToast(err.message || 'Error en registro', 'error');
+      showToast(err.message || 'Error al crear cuenta', 'error');
     } finally {
       btnSignUpPassword.disabled = false;
-      btnSignUpPassword.textContent = 'Registrarse';
+      btnSignUpPassword.textContent = 'Crear Cuenta';
     }
   });
 
@@ -1147,25 +1081,6 @@ document.addEventListener('DOMContentLoaded', () => {
       await window.appSupabase.signOut();
       showToast('Sesión cerrada. Ahora estás en modo local.', 'info');
       updateAuthUI();
-    }
-  });
-
-  // Save Supabase Configuration
-  btnSaveSupabaseConfig.addEventListener('click', () => {
-    const url = inputSupabaseUrl.value.trim();
-    const key = inputSupabaseKey.value.trim();
-    if (!url || !key) {
-      showToast('Ingresa tanto la URL como la Anon Key de Supabase', 'error');
-      return;
-    }
-
-    const success = window.appSupabase.saveConfig(url, key);
-    if (success) {
-      showToast('¡Credenciales de Supabase guardadas y validadas!', 'success');
-      updateAuthUI();
-      tabBtnAccount.click();
-    } else {
-      showToast('No se pudo inicializar Supabase. Verifica la URL y clave.', 'error');
     }
   });
 
