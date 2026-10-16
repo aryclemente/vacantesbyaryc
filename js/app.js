@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchQuery = '';
   let activeModalVacancyId = null;
   let intakePastedImageBase64 = null;
+  let pendingExtractedJob = null;
 
   // Cache DOM elements
   const kanbanBoardEl = document.getElementById('kanbanBoard');
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabBtns = document.querySelectorAll('.tab-btn');
   const mobileNavBtns = document.querySelectorAll('.mobile-nav-item');
   const viewPanels = document.querySelectorAll('.view-panel');
+  const toastContainer = document.getElementById('toastContainer');
 
   // KPI elements
   const kpiTotal = document.getElementById('kpiTotal');
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const kpiInterviews = document.getElementById('kpiInterviews');
   const kpiResponseRate = document.getElementById('kpiResponseRate');
 
-  // Modals
+  // Vacancy Detail Modal
   const vacancyModal = document.getElementById('vacancyModal');
   const btnCloseModal = document.getElementById('btnCloseModal');
   const btnSaveModalChanges = document.getElementById('btnSaveModalChanges');
@@ -50,6 +52,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnClearIntake = document.getElementById('btnClearIntake');
   const btnProcessIntake = document.getElementById('btnProcessIntake');
 
+  // Intake Confirmation Modal
+  const intakeConfirmModal = document.getElementById('intakeConfirmModal');
+  const btnCloseConfirmModal = document.getElementById('btnCloseConfirmModal');
+  const btnCancelConfirm = document.getElementById('btnCancelConfirm');
+  const btnSaveConfirmedJob = document.getElementById('btnSaveConfirmedJob');
+  const confirmEmpresa = document.getElementById('confirmEmpresa');
+  const confirmPuesto = document.getElementById('confirmPuesto');
+  const confirmModalidad = document.getElementById('confirmModalidad');
+  const confirmPrioridad = document.getElementById('confirmPrioridad');
+  const confirmSalario = document.getElementById('confirmSalario');
+  const confirmContacto = document.getElementById('confirmContacto');
+  const confirmUrl = document.getElementById('confirmUrl');
+  const confirmRequisitosChips = document.getElementById('confirmRequisitosChips');
+  const confirmRequisitosInput = document.getElementById('confirmRequisitosInput');
+  const confirmNotas = document.getElementById('confirmNotas');
+  const aiExtractionSourceBadge = document.getElementById('aiExtractionSourceBadge');
+
+  // Settings Modal elements
+  const settingsModal = document.getElementById('settingsModal');
+  const btnSettings = document.getElementById('btnSettings');
+  const btnCloseSettingsModal = document.getElementById('btnCloseSettingsModal');
+  const inputApiKey = document.getElementById('inputApiKey');
+  const btnSaveSettings = document.getElementById('btnSaveSettings');
+  const btnExportJson = document.getElementById('btnExportJson');
+  const btnTriggerImport = document.getElementById('btnTriggerImport');
+  const importFileInput = document.getElementById('importFileInput');
+  const btnResetSeed = document.getElementById('btnResetSeed');
+
   // CV elements
   const cvVacancySelect = document.getElementById('cvVacancySelect');
   const btnPrintCv = document.getElementById('btnPrintCv');
@@ -58,22 +88,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const cvExperienceBullets = document.getElementById('cvExperienceBullets');
 
   // =========================================================================
+  // Toast Notification System
+  // =========================================================================
+  function showToast(message, type = 'success') {
+    if (!toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if (type === 'error') {
+      iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    } else {
+      iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    }
+
+    toast.innerHTML = `
+      <div class="toast-icon">${iconSvg}</div>
+      <span>${escapeHtml(message)}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+
+  // =========================================================================
   // View Navigation
   // =========================================================================
   function switchView(viewName) {
     currentView = viewName;
 
-    // Update desktop tabs
     tabBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === viewName);
     });
 
-    // Update mobile nav items
     mobileNavBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === viewName);
     });
 
-    // Toggle panels
     viewPanels.forEach(panel => {
       panel.classList.toggle('active', panel.id === `view-${viewName}`);
     });
@@ -103,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!kanbanBoardEl) return;
     const allVacancies = window.appStorage.getVacancies();
 
-    // Filter vacancies
     const filtered = allVacancies.filter(v => {
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
@@ -115,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     });
 
-    // Build columns HTML
     kanbanBoardEl.innerHTML = COLUMNS.map(col => {
       const colVacancies = filtered.filter(v => v.estado === col.id);
       return `
@@ -224,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
     kpiApplied.textContent = applied;
     kpiInterviews.textContent = interviews;
 
-    // Rate: (Interviews + Offers) / Applied
     const rate = applied > 0 ? Math.round(((interviews + offers) / applied) * 100) : 0;
     kpiResponseRate.textContent = `${rate}%`;
   }
@@ -318,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    // Configure URL button
     if (vacancy.url) {
       btnOpenUrl.style.display = 'inline-flex';
       btnOpenUrl.onclick = () => window.open(vacancy.url, '_blank');
@@ -356,8 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.appStorage.updateVacancy(activeModalVacancyId, updated);
     closeModal();
-    renderKanban();
-    renderTable();
+    showToast('Cambios guardados correctamente');
   });
 
   btnDeleteVacancy.addEventListener('click', () => {
@@ -365,8 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (confirm('¿Deseas eliminar esta vacante de tu tablero?')) {
       window.appStorage.deleteVacancy(activeModalVacancyId);
       closeModal();
-      renderKanban();
-      renderTable();
+      showToast('Vacante eliminada del tablero', 'info');
     }
   });
 
@@ -382,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Drag and drop image
   intakeDropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     intakeDropzone.classList.add('drag-over');
@@ -400,14 +451,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Paste image from clipboard anywhere on document or dropzone
   window.addEventListener('paste', (e) => {
-    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+    if (!items) return;
     for (const item of items) {
       if (item.type.indexOf('image') !== -1) {
         const file = item.getAsFile();
         handleImageFile(file);
         switchView('intake');
+        showToast('Captura pegada desde el portapapeles', 'info');
         break;
       }
     }
@@ -439,36 +491,32 @@ document.addEventListener('DOMContentLoaded', () => {
     imagePreviewArea.style.display = 'none';
   });
 
-  // AI Extraction Simulator / Heuristic Parser
+  // Procesamiento con IA / Heurístico
   btnProcessIntake.addEventListener('click', async () => {
     const text = intakeText.value.trim();
     const url = intakeUrl.value.trim();
 
     if (!text && !intakePastedImageBase64 && !url) {
-      alert('Por favor pega el texto de la vacante, una captura de pantalla (Ctrl+V) o el enlace.');
+      showToast('Por favor pega texto, una captura de pantalla (Ctrl+V) o una URL.', 'error');
       return;
     }
 
     btnProcessIntake.disabled = true;
-    btnProcessIntake.innerHTML = '<span>Extrayendo con IA...</span>';
+    btnProcessIntake.innerHTML = '<span>Extrayendo información con IA...</span>';
 
     try {
-      // Extract vacancy details
-      const parsed = extractJobDetailsWithAi(text, intakePastedImageBase64, url);
+      // Llamada al motor de extracción
+      const extracted = await window.aiJobParser.extractJobDetails({
+        text,
+        imageBase64: intakePastedImageBase64,
+        url
+      });
 
-      // Save to storage
-      window.appStorage.addVacancy(parsed);
-
-      alert(`¡Vacante guardada con éxito!\n\nPuesto: ${parsed.puesto}\nEmpresa: ${parsed.empresa}\nEstado: Guardada`);
-
-      // Reset form
-      btnClearIntake.click();
-      renderKanban();
-      renderTable();
-      switchView('kanban');
+      pendingExtractedJob = extracted;
+      openConfirmModal(extracted);
     } catch (err) {
       console.error(err);
-      alert('Hubo un error extrayendo los datos. Por favor intenta de nuevo.');
+      showToast('Error procesando la vacante. Intenta de nuevo.', 'error');
     } finally {
       btnProcessIntake.disabled = false;
       btnProcessIntake.innerHTML = `
@@ -480,63 +528,132 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function extractJobDetailsWithAi(rawText, imageBase64, jobUrl) {
-    // Intelligent heuristic extractor
-    let empresa = 'Empresa por Confirmar';
-    let puesto = 'Oportunidad TI';
-    let modalidad = 'Remoto';
-    let salario = '';
-    let contacto = '';
+  // =========================================================================
+  // Intake Confirmation Modal Logic
+  // =========================================================================
+  function openConfirmModal(job) {
+    confirmEmpresa.value = job.empresa || '';
+    confirmPuesto.value = job.puesto || '';
+    confirmModalidad.value = job.modalidad || 'Remoto';
+    confirmPrioridad.value = job.prioridad || 'high';
+    confirmSalario.value = job.salario || '';
+    confirmContacto.value = job.contacto || '';
+    confirmUrl.value = job.url || '';
+    confirmNotas.value = job.notas || '';
 
-    // Check for common patterns in rawText
-    const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+    aiExtractionSourceBadge.textContent = job.aiGenerated 
+      ? 'Extracción multimodal exitosa vía Google Gemini API' 
+      : 'Extracción inteligente local (Heurística)';
 
-    if (lines.length > 0) {
-      // First prominent line often contains title or company
-      const firstLine = lines[0];
-      if (firstLine.includes(' - ')) {
-        const parts = firstLine.split(' - ');
-        empresa = parts[0].trim();
-        puesto = parts[1].trim();
-      } else if (firstLine.includes(' at ')) {
-        const parts = firstLine.split(' at ');
-        puesto = parts[0].trim();
-        empresa = parts[1].trim();
-      } else if (firstLine.includes(' en ')) {
-        const parts = firstLine.split(' en ');
-        puesto = parts[0].trim();
-        empresa = parts[1].trim();
-      } else {
-        puesto = firstLine.slice(0, 50);
-        if (lines.length > 1) empresa = lines[1].slice(0, 40);
-      }
-    }
+    // Render chips
+    renderRequisitosChips(job.requisitos || []);
 
-    if (/remot[oe]|remote|teletrabajo/i.test(rawText)) modalidad = 'Remoto';
-    else if (/h[ií]brid[oe]|hybrid/i.test(rawText)) modalidad = 'Híbrido';
-    else if (/presencial|on-site|office/i.test(rawText)) modalidad = 'Presencial';
-
-    const salaryMatch = rawText.match(/(\$|€|\bUSD\b|\bEUR\b)\s?[\d.,]+(\s?-\s?[\d.,]+)?(\s?(USD|EUR|k|al mes|\/mes|\/hr))?/i);
-    if (salaryMatch) salario = salaryMatch[0];
-
-    const emailMatch = rawText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    if (emailMatch) contacto = emailMatch[0];
-
-    return {
-      id: 'vac-' + Date.now(),
-      empresa,
-      puesto,
-      modalidad,
-      salario,
-      contacto,
-      url: jobUrl,
-      estado: 'saved',
-      prioridad: 'high',
-      fecha: new Date().toISOString().split('T')[0],
-      notas: rawText.slice(0, 300) + (rawText.length > 300 ? '...' : ''),
-      screenshot: imageBase64 ? true : false
-    };
+    intakeConfirmModal.classList.add('open');
   }
+
+  function renderRequisitosChips(techs) {
+    confirmRequisitosChips.innerHTML = techs.map(t => `
+      <span class="tag-pill">${escapeHtml(t)}</span>
+    `).join('');
+  }
+
+  function closeConfirmModal() {
+    intakeConfirmModal.classList.remove('open');
+    pendingExtractedJob = null;
+  }
+
+  btnCloseConfirmModal.addEventListener('click', closeConfirmModal);
+  btnCancelConfirm.addEventListener('click', closeConfirmModal);
+
+  btnSaveConfirmedJob.addEventListener('click', () => {
+    if (!pendingExtractedJob) return;
+
+    // Additional techs from input
+    const extraTechs = confirmRequisitosInput.value
+      .split(',')
+      .map(t => t.trim())
+      .filter(Boolean);
+
+    const allTechs = [...(pendingExtractedJob.requisitos || []), ...extraTechs];
+
+    const finalJob = {
+      ...pendingExtractedJob,
+      empresa: confirmEmpresa.value.trim() || 'Empresa Confidencial',
+      puesto: confirmPuesto.value.trim() || 'Oportunidad TI',
+      modalidad: confirmModalidad.value,
+      prioridad: confirmPrioridad.value,
+      salario: confirmSalario.value.trim(),
+      contacto: confirmContacto.value.trim(),
+      url: confirmUrl.value.trim(),
+      notas: confirmNotas.value.trim(),
+      requisitos: allTechs,
+      estado: 'saved'
+    };
+
+    window.appStorage.addVacancy(finalJob);
+    closeConfirmModal();
+    btnClearIntake.click();
+    switchView('kanban');
+    showToast(`¡Vacante "${finalJob.puesto}" guardada en el tablero!`, 'success');
+  });
+
+  // =========================================================================
+  // Settings & Backup Modal Logic
+  // =========================================================================
+  btnSettings.addEventListener('click', () => {
+    const current = window.appStorage.getSettings();
+    inputApiKey.value = current.geminiApiKey || '';
+    settingsModal.classList.add('open');
+  });
+
+  btnCloseSettingsModal.addEventListener('click', () => {
+    settingsModal.classList.remove('open');
+  });
+
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) settingsModal.classList.remove('open');
+  });
+
+  btnSaveSettings.addEventListener('click', () => {
+    const key = inputApiKey.value.trim();
+    window.appStorage.saveSettings({ geminiApiKey: key });
+    settingsModal.classList.remove('open');
+    showToast('Configuración guardada en tu navegador', 'success');
+  });
+
+  btnExportJson.addEventListener('click', () => {
+    window.appStorage.exportDataJson();
+    showToast('Copia de seguridad descargada', 'info');
+  });
+
+  btnTriggerImport.addEventListener('click', () => {
+    importFileInput.click();
+  });
+
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const success = window.appStorage.importDataJson(event.target.result);
+      if (success) {
+        showToast('Respaldo restaurado con éxito', 'success');
+        settingsModal.classList.remove('open');
+      } else {
+        showToast('Formato JSON no válido', 'error');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  btnResetSeed.addEventListener('click', () => {
+    if (confirm('¿Restablecer el tablero a las 16 vacantes iniciales extraídas de Gemini? Se sobrescribirán los datos actuales.')) {
+      window.appStorage.resetToSeedData();
+      settingsModal.classList.remove('open');
+      showToast('Tablero restablecido a las 16 vacantes de Gemini', 'info');
+    }
+  });
 
   // =========================================================================
   // CV Generator
@@ -584,16 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.print();
   });
 
-  // Settings button
-  document.getElementById('btnSettings').addEventListener('click', () => {
-    const current = window.appStorage.getSettings();
-    const newKey = prompt('Configura tu API Key de Gemini (opcional, para extracción con modelos de Google AI):', current.geminiApiKey || '');
-    if (newKey !== null) {
-      window.appStorage.saveSettings({ geminiApiKey: newKey.trim() });
-      alert('Configuración guardada en tu navegador.');
-    }
-  });
-
   // Helper
   function escapeHtml(str) {
     if (!str) return '';
@@ -604,6 +711,15 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  // =========================================================================
+  // Reactive Storage Subscription
+  // =========================================================================
+  window.appStorage.subscribe(() => {
+    renderKanban();
+    renderTable();
+    populateCvSelector();
+  });
 
   // Initial load
   renderKanban();

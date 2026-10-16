@@ -1,6 +1,6 @@
 /**
  * storage.js - Capa de almacenamiento y persistencia de Vacantes by AryC
- * Maneja persistencia en localStorage e inicialización con datos semilla extraídos de Gemini.
+ * Maneja persistencia en localStorage, reactividad con suscriptores y datos semilla extraídos de Gemini.
  */
 
 const STORAGE_KEY = 'aryc_vacancies_data';
@@ -21,6 +21,7 @@ const SEED_VACANCIES = [
     contacto: 'Talent Acquisition Team',
     fecha: '2026-10-01',
     notas: 'CV ModernCV Banking Style (1 pág. ATS friendly). Guía de práctica con ejercicios de lógica, algoritmos y PHP/JS Backend.',
+    requisitos: ['JavaScript', 'PHP', 'Algoritmos', 'REST APIs', 'PostgreSQL'],
     estrategia: 'CV 1 página ATS, destacar desarrollo web robusto y resolución de problemas algorítmicos.'
   },
   {
@@ -36,6 +37,7 @@ const SEED_VACANCIES = [
     contacto: 'Selección de Personal TI',
     fecha: '2026-10-03',
     notas: 'Cuestionario de RRHH y competencias completado. CV LaTeX en formato bancario.',
+    requisitos: ['Sistemas Transaccionales', 'Bases de Datos', 'Seguridad TI', 'Metodologías Ágiles'],
     estrategia: 'Enfocar en estabilidad, seguridad de datos bancarios y metodología ágil.'
   },
   {
@@ -51,6 +53,7 @@ const SEED_VACANCIES = [
     contacto: 'CTO Ventana Digital',
     fecha: '2026-10-05',
     notas: 'Script de preparación para entrevista con CTO. Solución de incidentes y performance en WordPress/Shopify.',
+    requisitos: ['WordPress Headless', 'Shopify', 'PHP', 'Core Web Vitals', 'JavaScript'],
     estrategia: 'Liderazgo técnico, arquitecturas headless y optimización Core Web Vitals.'
   },
   {
@@ -66,6 +69,7 @@ const SEED_VACANCIES = [
     contacto: 'Gestión Humana',
     fecha: '2026-10-08',
     notas: 'Entrevista de contexto local, matriz de priorización y gestión de contingencias.',
+    requisitos: ['Soporte Técnico Nivel 2', 'Infraestructura Web', 'Redes', 'Gestión de Servidores'],
     estrategia: 'Resolución de problemas en tiempo real y soporte a procesos operativos.'
   },
   {
@@ -81,6 +85,7 @@ const SEED_VACANCIES = [
     contacto: 'Hiring Manager',
     fecha: '2026-10-09',
     notas: 'CV Arianna Clemente adaptado a Wink. Argumentos enfocados en escalabilidad y UX.',
+    requisitos: ['Gestión de Producto', 'Análisis de Datos', 'Automatización', 'UX/UI'],
     estrategia: 'Orientación a métricas de retención, agilidad y automatización de procesos.'
   },
   {
@@ -96,6 +101,7 @@ const SEED_VACANCIES = [
     contacto: 'Área Digital',
     fecha: '2026-10-10',
     notas: 'Estrategia de posicionamiento orgánico y diseño web corporativo.',
+    requisitos: ['SEO Técnico', 'Google Search Console', 'WordPress', 'HTML5 Semántico'],
     estrategia: 'Demostrar resultados de posicionamiento técnico y auditorías web.'
   },
   {
@@ -111,6 +117,7 @@ const SEED_VACANCIES = [
     contacto: 'RRHH Efiempresa',
     fecha: '2026-10-10',
     notas: 'Guía de entrevista técnica preparada: SEO on-page, WordPress multisite, Google Ads.',
+    requisitos: ['WordPress Multisite', 'SEO On-Page', 'Google Ads', 'Copywriting Técnico'],
     estrategia: 'Habilidades híbridas de desarrollo y marketing digital de precisión.'
   },
   {
@@ -126,6 +133,7 @@ const SEED_VACANCIES = [
     contacto: 'Recruiting Team',
     fecha: '2026-10-11',
     notas: 'Portafolio de proyectos en producción y pitch personalizado enviado.',
+    requisitos: ['React', 'Node.js', 'PostgreSQL', 'Docker', 'REST APIs'],
     estrategia: 'Enfocar en desarrollo React, APIs RESTful y bases de datos relacionales.'
   },
   {
@@ -141,6 +149,7 @@ const SEED_VACANCIES = [
     contacto: 'Dirección Técnica',
     fecha: '2026-10-11',
     notas: 'Perfil orientado a backend inteligente y automatizaciones con LLMs.',
+    requisitos: ['Python', 'Integración LLMs', 'FastAPI', 'Automatización de Pipelines'],
     estrategia: 'Destacar pipelines de datos y consumo de APIs de IA generativa.'
   },
   {
@@ -156,6 +165,7 @@ const SEED_VACANCIES = [
     contacto: 'Formulario ClickUp',
     fecha: '2026-10-12',
     notas: 'Respuestas enviadas en formulario ClickUp. Plantillas de seguimiento listas para 7 días.',
+    requisitos: ['ClickUp', 'Zapier', 'Operaciones Educativas', 'LMS'],
     estrategia: 'Organización, gestión de cohortes educativas y herramientas no-code/low-code.'
   },
   {
@@ -171,6 +181,7 @@ const SEED_VACANCIES = [
     contacto: 'Comité Editorial',
     fecha: '2026-10-12',
     notas: 'CV especializado en Open Journal Systems y revistas científicas indexadas.',
+    requisitos: ['OJS (Open Journal Systems)', 'PHP', 'Metadatos Dublin Core', 'Indexación'],
     estrategia: 'Dominio de arquitectura OJS, metadatos Dublin Core y preservación digital.'
   },
   {
@@ -186,6 +197,7 @@ const SEED_VACANCIES = [
     contacto: 'Equipo E-learning',
     fecha: '2026-10-13',
     notas: 'CV enfocado en administración de campus virtual, plugins Moodle y soporte a docentes.',
+    requisitos: ['Moodle LMS', 'PHP', 'SCORM', 'Gestión de Servidores Educativos'],
     estrategia: 'Experiencia técnica en entornos educativos virtuales a gran escala.'
   },
   {
@@ -201,6 +213,7 @@ const SEED_VACANCIES = [
     contacto: 'Talento Digital',
     fecha: '2026-10-13',
     notas: 'Portafolio enviado con casos de éxito y mejoras de velocidad web.',
+    requisitos: ['JavaScript', 'HTML5/CSS3', 'Web Performance', 'Git'],
     estrategia: 'Entrega rápida de interfaces limpias y accesibles.'
   },
   {
@@ -216,6 +229,7 @@ const SEED_VACANCIES = [
     contacto: 'Vicepresidencia de Tecnología',
     fecha: '2026-10-14',
     notas: 'Formato bancario riguroso, énfasis en seguridad, transacciones y normativas.',
+    requisitos: ['Banca Online', 'Seguridad Transaccional', 'SQL', 'Auditoría TI'],
     estrategia: 'Rigurosidad metodológica, documentación y continuidad operativa.'
   },
   {
@@ -231,6 +245,7 @@ const SEED_VACANCIES = [
     contacto: 'Enlace de carreras',
     fecha: '2026-10-14',
     notas: 'Analizado rango salarial internacional. Pendiente afinar pitch en inglés.',
+    requisitos: ['React', 'TypeScript', 'TailwindCSS', 'Next.js', 'Inglés Profesional'],
     estrategia: 'Portafolio de componentes UI pulidos, TypeScript y pruebas de integración.'
   },
   {
@@ -246,12 +261,14 @@ const SEED_VACANCIES = [
     contacto: 'Talent Success Lead',
     fecha: '2026-10-15',
     notas: 'Perfil verificado y en lista de asignación directa de clientes internacionales.',
+    requisitos: ['Full Stack', 'Web Development', 'Comunicación Asíncrona'],
     estrategia: 'Mantener disponibilidad actualizada y portafolio activo.'
   }
 ];
 
 class StorageService {
   constructor() {
+    this.listeners = [];
     this.init();
   }
 
@@ -260,6 +277,23 @@ class StorageService {
     if (!existing) {
       this.saveVacancies(SEED_VACANCIES);
     }
+  }
+
+  subscribe(callback) {
+    if (typeof callback === 'function') {
+      this.listeners.push(callback);
+    }
+  }
+
+  notifySubscribers() {
+    const vacancies = this.getVacancies();
+    this.listeners.forEach(cb => {
+      try {
+        cb(vacancies);
+      } catch (e) {
+        console.error('Error in storage subscriber:', e);
+      }
+    });
   }
 
   getVacancies() {
@@ -275,6 +309,7 @@ class StorageService {
   saveVacancies(vacancies) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(vacancies));
+      this.notifySubscribers();
     } catch (e) {
       console.error('Error saving vacancies to storage:', e);
     }
@@ -284,6 +319,8 @@ class StorageService {
     const list = this.getVacancies();
     vacancy.id = vacancy.id || 'vac-' + Date.now();
     vacancy.fecha = vacancy.fecha || new Date().toISOString().split('T')[0];
+    vacancy.estado = vacancy.estado || 'saved';
+    vacancy.prioridad = vacancy.prioridad || 'high';
     list.unshift(vacancy);
     this.saveVacancies(list);
     return vacancy;
@@ -304,6 +341,11 @@ class StorageService {
     let list = this.getVacancies();
     list = list.filter(v => v.id !== id);
     this.saveVacancies(list);
+  }
+
+  resetToSeedData() {
+    this.saveVacancies(SEED_VACANCIES);
+    return SEED_VACANCIES;
   }
 
   getSettings() {
@@ -333,7 +375,7 @@ class StorageService {
   importDataJson(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         this.saveVacancies(parsed);
         return true;
       }

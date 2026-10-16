@@ -994,6 +994,72 @@ textarea.form-control {
 }
 
 /* ==========================================================================
+   Toast Notification System
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--dark-violet);
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-xl);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all var(--transition-normal);
+  pointer-events: auto;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast.success .toast-icon { background: var(--mint-turquoise); color: #001f24; }
+.toast.info .toast-icon { background: var(--secondary); color: #001f24; }
+.toast.error .toast-icon { background: var(--error); color: #ffffff; }
+
+/* Tag Pills */
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(77, 23, 214, 0.08);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ==========================================================================
    Print Styles (Clean ATS PDF Export)
    ========================================================================== */
 @media print {
@@ -1005,7 +1071,8 @@ textarea.form-control {
   .nav-controls-section,
   .cv-toolbar,
   .mobile-bottom-nav,
-  .modal-overlay {
+  .modal-overlay,
+  .toast-container {
     display: none !important;
   }
 
@@ -1026,3 +1093,4 @@ textarea.form-control {
     border-radius: 0 !important;
   }
 }
+
