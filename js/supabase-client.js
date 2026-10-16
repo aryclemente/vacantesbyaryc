@@ -82,6 +82,15 @@ class SupabaseService {
         this.currentSession = session;
         this.currentUser = session?.user || null;
         this.notifyAuthListeners(event, session);
+
+        // Limpiar el hash de la URL si contenía access_token para mantener la URL limpia
+        if (window.location.hash && window.location.hash.includes('access_token')) {
+          try {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch (e) {
+            // Ignorar en entornos restrictivos
+          }
+        }
       });
 
       // Recuperar sesión activa inicial
@@ -118,13 +127,17 @@ class SupabaseService {
   }
 
   /**
-   * Registro con correo y contraseña
+   * Registro con correo y contraseña con redirección dinámica al dominio actual
    */
   async signUp(email, password) {
     if (!this.client) throw new Error('Supabase no está configurado');
+    const redirectUrl = window.location.origin + window.location.pathname;
     const { data, error } = await this.client.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
     });
     if (error) throw error;
     return data;
