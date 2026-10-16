@@ -269,14 +269,184 @@ const SEED_VACANCIES = [
 class StorageService {
   constructor() {
     this.listeners = [];
+    this.cache = null;
+    this.syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error' | 'offline'
+    this.syncListeners = [];
     this.init();
   }
 
   init() {
+    // 1. Cargar caché inmediato desde localStorage
     const existing = localStorage.getItem(STORAGE_KEY);
     if (!existing) {
-      this.saveVacancies(SEED_VACANCIES);
+      this.cache = [...SEED_VACANCIES];
+      this.saveLocalVacancies(this.cache);
+    } else {
+      try {
+        this.cache = JSON.parse(existing);
+      } catch (e) {
+        this.cache = [...SEED_VACANCIES];
+      }
     }
+
+    // 2. Escuchar cambios de red (Online / Offline)
+    window.addEventListener('online', () => {
+      this.syncStatus = 'syncing';
+      this.notifySyncStatus();
+      this.syncWithSupabase();
+    });
+
+    window.addEventListener('offline', () => {
+      this.syncStatus = 'offline';
+      this.notifySyncStatus();
+    });
+
+    // 3. Conectar con el cliente de Supabase cuando esté disponible
+    this.setupSupabaseIntegration();
+  }
+
+  setupSupabaseIntegration() {
+    if (window.appSupabase) {
+      window.appSupabase.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          await this.syncWithSupabase();
+          this.setupRealtimeSubscription();
+        } else {
+          this.syncStatus = 'local';
+          this.notifySyncStatus();
+        }
+      });
+    } else {
+      setTimeout(() => this.setupSupabaseIntegration(), 500);
+    }
+  }
+
+  setupRealtimeSubscription() {
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
+
+    window.appSupabase.subscribeToChanges(
+      (newVac) => {
+        // Inserción remota desde otro dispositivo
+        if (!this.cache.some(v => v.id === newVac.id)) {
+          this.cache.unshift(newVac);
+          this.saveLocalVacancies(this.cache);
+          this.notifySubscribers();
+        }
+      },
+      (updVac) => {
+        // Actualización remota desde otro dispositivo
+        const index = this.cache.findIndex(v => v.id === updVac.id);
+        if (index !== -1) {
+          this.cache[index] = { ...this.cache[index], ...updVac };
+          this.saveLocalVacancies(this.cache);
+          this.notifySubscribers();
+        }
+      },
+      (delVac) => {
+        // Eliminación remota desde otro dispositivo
+        this.cache = this.cache.filter(v => v.id !== delVac.id);
+        this.saveLocalVacancies(this.cache);
+        this.notifySubscribers();
+      }
+    );
+  }
+
+  async syncWithSupabase() {
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
+      this.syncStatus = 'local';
+      this.notifySyncStatus();
+      return;
+    }
+
+    if (!navigator.onLine) {
+      this.syncStatus = 'offline';
+      this.notifySyncStatus();
+      return;
+    }
+
+    this.syncStatus = 'syncing';
+    this.notifySyncStatus();
+
+    try {
+      const { data, error } = await window.appSupabase.client
+        .from('vacantes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        this.cache = data;
+        this.saveLocalVacancies(data);
+      } else if (this.cache && this.cache.length > 0) {
+        // El usuario está conectado pero la nube está vacía: podemos sugerir o migrar
+        console.info('Cuenta en la nube sin vacantes. Se puede migrar el almacenamiento local.');
+      }
+
+      this.syncStatus = 'synced';
+      this.notifySyncStatus();
+      this.notifySubscribers();
+    } catch (err) {
+      console.error('Error al sincronizar con Supabase:', err);
+      this.syncStatus = 'error';
+      this.notifySyncStatus();
+    }
+  }
+
+  /**
+   * Sube las vacantes locales a la cuenta de Supabase del usuario autenticado
+   */
+  async migrateLocalToCloud() {
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
+      throw new Error('Debes iniciar sesión para migrar tus vacantes a la nube.');
+    }
+
+    const user = window.appSupabase.getUser();
+    const localList = this.getVacancies();
+
+    if (!localList || localList.length === 0) {
+      return { count: 0 };
+    }
+
+    this.syncStatus = 'syncing';
+    this.notifySyncStatus();
+
+    const payload = localList.map(v => ({
+      id: v.id || ('vac-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6)),
+      user_id: user.id,
+      empresa: v.empresa || 'Empresa Confidencial',
+      puesto: v.puesto || 'Puesto no especificado',
+      modalidad: v.modalidad || 'Remoto',
+      ubicacion: v.ubicacion || 'No especificada',
+      salario: v.salario || '',
+      estado: v.estado || 'saved',
+      prioridad: v.prioridad || 'high',
+      url: v.url || '',
+      contacto: v.contacto || '',
+      fecha: v.fecha || new Date().toISOString().split('T')[0],
+      notas: v.notas || '',
+      requisitos: Array.isArray(v.requisitos) ? v.requisitos : [],
+      estrategia: v.estrategia || ''
+    }));
+
+    const { data, error } = await window.appSupabase.client
+      .from('vacantes')
+      .upsert(payload, { onConflict: 'id' })
+      .select();
+
+    if (error) {
+      this.syncStatus = 'error';
+      this.notifySyncStatus();
+      throw error;
+    }
+
+    this.cache = data || payload;
+    this.saveLocalVacancies(this.cache);
+    this.syncStatus = 'synced';
+    this.notifySyncStatus();
+    this.notifySubscribers();
+
+    return { count: payload.length };
   }
 
   subscribe(callback) {
@@ -296,56 +466,164 @@ class StorageService {
     });
   }
 
+  onSyncStatusChange(callback) {
+    if (typeof callback === 'function') {
+      this.syncListeners.push(callback);
+      callback(this.syncStatus);
+    }
+  }
+
+  notifySyncStatus() {
+    this.syncListeners.forEach(cb => {
+      try {
+        cb(this.syncStatus);
+      } catch (e) {
+        console.error('Error in sync status subscriber:', e);
+      }
+    });
+  }
+
   getVacancies() {
+    if (this.cache && Array.isArray(this.cache)) {
+      return this.cache;
+    }
+    return this.getLocalVacancies();
+  }
+
+  getLocalVacancies() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : SEED_VACANCIES;
     } catch (e) {
-      console.error('Error reading vacancies from storage:', e);
       return SEED_VACANCIES;
     }
   }
 
-  saveVacancies(vacancies) {
+  saveLocalVacancies(vacancies) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(vacancies));
-      this.notifySubscribers();
     } catch (e) {
-      console.error('Error saving vacancies to storage:', e);
+      console.error('Error guardando en localStorage:', e);
     }
   }
 
+  saveVacancies(vacancies) {
+    this.cache = [...vacancies];
+    this.saveLocalVacancies(this.cache);
+    this.notifySubscribers();
+  }
+
   addVacancy(vacancy) {
-    const list = this.getVacancies();
-    vacancy.id = vacancy.id || 'vac-' + Date.now();
+    vacancy.id = vacancy.id || ('vac-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5));
     vacancy.fecha = vacancy.fecha || new Date().toISOString().split('T')[0];
     vacancy.estado = vacancy.estado || 'saved';
     vacancy.prioridad = vacancy.prioridad || 'high';
-    list.unshift(vacancy);
-    this.saveVacancies(list);
+
+    // 1. Actualización optimista local
+    this.cache.unshift(vacancy);
+    this.saveLocalVacancies(this.cache);
+    this.notifySubscribers();
+
+    // 2. Si hay sesión activa en Supabase, guardar en la nube en segundo plano
+    if (window.appSupabase && window.appSupabase.isAuthenticated()) {
+      const user = window.appSupabase.getUser();
+      const dbRecord = {
+        id: vacancy.id,
+        user_id: user.id,
+        empresa: vacancy.empresa,
+        puesto: vacancy.puesto,
+        modalidad: vacancy.modalidad || 'Remoto',
+        ubicacion: vacancy.ubicacion || 'No especificada',
+        salario: vacancy.salario || '',
+        estado: vacancy.estado,
+        prioridad: vacancy.prioridad,
+        url: vacancy.url || '',
+        contacto: vacancy.contacto || '',
+        fecha: vacancy.fecha,
+        notas: vacancy.notas || '',
+        requisitos: vacancy.requisitos || [],
+        estrategia: vacancy.estrategia || ''
+      };
+
+      window.appSupabase.client
+        .from('vacantes')
+        .insert([dbRecord])
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error insertando vacante en Supabase:', error);
+            this.syncStatus = 'error';
+            this.notifySyncStatus();
+          } else {
+            this.syncStatus = 'synced';
+            this.notifySyncStatus();
+          }
+        });
+    }
+
     return vacancy;
   }
 
   updateVacancy(id, updatedFields) {
-    const list = this.getVacancies();
-    const index = list.findIndex(v => v.id === id);
+    const index = this.cache.findIndex(v => v.id === id);
     if (index !== -1) {
-      list[index] = { ...list[index], ...updatedFields };
-      this.saveVacancies(list);
-      return list[index];
+      // 1. Actualización optimista local
+      this.cache[index] = { ...this.cache[index], ...updatedFields };
+      this.saveLocalVacancies(this.cache);
+      this.notifySubscribers();
+
+      // 2. Actualización en Supabase si está autenticado
+      if (window.appSupabase && window.appSupabase.isAuthenticated()) {
+        window.appSupabase.client
+          .from('vacantes')
+          .update(updatedFields)
+          .eq('id', id)
+          .then(({ error }) => {
+            if (error) {
+              console.error('Error actualizando vacante en Supabase:', error);
+              this.syncStatus = 'error';
+              this.notifySyncStatus();
+            } else {
+              this.syncStatus = 'synced';
+              this.notifySyncStatus();
+            }
+          });
+      }
+
+      return this.cache[index];
     }
     return null;
   }
 
   deleteVacancy(id) {
-    let list = this.getVacancies();
-    list = list.filter(v => v.id !== id);
-    this.saveVacancies(list);
+    // 1. Eliminación optimista local
+    this.cache = this.cache.filter(v => v.id !== id);
+    this.saveLocalVacancies(this.cache);
+    this.notifySubscribers();
+
+    // 2. Eliminación en Supabase si está autenticado
+    if (window.appSupabase && window.appSupabase.isAuthenticated()) {
+      window.appSupabase.client
+        .from('vacantes')
+        .delete()
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error eliminando vacante en Supabase:', error);
+            this.syncStatus = 'error';
+            this.notifySyncStatus();
+          } else {
+            this.syncStatus = 'synced';
+            this.notifySyncStatus();
+          }
+        });
+    }
   }
 
   resetToSeedData() {
-    this.saveVacancies(SEED_VACANCIES);
-    return SEED_VACANCIES;
+    this.cache = [...SEED_VACANCIES];
+    this.saveLocalVacancies(this.cache);
+    this.notifySubscribers();
+    return this.cache;
   }
 
   getSettings() {

@@ -85,6 +85,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const importFileInput = document.getElementById('importFileInput');
   const btnResetSeed = document.getElementById('btnResetSeed');
 
+  // Cloud & Supabase Modal elements
+  const btnOpenCloudModal = document.getElementById('btnOpenCloudModal');
+  const cloudModal = document.getElementById('cloudModal');
+  const btnCloseCloudModal = document.getElementById('btnCloseCloudModal');
+  const headerCloudDot = document.getElementById('headerCloudDot');
+  const headerCloudLabel = document.getElementById('headerCloudLabel');
+  const modalCloudDot = document.getElementById('modalCloudDot');
+  const modalCloudSubtext = document.getElementById('modalCloudSubtext');
+  const tabBtnAccount = document.getElementById('tabBtnAccount');
+  const tabBtnConfig = document.getElementById('tabBtnConfig');
+  const cloudTabAccount = document.getElementById('cloudTabAccount');
+  const cloudTabConfig = document.getElementById('cloudTabConfig');
+  const cloudAuthLoggedOut = document.getElementById('cloudAuthLoggedOut');
+  const cloudAuthLoggedIn = document.getElementById('cloudAuthLoggedIn');
+  const cloudSetupWarning = document.getElementById('cloudSetupWarning');
+  const btnToggleMagicLink = document.getElementById('btnToggleMagicLink');
+  const btnTogglePassword = document.getElementById('btnTogglePassword');
+  const formMagicLink = document.getElementById('formMagicLink');
+  const formPassword = document.getElementById('formPassword');
+  const inputMagicEmail = document.getElementById('inputMagicEmail');
+  const inputAuthEmail = document.getElementById('inputAuthEmail');
+  const inputAuthPassword = document.getElementById('inputAuthPassword');
+  const btnSignInPassword = document.getElementById('btnSignInPassword');
+  const btnSignUpPassword = document.getElementById('btnSignUpPassword');
+  const userAvatarLetter = document.getElementById('userAvatarLetter');
+  const userLoggedInEmail = document.getElementById('userLoggedInEmail');
+  const btnSignOut = document.getElementById('btnSignOut');
+  const btnMigrateSeedToCloud = document.getElementById('btnMigrateSeedToCloud');
+  const btnManualSync = document.getElementById('btnManualSync');
+  const inputSupabaseUrl = document.getElementById('inputSupabaseUrl');
+  const inputSupabaseKey = document.getElementById('inputSupabaseKey');
+  const btnSaveSupabaseConfig = document.getElementById('btnSaveSupabaseConfig');
+
   // CV elements
   const cvPaper = document.getElementById('cvPaper');
   const cvVacancySelect = document.getElementById('cvVacancySelect');
@@ -884,6 +917,298 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  // =========================================================================
+  // Supabase Cloud & Multi-Device Sync Controller
+  // =========================================================================
+  function updateCloudStatusUI(status) {
+    if (!headerCloudDot || !modalCloudDot) return;
+
+    // Reset status classes
+    const classes = ['cloud-dot-local', 'cloud-dot-syncing', 'cloud-dot-synced', 'cloud-dot-error', 'cloud-dot-offline'];
+    classes.forEach(c => {
+      headerCloudDot.classList.remove(c);
+      modalCloudDot.classList.remove(c);
+    });
+
+    const activeClass = `cloud-dot-${status || 'local'}`;
+    headerCloudDot.classList.add(activeClass);
+    modalCloudDot.classList.add(activeClass);
+
+    const isAuth = window.appSupabase && window.appSupabase.isAuthenticated();
+    const isConfig = window.appSupabase && window.appSupabase.isConfigured();
+
+    if (isAuth) {
+      headerCloudLabel.textContent = 'Nube Activa';
+      modalCloudSubtext.textContent = 'Conectado y sincronizado con Supabase Cloud';
+    } else if (isConfig) {
+      headerCloudLabel.textContent = 'Iniciar Sesión';
+      modalCloudSubtext.textContent = 'Supabase configurado. Inicia sesión para sincronizar.';
+    } else {
+      headerCloudLabel.textContent = 'Conectar Nube';
+      modalCloudSubtext.textContent = 'Configura Supabase para sincronizar entre laptop, móvil y PC';
+    }
+  }
+
+  function updateAuthUI() {
+    if (!window.appSupabase) return;
+
+    const isConfig = window.appSupabase.isConfigured();
+    const isAuth = window.appSupabase.isAuthenticated();
+    const config = window.appSupabase.getConfig();
+
+    if (inputSupabaseUrl && config.url) inputSupabaseUrl.value = config.url;
+    if (inputSupabaseKey && config.anonKey) inputSupabaseKey.value = config.anonKey;
+
+    if (cloudSetupWarning) {
+      cloudSetupWarning.style.display = isConfig ? 'none' : 'block';
+    }
+
+    if (isAuth) {
+      const user = window.appSupabase.getUser();
+      if (cloudAuthLoggedOut) cloudAuthLoggedOut.style.display = 'none';
+      if (cloudAuthLoggedIn) cloudAuthLoggedIn.style.display = 'block';
+      if (userLoggedInEmail) userLoggedInEmail.textContent = user?.email || 'Usuario Activo';
+      if (userAvatarLetter) userAvatarLetter.textContent = (user?.email || 'A')[0].toUpperCase();
+    } else {
+      if (cloudAuthLoggedOut) cloudAuthLoggedOut.style.display = 'block';
+      if (cloudAuthLoggedIn) cloudAuthLoggedIn.style.display = 'none';
+    }
+
+    updateCloudStatusUI(window.appStorage.syncStatus);
+  }
+
+  // Cloud Modal Open / Close
+  btnOpenCloudModal.addEventListener('click', () => {
+    updateAuthUI();
+    cloudModal.classList.add('open');
+  });
+
+  btnCloseCloudModal.addEventListener('click', () => {
+    cloudModal.classList.remove('open');
+  });
+
+  cloudModal.addEventListener('click', (e) => {
+    if (e.target === cloudModal) cloudModal.classList.remove('open');
+  });
+
+  // Cloud Tab Switching
+  tabBtnAccount.addEventListener('click', () => {
+    tabBtnAccount.classList.add('active');
+    tabBtnAccount.style.borderBottomColor = 'var(--primary)';
+    tabBtnAccount.style.color = 'var(--primary)';
+    tabBtnAccount.style.fontWeight = '700';
+
+    tabBtnConfig.classList.remove('active');
+    tabBtnConfig.style.borderBottomColor = 'transparent';
+    tabBtnConfig.style.color = 'var(--text-muted)';
+    tabBtnConfig.style.fontWeight = '600';
+
+    cloudTabAccount.style.display = 'block';
+    cloudTabConfig.style.display = 'none';
+  });
+
+  tabBtnConfig.addEventListener('click', () => {
+    tabBtnConfig.classList.add('active');
+    tabBtnConfig.style.borderBottomColor = 'var(--primary)';
+    tabBtnConfig.style.color = 'var(--primary)';
+    tabBtnConfig.style.fontWeight = '700';
+
+    tabBtnAccount.classList.remove('active');
+    tabBtnAccount.style.borderBottomColor = 'transparent';
+    tabBtnAccount.style.color = 'var(--text-muted)';
+    tabBtnAccount.style.fontWeight = '600';
+
+    cloudTabAccount.style.display = 'none';
+    cloudTabConfig.style.display = 'block';
+  });
+
+  // Toggle Magic Link vs Password Forms
+  btnToggleMagicLink.addEventListener('click', () => {
+    btnToggleMagicLink.style.background = 'var(--surface-container-lowest)';
+    btnToggleMagicLink.style.fontWeight = '700';
+    btnToggleMagicLink.style.color = 'inherit';
+    btnToggleMagicLink.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
+
+    btnTogglePassword.style.background = 'transparent';
+    btnTogglePassword.style.fontWeight = '500';
+    btnTogglePassword.style.color = 'var(--text-muted)';
+    btnTogglePassword.style.boxShadow = 'none';
+
+    formMagicLink.style.display = 'block';
+    formPassword.style.display = 'none';
+  });
+
+  btnTogglePassword.addEventListener('click', () => {
+    btnTogglePassword.style.background = 'var(--surface-container-lowest)';
+    btnTogglePassword.style.fontWeight = '700';
+    btnTogglePassword.style.color = 'inherit';
+    btnTogglePassword.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
+
+    btnToggleMagicLink.style.background = 'transparent';
+    btnToggleMagicLink.style.fontWeight = '500';
+    btnToggleMagicLink.style.color = 'var(--text-muted)';
+    btnToggleMagicLink.style.boxShadow = 'none';
+
+    formMagicLink.style.display = 'none';
+    formPassword.style.display = 'block';
+  });
+
+  // Magic Link Submit
+  formMagicLink.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = inputMagicEmail.value.trim();
+    if (!email) return;
+
+    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
+      showToast('Primero debes configurar Supabase en la pestaña "Configurar Supabase".', 'error');
+      tabBtnConfig.click();
+      return;
+    }
+
+    try {
+      btnSendMagicLink.disabled = true;
+      btnSendMagicLink.innerHTML = '<span>Enviando enlace...</span>';
+      await window.appSupabase.signInWithOtp(email);
+      showToast('¡Enlace de acceso enviado! Revisa tu bandeja de correo.', 'success');
+      inputMagicEmail.value = '';
+    } catch (err) {
+      showToast(err.message || 'Error al enviar Magic Link', 'error');
+    } finally {
+      btnSendMagicLink.disabled = false;
+      btnSendMagicLink.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <span>Enviar Enlace de Acceso</span>
+      `;
+    }
+  });
+
+  // Password Sign In
+  btnSignInPassword.addEventListener('click', async () => {
+    const email = inputAuthEmail.value.trim();
+    const password = inputAuthPassword.value;
+    if (!email || !password) {
+      showToast('Por favor completa tu correo y contraseña', 'error');
+      return;
+    }
+
+    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
+      showToast('Primero configura Supabase en la pestaña "Configurar Supabase".', 'error');
+      tabBtnConfig.click();
+      return;
+    }
+
+    try {
+      btnSignInPassword.disabled = true;
+      btnSignInPassword.textContent = 'Iniciando...';
+      await window.appSupabase.signIn(email, password);
+      showToast('¡Sesión iniciada con éxito! Sincronizando datos...', 'success');
+      updateAuthUI();
+    } catch (err) {
+      showToast(err.message || 'Error al iniciar sesión', 'error');
+    } finally {
+      btnSignInPassword.disabled = false;
+      btnSignInPassword.textContent = 'Iniciar Sesión';
+    }
+  });
+
+  // Password Sign Up
+  btnSignUpPassword.addEventListener('click', async () => {
+    const email = inputAuthEmail.value.trim();
+    const password = inputAuthPassword.value;
+    if (!email || !password) {
+      showToast('Por favor completa correo y contraseña para registrarte', 'error');
+      return;
+    }
+
+    if (!window.appSupabase || !window.appSupabase.isConfigured()) {
+      showToast('Primero configura Supabase en la pestaña "Configurar Supabase".', 'error');
+      tabBtnConfig.click();
+      return;
+    }
+
+    try {
+      btnSignUpPassword.disabled = true;
+      btnSignUpPassword.textContent = 'Registrando...';
+      await window.appSupabase.signUp(email, password);
+      showToast('¡Registro completado! Si requiere confirmación revisa tu correo, o inicia sesión.', 'success');
+      updateAuthUI();
+    } catch (err) {
+      showToast(err.message || 'Error en registro', 'error');
+    } finally {
+      btnSignUpPassword.disabled = false;
+      btnSignUpPassword.textContent = 'Registrarse';
+    }
+  });
+
+  // Sign Out
+  btnSignOut.addEventListener('click', async () => {
+    if (window.appSupabase) {
+      await window.appSupabase.signOut();
+      showToast('Sesión cerrada. Ahora estás en modo local.', 'info');
+      updateAuthUI();
+    }
+  });
+
+  // Save Supabase Configuration
+  btnSaveSupabaseConfig.addEventListener('click', () => {
+    const url = inputSupabaseUrl.value.trim();
+    const key = inputSupabaseKey.value.trim();
+    if (!url || !key) {
+      showToast('Ingresa tanto la URL como la Anon Key de Supabase', 'error');
+      return;
+    }
+
+    const success = window.appSupabase.saveConfig(url, key);
+    if (success) {
+      showToast('¡Credenciales de Supabase guardadas y validadas!', 'success');
+      updateAuthUI();
+      tabBtnAccount.click();
+    } else {
+      showToast('No se pudo inicializar Supabase. Verifica la URL y clave.', 'error');
+    }
+  });
+
+  // Migrate Seed Vacancies to Cloud
+  btnMigrateSeedToCloud.addEventListener('click', async () => {
+    try {
+      btnMigrateSeedToCloud.disabled = true;
+      btnMigrateSeedToCloud.innerHTML = '<span>Subiendo vacantes a la nube...</span>';
+      const result = await window.appStorage.migrateLocalToCloud();
+      showToast(`¡${result.count} vacantes migradas a tu nube con éxito!`, 'success');
+    } catch (err) {
+      showToast(err.message || 'Error al migrar vacantes', 'error');
+    } finally {
+      btnMigrateSeedToCloud.disabled = false;
+      btnMigrateSeedToCloud.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Subir vacantes locales a la nube (16 iniciales)</span>
+      `;
+    }
+  });
+
+  // Manual Sync
+  btnManualSync.addEventListener('click', async () => {
+    showToast('Sincronizando con Supabase...', 'info');
+    await window.appStorage.syncWithSupabase();
+    showToast('Sincronización completada', 'success');
+  });
+
+  // Listeners for Supabase Auth and Sync Status
+  window.appStorage.onSyncStatusChange((status) => {
+    updateCloudStatusUI(status);
+  });
+
+  if (window.appSupabase) {
+    window.appSupabase.onAuthStateChange(() => {
+      updateAuthUI();
+    });
+  }
+
+  // Initial Auth & Cloud state check
+  setTimeout(() => {
+    updateAuthUI();
+  }, 300);
 
   // =========================================================================
   // Reactive Storage Subscription
