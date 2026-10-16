@@ -128,10 +128,11 @@ flowchart TD
 
 | Paso | Acción | Estado |
 | :---: | :--- | :---: |
-| **1** | Aprobación del plan y validación de componentes | 🟡 En curso |
-| **2** | Creación de la estructura base y diseño en CSS (Electric Neo-Architect) | ⏳ Siguiente |
-| **3** | Implementación de `storage.js` y carga de las 16 vacantes de Gemini | ⏳ Pendiente |
-| **4** | Creación del componente Smart Intake (texto + capturas de pantalla) | ⏳ Pendiente |
-| **5** | Implementación del Tablero Kanban y Vista Lista con Métricas | ⏳ Pendiente |
-| **6** | Implementación del Generador de CVs y exportación a PDF | ⏳ Pendiente |
-| **7** | Push al repositorio GitHub y preparación para Netlify | ⏳ Pendiente |
+| **1** | Aprobación del plan y validación de componentes | ✅ Completado |
+| **2** | Creación de la estructura base y diseño en CSS (Electric Neo-Architect) | ✅ Completado |
+| **3** | Implementación de `storage.js` y carga de las 16 vacantes de Gemini | ✅ Completado |
+| **4** | Creación del componente Smart Intake (texto + capturas de pantalla) | ✅ Completado |
+| **5** | Implementación del Tablero Kanban y Vista Lista con Métricas y Filtros | ✅ Completado |
+| **6** | Implementación del Generador de CVs y exportación a PDF | ✅ Completado |
+| **7** | Push al repositorio GitHub y preparación para Netlify | ✅ Completado |
+
