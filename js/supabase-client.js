@@ -77,7 +77,25 @@ class SupabaseService {
         }
       });
 
-      // Escuchar cambios de sesión
+      // 1. Detectar e intercambiar código de autenticación PKCE (?code=)
+      const urlParams = new URLSearchParams(window.location.search);
+      const authCode = urlParams.get('code');
+      if (authCode) {
+        this.client.auth.exchangeCodeForSession(authCode).then(({ data, error }) => {
+          if (!error && data?.session) {
+            this.currentSession = data.session;
+            this.currentUser = data.session.user;
+            this.notifyAuthListeners('SIGNED_IN', data.session);
+            try {
+              window.history.replaceState(null, '', window.location.pathname);
+            } catch (e) {}
+          } else if (error) {
+            console.warn('Código de autenticación expirado o ya utilizado:', error);
+          }
+        });
+      }
+
+      // 2. Escuchar cambios de sesión
       this.client.auth.onAuthStateChange((event, session) => {
         this.currentSession = session;
         this.currentUser = session?.user || null;
@@ -87,13 +105,11 @@ class SupabaseService {
         if (window.location.hash && window.location.hash.includes('access_token')) {
           try {
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          } catch (e) {
-            // Ignorar en entornos restrictivos
-          }
+          } catch (e) {}
         }
       });
 
-      // Recuperar sesión activa inicial
+      // 3. Recuperar sesión activa inicial
       this.client.auth.getSession().then(({ data: { session } }) => {
         this.currentSession = session;
         this.currentUser = session?.user || null;
