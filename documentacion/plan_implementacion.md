@@ -134,9 +134,10 @@ flowchart TD
 | **4** | Creación del componente Smart Intake (texto + capturas de pantalla) | ✅ Completado |
 | **5** | Implementación del Tablero Kanban y Vista Lista con Métricas y Filtros | ✅ Completado |
 | **6** | Implementación del Generador de CVs y exportación a PDF | ✅ Completado |
-| **7** | Push al repositorio GitHub y preparación para Netlify | ✅ Completado |
+| **7** | Push al repositorio GitHub y despliegue continuo en Netlify | ✅ Completado |
+| **8** | Integración de Supabase Cloud BaaS (Auth + RLS + Sincronización en tiempo real) | ✅ Completado |
+| **9** | CV Base Maestro (`cv_base_arianna.md`) extraído y estructurado desde LinkedIn | ✅ Completado |
+| **10** | Netlify Serverless Functions (`extract-job` y `tailor-cv`) con Gemini 2.5 Flash y Scraping | ✅ Completado |
+| **11** | Smart Intake conectado al backend serverless (cero exposición de API Keys en cliente) | ✅ Completado |
+| **12** | Generador de CVs con 3 plantillas (Modern Tech, Clásica Harvard, Banking), Toggle Foto y Adaptación con IA | ✅ Completado |
 
-SUPABASE
-
-PASS
-5Mrn9XfNNBQsp2gB
