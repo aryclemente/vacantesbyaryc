@@ -810,6 +810,7 @@ textarea.form-control {
   color: #1e293b;
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
+  transition: all var(--transition-normal);
 }
 
 .cv-header {
@@ -818,7 +819,34 @@ textarea.form-control {
   margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.cv-photo-container {
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cv-photo-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cv-header-info {
+  flex-grow: 1;
+}
+
+/* Strict ATS Compliance: When photo toggle is off, photo is completely hidden */
+.cv-paper.no-photo .cv-photo-container {
+  display: none !important;
 }
 
 .cv-name {
@@ -886,8 +914,185 @@ textarea.form-control {
 }
 
 .cv-bullets li {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
 }
+
+/* ==========================================================================
+   Plantilla 1: Modern Tech (Inter + Plus Jakarta Sans + Acentos Tecnológicos)
+   ========================================================================== */
+.cv-paper.template-modern {
+  font-family: 'Inter', sans-serif;
+}
+.cv-paper.template-modern .cv-header {
+  border-bottom: 2px solid var(--primary);
+}
+.cv-paper.template-modern .cv-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--primary-dark);
+}
+.cv-paper.template-modern .cv-role {
+  color: var(--deep-teal);
+}
+.cv-paper.template-modern .cv-section-title {
+  color: var(--primary);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ==========================================================================
+   Plantilla 2: Clásica Harvard (Merriweather / Serif Formal / Cabecera Centrada)
+   ========================================================================== */
+.cv-paper.template-harvard {
+  font-family: 'Merriweather', Georgia, serif;
+  color: #111827;
+  line-height: 1.65;
+}
+
+.cv-paper.template-harvard .cv-header {
+  border-bottom: 1.5px solid #111827;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+}
+
+.cv-paper.template-harvard .cv-photo-container {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  border: 1px solid #374151;
+  box-shadow: none;
+}
+
+.cv-paper.template-harvard .cv-header-info {
+  text-align: center;
+}
+
+.cv-paper.template-harvard .cv-name {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.01em;
+}
+
+.cv-paper.template-harvard .cv-role {
+  font-family: 'Merriweather', Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: #4b5563;
+  margin-top: 0.2rem;
+}
+
+.cv-paper.template-harvard .cv-contacts {
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+}
+
+.cv-paper.template-harvard .cv-section-title {
+  font-family: 'Merriweather', Georgia, serif;
+  color: #111827;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #111827;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.65rem;
+}
+
+.cv-paper.template-harvard .cv-job-header {
+  color: #111827;
+  font-size: 0.9375rem;
+}
+
+.cv-paper.template-harvard .cv-bullets {
+  list-style-type: disc;
+}
+
+.cv-paper.template-harvard .cv-bullets li {
+  margin-bottom: 0.35rem;
+  color: #1f2937;
+}
+
+/* ==========================================================================
+   Plantilla 3: Banking & Corporate (Fintech / Banesco / Rigor Operativo)
+   ========================================================================== */
+.cv-paper.template-banking {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+}
+
+.cv-paper.template-banking .cv-header {
+  border-bottom: 2px solid #0f2744;
+  border-left: 5px solid #0f2744;
+  padding-left: 1.25rem;
+  padding-bottom: 1rem;
+  background: #f8fafc;
+  padding-top: 0.6rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.cv-paper.template-banking .cv-photo-container {
+  border-radius: var(--radius-sm);
+  border: 2px solid #0f2744;
+  width: 74px;
+  height: 74px;
+}
+
+.cv-paper.template-banking .cv-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f2744;
+  font-weight: 800;
+  font-size: 2.05rem;
+  letter-spacing: -0.01em;
+}
+
+.cv-paper.template-banking .cv-role {
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+}
+
+.cv-paper.template-banking .cv-contacts {
+  color: #334155;
+  font-weight: 500;
+  text-align: right;
+  font-size: 0.8125rem;
+}
+
+.cv-paper.template-banking .cv-section-title {
+  background: #0f2744;
+  color: #ffffff;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: none;
+  margin-bottom: 0.75rem;
+}
+
+.cv-paper.template-banking .cv-job-header span:first-child {
+  color: #0f2744;
+  font-weight: 700;
+}
+
+.cv-paper.template-banking .cv-bullets {
+  list-style-type: square;
+}
+
+.cv-paper.template-banking .cv-bullets li {
+  color: #1e293b;
+  margin-bottom: 0.3rem;
+}
+
 
 /* ==========================================================================
    Modals & Drawers
@@ -1199,5 +1404,10 @@ textarea.form-control {
     padding: 0 !important;
     border-radius: 0 !important;
   }
+
+  .cv-paper.no-photo .cv-photo-container {
+    display: none !important;
+  }
 }
+
 

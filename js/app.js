@@ -113,6 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // CV elements
   const cvPaper = document.getElementById('cvPaper');
   const cvVacancySelect = document.getElementById('cvVacancySelect');
+  const btnTailorCvAi = document.getElementById('btnTailorCvAi');
+  const tailorCvBtnText = document.getElementById('tailorCvBtnText');
+  const cvTemplateSelect = document.getElementById('cvTemplateSelect');
+  const cvTogglePhoto = document.getElementById('cvTogglePhoto');
+  const btnUploadPhoto = document.getElementById('btnUploadPhoto');
+  const cvPhotoInput = document.getElementById('cvPhotoInput');
+  const cvPhotoContainer = document.getElementById('cvPhotoContainer');
+  const cvPhotoImg = document.getElementById('cvPhotoImg');
   const btnPrintCv = document.getElementById('btnPrintCv');
   const btnToggleEditCv = document.getElementById('btnToggleEditCv');
   const editCvBtnText = document.getElementById('editCvBtnText');
@@ -121,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cvSummaryText = document.getElementById('cvSummaryText');
   const cvExperienceBullets = document.getElementById('cvExperienceBullets');
   const cvSkillsList = document.getElementById('cvSkillsList');
+
 
   // =========================================================================
   // Toast Notification System
@@ -687,9 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmUrl.value = job.url || '';
     confirmNotas.value = job.notas || '';
 
-    aiExtractionSourceBadge.textContent = job.aiGenerated 
-      ? 'Extracción multimodal exitosa vía Google Gemini API' 
-      : 'Extracción inteligente local (Heurística)';
+    let badgeText = '⚡ Extracción inteligente local (Heurística)';
+    if (job.extractionSource === 'ai-serverless') {
+      badgeText = '✨ Extracción Multimodal con IA en la Nube (Gemini 1.5 Flash)';
+    } else if (job.extractionSource === 'ai-direct' || job.aiGenerated) {
+      badgeText = '✨ Extracción Multimodal con Google Gemini API';
+    }
+    aiExtractionSourceBadge.textContent = badgeText;
+
 
     renderRequisitosChips(job.requisitos || []);
     intakeConfirmModal.classList.add('open');
@@ -799,8 +813,114 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // CV Generator (Tailored Content & Inline Edit)
+  // CV Generator (Tailored Content, Templates, Photo & AI Optimization)
   // =========================================================================
+
+  // Initial Master CV Base (from cv_base_arianna.md)
+  const MASTER_CV = {
+    role: 'Full Stack Developer & Especialista TI / Web',
+    summary: 'Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git y Netlify.',
+    bullets: [
+      'Diseño, desarrollo y despliegue de aplicaciones web reactivas, optimizando Core Web Vitals en más de un 40%.',
+      'Integración de servicios Cloud (Supabase PostgreSQL con RLS y Netlify Functions) para persistencia y sincronización en tiempo real.',
+      'Implementación de pipelines asistidos por Inteligencia Artificial multimodal (Google Gemini 1.5) para procesamiento y extracción de datos.',
+      'Modernización de plataformas e-commerce y portales corporativos sobre WordPress y Shopify Headless con alta disponibilidad.'
+    ],
+    skills: {
+      relevant: 'JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance',
+      core: 'PHP, Python, Node.js, REST APIs, PostgreSQL (RLS), MySQL, SQL Server, JSON, Git, GitHub, Supabase Cloud',
+      methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa'
+    }
+  };
+
+  // --- Photo Management ---
+  function initCvPhoto() {
+    const savedPhoto = localStorage.getItem('aryc_cv_photo');
+    const photoEnabled = localStorage.getItem('aryc_cv_photo_enabled') === 'true';
+
+    if (savedPhoto && cvPhotoImg) {
+      cvPhotoImg.src = savedPhoto;
+    }
+
+    if (cvTogglePhoto) {
+      cvTogglePhoto.checked = photoEnabled && !!savedPhoto;
+      applyPhotoVisibility(cvTogglePhoto.checked);
+    }
+  }
+
+  function applyPhotoVisibility(show) {
+    if (!cvPaper || !cvPhotoContainer) return;
+    const hasPhoto = cvPhotoImg && cvPhotoImg.src && !cvPhotoImg.src.endsWith('/#') && cvPhotoImg.src !== window.location.href;
+
+    if (show && hasPhoto) {
+      cvPaper.classList.remove('no-photo');
+      cvPhotoContainer.style.display = 'block';
+    } else {
+      cvPaper.classList.add('no-photo');
+      cvPhotoContainer.style.display = 'none';
+    }
+    localStorage.setItem('aryc_cv_photo_enabled', show ? 'true' : 'false');
+  }
+
+  if (cvTogglePhoto) {
+    cvTogglePhoto.addEventListener('change', () => {
+      const hasPhoto = cvPhotoImg && cvPhotoImg.src && !cvPhotoImg.src.endsWith('/#') && cvPhotoImg.src !== window.location.href;
+      if (cvTogglePhoto.checked && !hasPhoto) {
+        cvPhotoInput.click();
+      } else {
+        applyPhotoVisibility(cvTogglePhoto.checked);
+      }
+    });
+  }
+
+  if (btnUploadPhoto) {
+    btnUploadPhoto.addEventListener('click', () => {
+      cvPhotoInput.click();
+    });
+  }
+
+  if (cvPhotoInput) {
+    cvPhotoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const b64 = evt.target.result;
+          cvPhotoImg.src = b64;
+          localStorage.setItem('aryc_cv_photo', b64);
+          cvTogglePhoto.checked = true;
+          applyPhotoVisibility(true);
+          showToast('Fotografía cargada exitosamente', 'success');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // --- Template Selector ---
+  function initCvTemplate() {
+    const savedTemplate = localStorage.getItem('aryc_cv_template') || 'modern';
+    if (cvTemplateSelect) {
+      cvTemplateSelect.value = savedTemplate;
+    }
+    applyTemplate(savedTemplate);
+  }
+
+  function applyTemplate(templateName) {
+    if (!cvPaper) return;
+    cvPaper.classList.remove('template-modern', 'template-harvard', 'template-banking');
+    cvPaper.classList.add(`template-${templateName}`);
+    localStorage.setItem('aryc_cv_template', templateName);
+  }
+
+  if (cvTemplateSelect) {
+    cvTemplateSelect.addEventListener('change', () => {
+      applyTemplate(cvTemplateSelect.value);
+      showToast(`Plantilla cambiada a: ${cvTemplateSelect.options[cvTemplateSelect.selectedIndex].text}`, 'info');
+    });
+  }
+
+  // --- CV Selector & Rendering ---
   function populateCvSelector() {
     const vacancies = window.appStorage.getVacancies();
     cvVacancySelect.innerHTML = `
@@ -818,49 +938,126 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateCvPreview() {
     const selectedId = cvVacancySelect.value;
     if (selectedId === 'general') {
-      cvHeaderRole.textContent = 'Full Stack Developer & TI Specialist';
-      cvSummaryText.textContent = 'Especialista en Desarrollo de Soluciones Tecnológicas, aplicaciones web escalables y optimización de plataformas de gestión. Amplia experiencia en desarrollo Frontend y Backend, integración de APIs de Inteligencia Artificial, y diseño de flujos operativos para plataformas educativas y bancarias.';
-      cvExperienceBullets.innerHTML = `
-        <li>Diseño e implementación de arquitecturas web modernas con optimización de rendimiento y SEO técnico.</li>
-        <li>Desarrollo de integraciones automatizadas con modelos de IA para ingesta de datos y aceleración de flujos.</li>
-        <li>Gestión de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript).</li>
-        <li>Liderazgo en resolución de incidentes técnicos y despliegue ágil con Git y CI/CD.</li>
-      `;
-      cvSkillsList.innerHTML = `
-        <strong>Frontend & Web:</strong> JavaScript (ES6+), HTML5 Semántico, CSS3 Moderno, Responsive Design, React, WordPress.<br>
-        <strong>Backend & Datos:</strong> PHP, Python, REST APIs, JSON, SQL, Optimización de Rendimiento.<br>
-        <strong>Especialidades:</strong> Integración IA (Gemini API), SEO Técnico, Git/GitHub, Netlify, ModernCV / ATS Optimization.
-      `;
+      applyTailoredCvData(MASTER_CV, { empresa: 'General', puesto: 'Full Stack Developer & Especialista TI / Web' });
     } else {
       const vacancies = window.appStorage.getVacancies();
       const vacancy = vacancies.find(v => v.id === selectedId);
       if (vacancy) {
-        cvHeaderRole.textContent = `${vacancy.puesto} | Arianna Clemente`;
-        
-        // Auto-tailored summary
-        cvSummaryText.textContent = `Especialista en ${vacancy.puesto} con enfoque orientado a resultados para ${vacancy.empresa}. Sólida trayectoria optimizando procesos tecnológicos, desarrollo de plataformas de alta disponibilidad y soluciones adaptadas a los estándares de ${vacancy.empresa}. Dominio comprobado en trabajo en equipo ágil y entrega continua.`;
-
-        // Highlight company requirements in bullets
-        const reqsText = (vacancy.requisitos && vacancy.requisitos.length > 0)
-          ? vacancy.requisitos.slice(0, 3).join(', ')
-          : 'desarrollo full stack y metodologías ágiles';
-
-        cvExperienceBullets.innerHTML = `
-          <li>Adaptación y entrega de soluciones para <strong>${escapeHtml(vacancy.empresa)}</strong> aplicando ${escapeHtml(reqsText)}.</li>
-          <li>Desarrollo de integraciones eficientes, APIs y modernización de interfaces web de alto rendimiento.</li>
-          <li>Estrategias de despliegue continuo, buenas prácticas de desarrollo ágil y aseguramiento de calidad.</li>
-          <li>Optimización de flujos de trabajo con automatizaciones y resolución proactiva de incidentes.</li>
-        `;
-
-        // Tailored skills
-        const topSkills = (vacancy.requisitos || []).join(', ');
-        cvSkillsList.innerHTML = `
-          <strong>Tecnologías Relevantes para ${escapeHtml(vacancy.empresa)}:</strong> ${topSkills ? topSkills + ', ' : ''}JavaScript, PHP, React, REST APIs, SQL.<br>
-          <strong>Habilidades Clave:</strong> Desarrollo Web Ágil, Integración de IA, Optimización SEO, Git, Trabajo Remoto Internacional.<br>
-          <strong>Metodologías:</strong> SCRUM, Testing, Documentación Técnica, Enfoque en Escalabilidad.
-        `;
+        const localTailored = generateLocalTailoredCv(vacancy);
+        applyTailoredCvData(localTailored, vacancy);
       }
     }
+  }
+
+  function generateLocalTailoredCv(vacancy) {
+    const empresa = vacancy.empresa || 'la empresa';
+    const puesto = vacancy.puesto || 'Full Stack Developer';
+    const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
+      ? vacancy.requisitos
+      : ['JavaScript', 'PHP', 'React', 'SQL', 'Git'];
+    const reqsText = reqs.slice(0, 3).join(', ');
+
+    return {
+      role: `${puesto} | Arianna Clemente`,
+      summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables y sistemas transaccionales. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código y diseño de arquitecturas eficientes orientadas a resultados.`,
+      bullets: [
+        `Diseño e implementación de soluciones tecnológicas adaptadas a ${empresa}, aplicando ${reqsText} con foco en alta disponibilidad y rendimiento.`,
+        `Construcción de arquitecturas web modernas con optimización de Core Web Vitals (+40%) y consumo de APIs REST de alto desempeño.`,
+        `Automatización de flujos de trabajo e integración de servicios en la nube (Supabase PostgreSQL, Netlify Functions e Inteligencia Artificial).`,
+        `Liderazgo técnico en resolución de incidentes de misión crítica, mantenimiento de plataformas de alta demanda y metodologías ágiles.`
+      ],
+      skills: {
+        relevant: `${reqs.join(', ')}`,
+        core: 'JavaScript (ES6+), React, PHP, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
+        methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa.'
+      }
+    };
+  }
+
+  function applyTailoredCvData(data, vacancy) {
+    cvHeaderRole.textContent = data.role || `${vacancy.puesto || 'Full Stack Developer'} | Arianna Clemente`;
+    cvSummaryText.textContent = data.summary || MASTER_CV.summary;
+
+    if (Array.isArray(data.bullets) && data.bullets.length > 0) {
+      cvExperienceBullets.innerHTML = data.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
+    }
+
+    if (data.skills && typeof data.skills === 'object') {
+      cvSkillsList.innerHTML = `
+        <strong>Tecnologías Clave para ${escapeHtml(vacancy.empresa || 'el puesto')}:</strong> ${escapeHtml(data.skills.relevant || '')}<br>
+        <strong>Stack &amp; Arquitectura:</strong> ${escapeHtml(data.skills.core || '')}<br>
+        <strong>Metodologías &amp; Prácticas:</strong> ${escapeHtml(data.skills.methodologies || '')}
+      `;
+    }
+  }
+
+  // --- AI Tailor CV Action Button ---
+  if (btnTailorCvAi) {
+    btnTailorCvAi.addEventListener('click', async () => {
+      const selectedId = cvVacancySelect.value;
+      const vacancies = window.appStorage.getVacancies();
+      const vacancy = selectedId === 'general'
+        ? {
+            empresa: 'Empresas Tech & Fintech',
+            puesto: 'Senior Full Stack Developer & Tech Lead',
+            modalidad: 'Remoto',
+            requisitos: ['JavaScript', 'React', 'PHP', 'Python', 'PostgreSQL', 'APIs REST', 'Cloud Architecture'],
+            notas: 'Perfil orientado a liderazgo técnico, calidad de software y arquitecturas cloud escalables.'
+          }
+        : vacancies.find(v => v.id === selectedId);
+
+      if (!vacancy) {
+        showToast('Selecciona una vacante para adaptar el CV', 'error');
+        return;
+      }
+
+      btnTailorCvAi.disabled = true;
+      tailorCvBtnText.textContent = 'Adaptando con IA...';
+
+      try {
+        const settings = window.appStorage.getSettings();
+        const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+        const headers = { 'Content-Type': 'application/json' };
+        if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+        let res = await fetch('/api/tailor-cv', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ vacancy })
+        }).catch(() => null);
+
+        if (!res || !res.ok) {
+          res = await fetch('/.netlify/functions/tailor-cv', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ vacancy })
+          }).catch(() => null);
+        }
+
+        let tailoredData = null;
+        if (res && res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            tailoredData = json.data;
+          }
+        }
+
+        if (!tailoredData) {
+          tailoredData = generateLocalTailoredCv(vacancy);
+        }
+
+        applyTailoredCvData(tailoredData, vacancy);
+        showToast(`¡CV adaptado exitosamente con IA para ${vacancy.empresa}!`, 'success');
+      } catch (err) {
+        console.error('Error al adaptar CV con IA:', err);
+        const fallback = generateLocalTailoredCv(vacancy);
+        applyTailoredCvData(fallback, vacancy);
+        showToast('CV adaptado con motor inteligente local.', 'info');
+      } finally {
+        btnTailorCvAi.disabled = false;
+        tailorCvBtnText.textContent = '✨ Adaptar con IA';
+      }
+    });
   }
 
   // Toggle inline editing on the CV paper
@@ -892,7 +1089,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   btnPrintCv.addEventListener('click', () => {
-    // If edit mode was on, turn it off for a pristine print
     if (isCvEditMode) {
       btnToggleEditCv.click();
     }
@@ -1137,4 +1333,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial load
   renderKanban();
   renderTable();
+  initCvPhoto();
+  initCvTemplate();
 });

@@ -7,10 +7,10 @@
   <title>Vacantes by AryC // ATS Personal</title>
   <meta name="description" content="Sistema de gestión personal de vacantes y postulaciones de inicio a fin. Ingesta inteligente con IA, tablero Kanban y generador dinámico de CVs.">
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <!-- Google Fonts: Plus Jakarta Sans, Inter & Merriweather (para Plantilla Harvard) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css">
@@ -284,56 +284,103 @@
     <!-- View 4: CV Generator -->
     <div class="view-panel" id="view-cv">
       <div class="cv-container">
+        
+        <!-- CV Multi-Control Toolbar -->
         <div class="cv-toolbar">
-          <div style="display:flex; align-items:center; flex-wrap:wrap; gap: 0.75rem;">
-            <label class="form-label" style="margin:0;">Adaptar para vacante:</label>
-            <select id="cvVacancySelect" class="form-control" style="width: auto; padding: 0.4rem 0.8rem;">
-              <option value="general">CV Perfil General (Tech & Banking)</option>
-              <!-- Filled dynamically with vacancies -->
-            </select>
-            <span class="tag-pill" style="margin:0; background:rgba(0, 210, 180, 0.12); color:var(--deep-teal);">
-              ✨ ATS Ready (1 Pág)
-            </span>
+          <div class="cv-toolbar-row" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; width:100%;">
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap: 0.6rem;">
+              <label class="form-label" style="margin:0; font-size:0.75rem;">Vacante Objetivo:</label>
+              <select id="cvVacancySelect" class="form-control" style="width: auto; padding: 0.4rem 0.8rem; font-size:0.875rem;">
+                <option value="general">CV Perfil General (Tech & Banking)</option>
+                <!-- Filled dynamically with vacancies -->
+              </select>
+              <button class="btn btn-primary" id="btnTailorCvAi" style="padding:0.45rem 0.85rem; font-size:0.8125rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+                </svg>
+                <span id="tailorCvBtnText">✨ Adaptar con IA</span>
+              </button>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span class="tag-pill" style="margin:0; background:rgba(0, 210, 180, 0.12); color:var(--deep-teal); font-weight:700;">
+                ✓ ATS Ready (1 Pág)
+              </span>
+            </div>
           </div>
 
-          <div style="display:flex; align-items:center; gap:0.5rem;">
-            <button class="btn btn-outline" id="btnToggleEditCv" title="Permite editar cualquier texto del CV directamente con un clic">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              <span id="editCvBtnText">Editar Texto</span>
-            </button>
-            <button class="btn btn-outline" id="btnResetCvContent" title="Restablecer contenido automático">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-            </button>
-            <button class="btn btn-primary" id="btnPrintCv">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                <rect x="6" y="14" width="12" height="8"></rect>
-              </svg>
-              <span>Descargar PDF</span>
-            </button>
+          <!-- Secondary Toolbar: Template Selector & Photo Toggle -->
+          <div class="cv-toolbar-row" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; width:100%; border-top:1px solid var(--border-slate); padding-top:0.75rem; margin-top:0.35rem;">
+            
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <!-- Template Selector -->
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <label class="form-label" style="margin:0; font-size:0.75rem;">Plantilla:</label>
+                <select id="cvTemplateSelect" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size:0.8125rem;">
+                  <option value="modern">Modern Tech (Inter / Neo-Architect)</option>
+                  <option value="harvard">Clásica Harvard (Merriweather / Serif)</option>
+                  <option value="banking">Banking & Corporate (Fintech / Executive)</option>
+                </select>
+              </div>
+
+              <!-- Photo Controls -->
+              <div class="cv-photo-controls" style="display:flex; align-items:center; gap:0.6rem;">
+                <label class="cv-toggle-label" style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.8125rem; font-weight:600; color:var(--text-dark-primary); margin:0;">
+                  <input type="checkbox" id="cvTogglePhoto" style="accent-color:var(--primary); cursor:pointer;">
+                  <span>Incluir Foto</span>
+                </label>
+                <button class="btn btn-outline" id="btnUploadPhoto" style="padding:0.3rem 0.6rem; font-size:0.75rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>Subir Foto</span>
+                </button>
+                <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <button class="btn btn-outline" id="btnToggleEditCv" title="Permite editar cualquier texto del CV directamente con un clic" style="padding:0.4rem 0.75rem; font-size:0.8125rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span id="editCvBtnText">Editar Texto</span>
+              </button>
+              <button class="btn btn-outline" id="btnResetCvContent" title="Restablecer contenido automático" style="padding:0.4rem 0.6rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+              </button>
+              <button class="btn btn-primary" id="btnPrintCv" style="padding:0.4rem 0.85rem; font-size:0.8125rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Descargar PDF</span>
+              </button>
+            </div>
+
           </div>
         </div>
 
 
         <!-- Rendered CV Paper for ATS -->
-        <div class="cv-paper" id="cvPaper">
+        <div class="cv-paper template-modern no-photo" id="cvPaper">
           <div class="cv-header">
-            <div>
+            <div class="cv-photo-container" id="cvPhotoContainer">
+              <img id="cvPhotoImg" src="" alt="Arianna Clemente" class="cv-photo-avatar">
+            </div>
+            <div class="cv-header-info">
               <div class="cv-name">Arianna Clemente</div>
-              <div class="cv-role" id="cvHeaderRole">Full Stack Developer & TI Specialist</div>
+              <div class="cv-role" id="cvHeaderRole">Full Stack Developer &amp; Especialista TI / Web</div>
             </div>
             <div class="cv-contacts">
               <div>Caracas, Venezuela &bull; Remoto Internacional</div>
-              <div>github.com/aryclemente</div>
-              <div>linkedin.com/in/aryclemente</div>
+              <div>hello.ary.code@gmail.com</div>
+              <div>github.com/aryclemente &bull; linkedin.com/in/aryclement</div>
             </div>
           </div>
 
           <div class="cv-section">
             <div class="cv-section-title">Resumen Profesional</div>
             <p id="cvSummaryText" style="font-size:0.875rem;">
-              Especialista en Desarrollo de Soluciones Tecnológicas, aplicaciones web escalables y optimización de plataformas de gestión. Amplia experiencia en desarrollo Frontend y Backend, integración de APIs de Inteligencia Artificial, y diseño de flujos operativos para plataformas educativas y bancarias.
+              Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git y Netlify.
             </p>
           </div>
 
@@ -341,17 +388,18 @@
             <div class="cv-section-title">Experiencia Destacada</div>
             <div class="cv-job">
               <div class="cv-job-header">
-                <span>Especialista de Desarrollo TI & Soluciones Web</span>
+                <span>Especialista de Desarrollo TI &amp; Soluciones Web</span>
                 <span>2023 &ndash; Presente</span>
               </div>
               <div class="cv-job-sub">
-                <span>Proyectos de Modernización & Consultoría Técnica</span>
+                <span>Consultoría Independiente &amp; Proyectos</span>
                 <span>Remoto</span>
               </div>
               <ul class="cv-bullets" id="cvExperienceBullets">
-                <li>Diseño e implementación de arquitecturas web modernas con optimización de rendimiento y SEO técnico.</li>
-                <li>Desarrollo de integraciones automatizadas con modelos de IA para ingesta de datos y aceleración de flujos.</li>
-                <li>Gestión de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript).</li>
+                <li>Diseño, desarrollo y despliegue de aplicaciones web reactivas, optimizando Core Web Vitals en más de un 40%.</li>
+                <li>Integración de servicios Cloud (Supabase PostgreSQL con RLS y Netlify Functions) para persistencia y sincronización en tiempo real.</li>
+                <li>Implementación de pipelines asistidos por Inteligencia Artificial multimodal (Google Gemini 1.5) para procesamiento y extracción de datos.</li>
+                <li>Modernización de plataformas e-commerce y portales corporativos sobre WordPress y Shopify Headless con alta disponibilidad.</li>
               </ul>
             </div>
           </div>
@@ -359,9 +407,9 @@
           <div class="cv-section">
             <div class="cv-section-title">Competencias Clave</div>
             <div style="font-size:0.875rem; color:#334155;" id="cvSkillsList">
-              <strong>Frontend & Web:</strong> JavaScript (ES6+), HTML5, CSS3 Moderno, Responsive Design, React, WordPress.<br>
-              <strong>Backend & Datos:</strong> PHP, Python, REST APIs, JSON, SQL, Optimización de Rendimiento.<br>
-              <strong>Especialidades:</strong> Integración IA (Gemini API), SEO Técnico, Git/GitHub, Netlify, ModernCV / ATS Optimization.
+              <strong>Frontend &amp; Web:</strong> JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance.<br>
+              <strong>Backend &amp; Bases de Datos:</strong> PHP, Python, Node.js, REST APIs, PostgreSQL (RLS), MySQL, SQL Server, JSON.<br>
+              <strong>Cloud, DevOps &amp; Especialidades:</strong> Git, GitHub, Netlify (Serverless Functions), Supabase Cloud, Integración IA (Gemini API), Moodle LMS, OJS, Optimización ATS.
             </div>
           </div>
         </div>

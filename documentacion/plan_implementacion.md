@@ -136,3 +136,7 @@ flowchart TD
 | **6** | Implementación del Generador de CVs y exportación a PDF | ✅ Completado |
 | **7** | Push al repositorio GitHub y preparación para Netlify | ✅ Completado |
 
+SUPABASE
+
+PASS
+5Mrn9XfNNBQsp2gB

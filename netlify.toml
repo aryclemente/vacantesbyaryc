@@ -2,6 +2,7 @@
 
 [build]
   publish = "."
+  functions = "netlify/functions"
 
 [[headers]]
   for = "/*"
@@ -12,6 +13,13 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+# Forward /api/* requests directly to serverless Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Client-side SPA routing fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
