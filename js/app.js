@@ -557,11 +557,25 @@ document.addEventListener('DOMContentLoaded', () => {
         <textarea id="mNotas" class="form-control" rows="3">${escapeHtml(vacancy.notas || '')}</textarea>
       </div>
 
-      <div style="background:var(--surface-container-low); padding:0.75rem 1rem; border-radius:var(--radius-lg); display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:0.8125rem; font-weight:600; color:var(--text-dark-secondary);">¿Generar CV adaptado para esta vacante?</span>
-        <button class="btn btn-purple" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="window.generateCvForVacancy('${vacancy.id}')">
-          Adaptar CV &rarr;
-        </button>
+      <div style="background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-lg); margin-top:0.5rem; border:1px solid var(--border-slate);">
+        <div style="font-size:0.8125rem; font-weight:700; color:var(--text-dark-primary); margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          <span>Herramientas IA para esta Vacante:</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+          <button class="btn btn-purple" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="window.generateCvForVacancy('${vacancy.id}')">
+            📄 Adaptar CV
+          </button>
+          <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="window.openCoverLetterForVacancy('${vacancy.id}')">
+            📝 Carta de Presentación
+          </button>
+          <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="window.openEmailForVacancy('${vacancy.id}')">
+            ✉️ Email Postulación
+          </button>
+          <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem; color:var(--primary); font-weight:700;" onclick="window.openInterviewCoachForVacancy('${vacancy.id}')">
+            🎯 Entrenador IA
+          </button>
+        </div>
       </div>
     `;
 
@@ -580,6 +594,21 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('cv');
     cvVacancySelect.value = id;
     updateCvPreview();
+  };
+
+  window.openCoverLetterForVacancy = function(id) {
+    closeModal();
+    openCoverLetterModal(id);
+  };
+
+  window.openEmailForVacancy = function(id) {
+    closeModal();
+    openEmailPitchModal(id);
+  };
+
+  window.openInterviewCoachForVacancy = function(id) {
+    closeModal();
+    openInterviewCoachModal(id);
   };
 
   function closeModal() {
