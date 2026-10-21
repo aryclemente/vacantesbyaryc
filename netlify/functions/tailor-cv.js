@@ -65,22 +65,83 @@ Experiencia Laboral Detallada:
 function getHeuristicTailoring(vacancy) {
   const empresa = vacancy.empresa || 'Empresa';
   const puesto = vacancy.puesto || 'Full Stack Developer';
-  const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos : ['JavaScript', 'PHP', 'React', 'SQL', 'Git'];
+  const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git'];
   const reqsJoined = reqs.slice(0, 3).join(', ');
 
   return {
     role: `${puesto} | Arianna Clemente`,
-    summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables y sistemas transaccionales. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código y diseño de arquitecturas eficientes orientadas a resultados.`,
-    bullets: [
-      `Diseño e implementación de soluciones tecnológicas adaptadas a ${empresa}, aplicando ${reqsJoined} con foco en alta disponibilidad y rendimiento.`,
-      `Construcción de arquitecturas web modernas con optimización de Core Web Vitals (+40%) y consumo de APIs REST de alto desempeño.`,
-      `Automatización de flujos de trabajo e integración de servicios en la nube (Supabase PostgreSQL, Netlify Functions e Inteligencia Artificial).`,
-      `Liderazgo técnico en resolución de incidentes de misión crítica, mantenimiento de plataformas de alta demanda y metodologías ágiles.`
+    summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables, sistemas transaccionales e integración de Inteligencia Artificial. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código, resolución de incidentes y diseño de arquitecturas eficientes orientadas a resultados.`,
+    experiences: [
+      {
+        company: 'Colegio Gonzaga',
+        role: 'Desarrollador de sistemas',
+        period: 'febrero de 2026 - octubre de 2026 (9 meses)',
+        location: 'Maracaibo, Estado Zulia, Venezuela (Remoto)',
+        bullets: [
+          'Pasarela Multicuenta: Desarrollo e integración de Gonzaga Admin para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 transacciones mensuales).',
+          'Rediseño & UX/UI: Optimización de rendimiento web (WPO) y reestructuración completa de la arquitectura del portal colegiogonzaga.org.ve.',
+          `Analítica & Automatización: Configuración de GA4, reportes en tiempo real, alertas de tesorería y re-consultas automatizadas con la API Banco Mercantil.`
+        ]
+      },
+      {
+        company: 'Centro de Espiritualidad y Pastoral Venezuela',
+        role: 'Diseñador de páginas web',
+        period: 'marzo de 2026 - julio de 2026 (5 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          'Arquitectura Web: Diseñé y desplegué la plataforma nacional en WordPress, escalando de 7 a 11 páginas responsivas.',
+          'Sistema de Diseño Oasis: Desarrollé el sistema Oasis (tokens y componentes modulares) alineado al manual de identidad jesuita.',
+          'Componentes Dinámicos & APIs: Implementé mapa interactivo SVG por estados, agenda pastoral responsiva y diagnósticos de integración con API de Meta y CPT.'
+        ]
+      },
+      {
+        company: 'INGEDACA',
+        role: 'Asistente del presidente & TI',
+        period: 'marzo de 2026 - abril de 2026 (2 meses)',
+        location: 'Metropolitan Region of Caracas, Venezuela',
+        bullets: [
+          'Arquitectura Web: Auditoría, optimización y mantenimiento de sitios web e infraestructura digital corporativa.',
+          'Gestión ERP: Estructuración e importación de datos en Odoo para optimizar procesos de procura y CRM.',
+          'Seguridad e IT: Gestión de accesos corporativos, contraseñas, políticas de seguridad y documentación de procesos técnicos.'
+        ]
+      },
+      {
+        company: 'Fe y Alegría Venezuela',
+        role: 'Desarrolladora Full Stack',
+        period: 'agosto de 2025 - noviembre de 2025 (4 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          `Sistema de Donaciones en Laravel: Desarrollé sistema a medida gestionando flujos transaccionales y usuarios seguros (app.donarfeyalegriavzla.org).`,
+          'Despliegue & DevOps: Orquesté el ciclo completo de despliegue, gestión de hosting y migraciones de bases de datos SQL para campañas de alto tráfico.',
+          'Landing Page en WordPress: Diseñé y lancé landing de alto rendimiento integrada con Google Analytics y estrategias SEO para maximizar conversión de donantes.'
+        ]
+      },
+      {
+        company: 'CIDE (Centro de Investigación y Desarrollo Ecuador)',
+        role: 'Desarrolladora WordPress y Administradora CMS',
+        period: 'enero de 2025 - julio de 2025 (7 meses)',
+        location: 'Pichincha, Ecuador (Remoto)',
+        bullets: [
+          'Plugin de WordPress Personalizado: Diseñé y desarrollé plugin para la consulta y validación de bases de datos en tiempo real (cidelatam.org/sistema-de-validacion-de-resultados-2025).',
+          'Campus Virtual & LMS: Administración y optimización de plataformas institucionales sobre LearnDash, Moodle y sistemas de gestión de eventos (Eventin).',
+          'Ecosistema CMS Académico: Mantenimiento y actualización de plataformas complejas incluyendo DSpace y Open Journal Systems (OJS), garantizando integridad y seguridad.'
+        ]
+      },
+      {
+        company: 'Fe y Alegría Venezuela',
+        role: 'Pasante Desarrolladora de Chatbots',
+        period: 'abril de 2025 - junio de 2025 (3 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          'Chatbot impulsado por IA: Construí prototipo funcional utilizando HTML5, CSS3 y JavaScript, integrando la API de Google Gemini para procesamiento de lenguaje natural (chatbotfya.web.app).',
+          'Experiencia de Usuario: Colaboré de forma remota para refinar los flujos de interacción del usuario, mejorando el canal de soporte digital institucional.'
+        ]
+      }
     ],
     skills: {
       relevant: `${reqs.join(', ')}`,
-      core: 'JavaScript (ES6+), React, PHP, Python, PostgreSQL, MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
-      methodologies: 'Scrum, Kanban, Optimización ATS, SEO Técnico, Seguridad en Bases de Datos, Continuidad Operativa.'
+      core: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
+      methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa.'
     }
   };
 }
@@ -124,7 +185,6 @@ exports.handler = async (event) => {
     const headers = event.headers || {};
     const apiKey = process.env.GEMINI_API_KEY || headers['x-gemini-api-key'] || headers['X-Gemini-Api-Key'];
 
-
     // Si no hay API key disponible en el entorno, devolver la adaptación heurística de alta calidad
     if (!apiKey) {
       const fallback = getHeuristicTailoring(vacancy);
@@ -140,10 +200,10 @@ exports.handler = async (event) => {
     }
 
     const prompt = `
-Eres una asesora de carrera de élite y reclutadora técnica sénior (Senior Tech Recruiter & Career Strategist).
-Tu misión es adaptar el Currículum Maestro de Arianna Clemente para postular a una vacante específica, maximizando su puntuación en sistemas ATS (Applicant Tracking Systems) y captando inmediatamente el interés del Hiring Manager.
+Eres una asesora de carrera de élite y reclutadora técnica sénior (Senior Tech Recruiter & ATS Strategist).
+Tu misión es adaptar el Currículum de Arianna Clemente para postular a la vacante objetivo, maximizando su compatibilidad ATS sin perder la veracidad ni la estructura individualizada de su trayectoria laboral.
 
-Perfil de la Candidata (CV Maestro):
+Perfil Real de la Candidata (con cada experiencia individual de LinkedIn):
 ${cvBase}
 
 Detalles de la Vacante Objetivo:
@@ -154,27 +214,89 @@ Detalles de la Vacante Objetivo:
 - Requisitos / Tecnologías: ${(vacancy.requisitos || []).join(', ') || 'No especificados'}
 - Notas / Contexto: ${vacancy.notas || ''}
 
-Instrucciones Estrictas de Adaptación:
-1. "role": Título profesional adaptado que combine el rol buscado con la identidad de Arianna (ej: "${vacancy.puesto} | Arianna Clemente").
-2. "summary": Un párrafo profesional persuasivo de 3 a 4 líneas exactas. Debe conectar directamente la trayectoria de Arianna con los problemas y retos que ${vacancy.empresa} busca resolver, usando tono formal, técnico y orientado al valor de negocio.
-3. "bullets": Array con exactamente 4 viñetas (bullets) para la sección de Experiencia Destacada:
+REGLAS CRÍTICAS Y ESTRICTAS DE ESTRUCTURA:
+1. PROHIBICIÓN ABSOLUTA DE AGRUPAR EXPERIENCIAS: Queda estrictamente PROHIBIDO resumir o consolidar las empresas en un solo bloque o mezclar fechas y tareas. Cada empresa y cargo del perfil de LinkedIn debe aparecer como un objeto INDIVIDUAL e INDEPENDIENTE dentro del array "experiences".
+2. Mantén la separación exacta de empresas, cargos, periodos y ubicaciones tal como aparecen en su perfil:
+   - Colegio Gonzaga (febrero de 2026 - octubre de 2026 | Maracaibo / Remoto) - Desarrollador de sistemas
+   - Centro de Espiritualidad y Pastoral Venezuela (marzo de 2026 - julio de 2026 | Caracas) - Diseñador de páginas web
+   - INGEDACA (marzo de 2026 - abril de 2026 | Caracas) - Asistente del presidente
+   - Fe y Alegría Venezuela (agosto de 2025 - noviembre de 2025 | Caracas) - Desarrolladora Full Stack
+   - CIDE Ecuador (enero de 2025 - julio de 2025 | Pichincha, Ecuador) - Desarrolladora WordPress y Administradora CMS
+   - Fe y Alegría Venezuela (abril de 2025 - junio de 2025 | Caracas) - Pasante Desarrolladora de Chatbots
+3. Para CADA experiencia individual:
+   - Redacta entre 2 y 3 viñetas ("bullets") detallando las tareas y logros reales de Arianna en esa empresa.
    - Aplica el método STAR/XYZ ("Logré X medido por Y realizando Z").
-   - Resalta cómo su experiencia real (LMS/OJS de alto tráfico, arquitecturas web optimizadas, integración de IA multimodal, bases de datos PostgreSQL/MySQL, backend y APIs) resuelve los requerimientos de esta vacante.
-   - Incorpora las palabras clave y tecnologías de la oferta de forma natural y creíble.
-4. "skills": Objeto con 3 categorías de habilidades:
-   - "relevant": Las tecnologías y herramientas más demandadas por esta vacante.
-   - "core": Tecnologías troncales del stack de Arianna que refuerzan su candidatura.
-   - "methodologies": Metodologías de trabajo, rigurosidad técnica, seguridad y buenas prácticas.
+   - Ajusta el vocabulario técnico para que resuene con las necesidades de ${vacancy.empresa} (${(vacancy.requisitos || []).slice(0, 3).join(', ')}), sin cambiar la verdad histórica de lo que hizo en esa empresa.
+4. "role": Título profesional adaptado (ej: "${vacancy.puesto} | Arianna Clemente").
+5. "summary": Párrafo profesional persuasivo de 3 a 4 líneas que conecte su trayectoria con los retos de ${vacancy.empresa}.
+6. "skills": Objeto con "relevant", "core" y "methodologies".
 
 Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura exacta:
 {
   "role": "...",
   "summary": "...",
-  "bullets": [
-    "...",
-    "...",
-    "...",
-    "..."
+  "experiences": [
+    {
+      "company": "Colegio Gonzaga",
+      "role": "Desarrollador de sistemas",
+      "period": "febrero de 2026 - octubre de 2026",
+      "location": "Maracaibo, Estado Zulia, Venezuela (Remoto)",
+      "bullets": [
+        "...",
+        "...",
+        "..."
+      ]
+    },
+    {
+      "company": "Centro de Espiritualidad y Pastoral Venezuela",
+      "role": "Diseñador de páginas web",
+      "period": "marzo de 2026 - julio de 2026",
+      "location": "Caracas, Distrito Federal, Venezuela",
+      "bullets": [
+        "...",
+        "..."
+      ]
+    },
+    {
+      "company": "INGEDACA",
+      "role": "Asistente del presidente & TI",
+      "period": "marzo de 2026 - abril de 2026",
+      "location": "Caracas, Venezuela",
+      "bullets": [
+        "...",
+        "..."
+      ]
+    },
+    {
+      "company": "Fe y Alegría Venezuela",
+      "role": "Desarrolladora Full Stack",
+      "period": "agosto de 2025 - noviembre de 2025",
+      "location": "Caracas, Distrito Federal, Venezuela",
+      "bullets": [
+        "...",
+        "..."
+      ]
+    },
+    {
+      "company": "CIDE (Centro de Investigación y Desarrollo Ecuador)",
+      "role": "Desarrolladora WordPress y Administradora CMS",
+      "period": "enero de 2025 - julio de 2025",
+      "location": "Pichincha, Ecuador (Remoto)",
+      "bullets": [
+        "...",
+        "..."
+      ]
+    },
+    {
+      "company": "Fe y Alegría Venezuela",
+      "role": "Pasante Desarrolladora de Chatbots",
+      "period": "abril de 2025 - junio de 2025",
+      "location": "Caracas, Distrito Federal, Venezuela",
+      "bullets": [
+        "...",
+        "..."
+      ]
+    }
   ],
   "skills": {
     "relevant": "...",

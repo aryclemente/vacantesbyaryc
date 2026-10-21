@@ -872,11 +872,72 @@ document.addEventListener('DOMContentLoaded', () => {
   const MASTER_CV = {
     role: 'Full Stack Developer & Especialista TI / Web',
     summary: 'Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/Laravel/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), pasarelas de pago multimoneda y transaccionales (+900 tx/mes), construcción de interfaces de alto rendimiento (Core Web Vitals) y despliegues continuos con Git, Netlify y Supabase.',
-    bullets: [
-      'Colegio Gonzaga (2026): Desarrollo de Pasarela Multicuenta (Gonzaga Admin) para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 tx/mes), con conciliación y reportes GA4.',
-      'Fe y Alegría Venezuela (2025): Sistema de donaciones transaccional en Laravel con base de datos SQL segura, y desarrollo de Chatbot IA con Google Gemini 2.5 API y JavaScript.',
-      'CIDE Ecuador (2025): Plugin de WordPress personalizado para validación y consulta de datos en tiempo real, administración de Campus Virtual Moodle/LearnDash y revistas OJS.',
-      'Arquitectura Cloud & WPO: Optimización de Core Web Vitals en +40%, consumo de APIs REST de alta concurrencia y persistencia en tiempo real con Supabase PostgreSQL (RLS).'
+    experiences: [
+      {
+        company: 'Colegio Gonzaga',
+        role: 'Desarrollador de sistemas',
+        period: 'febrero de 2026 - octubre de 2026 (9 meses)',
+        location: 'Maracaibo, Estado Zulia, Venezuela (Remoto)',
+        bullets: [
+          'Pasarela Multicuenta: Desarrollo e integración de Gonzaga Admin para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 transacciones mensuales).',
+          'Rediseño & UX/UI: Optimización de rendimiento web (WPO) y reestructuración completa de la arquitectura del portal colegiogonzaga.org.ve.',
+          'Analítica & Automatización: Configuración de GA4, reportes en tiempo real, alertas de tesorería y re-consultas automatizadas con la API Banco Mercantil.'
+        ]
+      },
+      {
+        company: 'Centro de Espiritualidad y Pastoral Venezuela',
+        role: 'Diseñador de páginas web',
+        period: 'marzo de 2026 - julio de 2026 (5 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          'Arquitectura Web: Diseñé y desplegué la plataforma nacional en WordPress, escalando de 7 a 11 páginas responsivas.',
+          'Sistema de Diseño Oasis: Desarrollé el sistema Oasis (tokens y componentes modulares) alineado al manual de identidad jesuita.',
+          'Componentes Dinámicos & APIs: Implementé mapa interactivo SVG por estados, agenda pastoral responsiva y diagnósticos de integración con API de Meta y CPT.'
+        ]
+      },
+      {
+        company: 'INGEDACA',
+        role: 'Asistente del presidente & TI',
+        period: 'marzo de 2026 - abril de 2026 (2 meses)',
+        location: 'Metropolitan Region of Caracas, Venezuela',
+        bullets: [
+          'Arquitectura Web: Auditoría, optimización y mantenimiento de sitios web corporativos e infraestructura digital.',
+          'Gestión ERP: Estructuración e importación de datos en Odoo para optimizar procesos de procura y CRM.',
+          'Seguridad e IT: Gestión de accesos corporativos, contraseñas, políticas de seguridad y documentación de procesos técnicos.'
+        ]
+      },
+      {
+        company: 'Fe y Alegría Venezuela',
+        role: 'Desarrolladora Full Stack',
+        period: 'agosto de 2025 - noviembre de 2025 (4 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          'Sistema de Donaciones en Laravel: Desarrollé sistema a medida gestionando flujos transaccionales y usuarios seguros (app.donarfeyalegriavzla.org).',
+          'Despliegue & DevOps: Orquesté el ciclo completo de despliegue, gestión de hosting y migraciones de bases de datos SQL para campañas de recaudación de alto tráfico.',
+          'Landing Page en WordPress: Diseñé y lancé landing de alto rendimiento integrada con Google Analytics y estrategias SEO para maximizar conversión de donantes.'
+        ]
+      },
+      {
+        company: 'CIDE (Centro de Investigación y Desarrollo Ecuador)',
+        role: 'Desarrolladora WordPress y Administradora CMS',
+        period: 'enero de 2025 - julio de 2025 (7 meses)',
+        location: 'Pichincha, Ecuador (Remoto)',
+        bullets: [
+          'Plugin de WordPress Personalizado: Diseñé y desarrollé plugin para la consulta y validación de bases de datos en tiempo real (cidelatam.org/sistema-de-validacion-de-resultados-2025).',
+          'Campus Virtual & LMS: Administración y optimización de plataformas institucionales sobre LearnDash, Moodle y sistemas de gestión de eventos (Eventin).',
+          'Ecosistema CMS Académico: Mantenimiento y actualización de plataformas complejas incluyendo DSpace y Open Journal Systems (OJS), garantizando integridad y seguridad.'
+        ]
+      },
+      {
+        company: 'Fe y Alegría Venezuela',
+        role: 'Pasante Desarrolladora de Chatbots',
+        period: 'abril de 2025 - junio de 2025 (3 meses)',
+        location: 'Caracas, Distrito Federal, Venezuela',
+        bullets: [
+          'Chatbot impulsado por IA: Construí prototipo funcional utilizando HTML5, CSS3 y JavaScript, integrando la API de Google Gemini para procesamiento de lenguaje natural (chatbotfya.web.app).',
+          'Experiencia de Usuario: Colaboré de forma remota para refinar los flujos de interacción del usuario, mejorando el canal de soporte digital institucional.'
+        ]
+      }
     ],
     skills: {
       relevant: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, APIs REST, Netlify Functions, Git/GitHub, Supabase Cloud',
@@ -1007,17 +1068,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
       ? vacancy.requisitos
       : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git'];
-    const reqsText = reqs.slice(0, 3).join(', ');
 
     return {
       role: `${puesto} | Arianna Clemente`,
       summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables, sistemas transaccionales e integración de Inteligencia Artificial. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código, resolución de incidentes y diseño de arquitecturas eficientes orientadas a resultados.`,
-      bullets: [
-        `Diseño e implementación de soluciones tecnológicas adaptadas a ${empresa}, aplicando ${reqsText} con foco en alta disponibilidad, seguridad y rendimiento.`,
-        `Experiencia probada en sistemas transaccionales críticos (+900 tx/mes en pasarela multicuenta Gonzaga Admin) y desarrollo con Laravel, PHP y APIs REST.`,
-        `Construcción de arquitecturas web modernas con optimización de Core Web Vitals (+40%) e integración de IA generativa (Google Gemini API) y servicios Cloud.`,
-        `Liderazgo técnico en resolución de incidentes de misión crítica, mantenimiento de plataformas de alta demanda (Moodle, OJS, WordPress) y metodologías ágiles.`
-      ],
+      experiences: MASTER_CV.experiences.map(exp => ({
+        company: exp.company,
+        role: exp.role,
+        period: exp.period,
+        location: exp.location,
+        bullets: [...exp.bullets]
+      })),
       skills: {
         relevant: `${reqs.join(', ')}`,
         core: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
@@ -1030,8 +1091,33 @@ document.addEventListener('DOMContentLoaded', () => {
     cvHeaderRole.textContent = data.role || `${vacancy.puesto || 'Full Stack Developer'} | Arianna Clemente`;
     cvSummaryText.textContent = data.summary || MASTER_CV.summary;
 
-    if (Array.isArray(data.bullets) && data.bullets.length > 0) {
-      cvExperienceBullets.innerHTML = data.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
+    const expContainer = document.getElementById('cvExperienceContainer');
+    if (expContainer) {
+      const experiences = (Array.isArray(data.experiences) && data.experiences.length > 0)
+        ? data.experiences
+        : MASTER_CV.experiences;
+
+      expContainer.innerHTML = experiences.map(job => `
+        <div class="cv-job">
+          <div class="cv-job-header">
+            <span class="cv-job-role">${escapeHtml(job.role)}</span>
+            <span class="cv-job-period">${escapeHtml(job.period)}</span>
+          </div>
+          <div class="cv-job-sub">
+            <span class="cv-job-company"><strong>${escapeHtml(job.company)}</strong></span>
+            <span class="cv-job-location">${escapeHtml(job.location || 'Remoto')}</span>
+          </div>
+          <ul class="cv-bullets">
+            ${(job.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+
+      if (isCvEditMode) {
+        expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li').forEach(el => {
+          el.setAttribute('contenteditable', 'true');
+        });
+      }
     }
 
     if (data.skills && typeof data.skills === 'object') {
@@ -1117,10 +1203,17 @@ document.addEventListener('DOMContentLoaded', () => {
     isCvEditMode = !isCvEditMode;
     cvPaper.classList.toggle('editing-mode', isCvEditMode);
 
-    const editableElements = [cvHeaderRole, cvSummaryText, cvExperienceBullets, cvSkillsList];
+    const editableElements = [cvHeaderRole, cvSummaryText, cvSkillsList];
     editableElements.forEach(el => {
-      el.setAttribute('contenteditable', isCvEditMode ? 'true' : 'false');
+      if (el) el.setAttribute('contenteditable', isCvEditMode ? 'true' : 'false');
     });
+
+    const expContainer = document.getElementById('cvExperienceContainer');
+    if (expContainer) {
+      expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li').forEach(el => {
+        el.setAttribute('contenteditable', isCvEditMode ? 'true' : 'false');
+      });
+    }
 
     if (isCvEditMode) {
       editCvBtnText.textContent = 'Terminar Edición';
