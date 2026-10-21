@@ -426,7 +426,8 @@ class StorageService {
       fecha: v.fecha || new Date().toISOString().split('T')[0],
       notas: v.notas || '',
       requisitos: Array.isArray(v.requisitos) ? v.requisitos : [],
-      estrategia: v.estrategia || ''
+      estrategia: v.estrategia || '',
+      interview_prep: v.interview_prep || null
     }));
 
     const { data, error } = await window.appSupabase.client
@@ -542,7 +543,8 @@ class StorageService {
         fecha: vacancy.fecha,
         notas: vacancy.notas || '',
         requisitos: vacancy.requisitos || [],
-        estrategia: vacancy.estrategia || ''
+        estrategia: vacancy.estrategia || '',
+        interview_prep: vacancy.interview_prep || null
       };
 
       window.appSupabase.client
@@ -592,6 +594,10 @@ class StorageService {
       return this.cache[index];
     }
     return null;
+  }
+
+  saveInterviewPrep(id, compressedData) {
+    return this.updateVacancy(id, { interview_prep: compressedData });
   }
 
   deleteVacancy(id) {

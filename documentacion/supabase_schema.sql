@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.vacantes (
     notas TEXT,
     requisitos TEXT[] DEFAULT '{}',
     estrategia TEXT,
+    interview_prep TEXT,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );

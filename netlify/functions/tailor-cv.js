@@ -13,35 +13,53 @@ Rol Principal: Full Stack Developer & Especialista en Soluciones TI / Web
 Ubicación: Caracas, Venezuela (Disponible para Remoto Internacional)
 Contacto: hello.ary.code@gmail.com | github.com/aryclemente | linkedin.com/in/aryclement
 
+Educación Formal:
+- Técnico Superior en Informática, Instituto Universitario Jesús Obrero (IUJO, 2022 - 2025)
+- Técnico Medio en Programación Informática, Instituto Técnico Jesús Obrero (ITJO, 2016 - 2019)
+
 Perfil Profesional:
-Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git y Netlify.
+Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/Laravel/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), pasarelas de pago multimoneda y transaccionales, construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git, Netlify y Supabase.
 
-Competencias Técnicas:
-- Frontend: JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance, Accesibilidad (a11y).
-- Backend & APIs: PHP, Python, Node.js, REST APIs, Microservicios, Integración de Webhooks, JSON.
-- Bases de Datos: PostgreSQL (RLS), MySQL, SQL Server, Modelado Relacional, Optimización de Consultas e Índices.
-- Plataformas: Moodle LMS (arquitectura y plugins avanzados), Open Journal Systems (OJS), WordPress Headless, Shopify.
+Competencias Técnicas Clave:
+- Frontend: JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance (WPO), Accesibilidad (a11y).
+- Backend & APIs: PHP, Laravel, Python, Node.js, REST APIs, Microservicios, Integración de Pasarelas Bancarias y Webhooks, JSON.
+- Bases de Datos: PostgreSQL (RLS), MySQL, SQL Server, Modelado Relacional, Migraciones y Optimización de Consultas.
+- Plataformas & CMS: Moodle LMS (arquitectura y plugins avanzados), Open Journal Systems (OJS), WordPress Headless/Custom Plugins, Shopify, Odoo ERP.
 - Cloud & DevOps: Supabase Cloud (BaaS, Auth, Realtime, RLS), Netlify (Functions Serverless, CI/CD), Git/GitHub, Docker, Linux/Bash.
-- Especialidades: Integración de IA Generativa (Gemini API), Automatización, Optimización ATS, SEO Técnico.
-- Metodologías: Scrum, Kanban, Rigurosidad Metodológica, Documentación Técnica, Continuidad Operativa, Resolución de Incidentes Nivel 2 y 3.
+- Especialidades: Integración de IA Generativa (Gemini 2.5 API), Automatización, Optimización ATS, SEO Técnico, Pasarelas de Pago Multimoneda.
 
-Experiencia Laboral:
-1. Especialista de Desarrollo TI & Soluciones Web | Consultoría Independiente & Proyectos (2023 - Presente):
-   - Desarrollo y despliegue de aplicaciones web reactivas, optimizando Core Web Vitals en +40%.
-   - Integración de servicios Cloud (Supabase PostgreSQL RLS y Netlify Serverless Functions) con persistencia en tiempo real.
-   - Implementación de flujos con IA multimodal (Gemini 1.5) para procesamiento y extracción automatizada de datos.
-   - Modernización de plataformas de comercio electrónico y portales corporativos sobre WordPress y Shopify Headless con alta disponibilidad.
+Experiencia Laboral Detallada:
+1. Colegio Gonzaga | Desarrollador de sistemas (Febrero 2026 - Octubre 2026, Maracaibo / Remoto):
+   - Rediseño & UX/UI: Optimización de rendimiento web (WPO) y reestructuración completa de la arquitectura del portal colegiogonzaga.org.ve.
+   - Pasarela Multicuenta (Gonzaga Admin): Desarrollo e integración de módulo transaccional para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 transacciones mensuales).
+   - Analítica & Automatización: Configuración de GA4, reportes en tiempo real, alertas de tesorería y re-consultas automatizadas con la API Banco Mercantil.
 
-2. Especialista en Plataformas Web Educativas & Campus Virtual | Sector Académico / E-learning (2021 - 2023):
-   - Administración integral y escalabilidad de campus virtuales basados en Moodle LMS (+5,000 usuarios activos simultáneos).
-   - Desarrollo de plugins personalizados en PHP/JavaScript para gestión de notas, estándares SCORM y reportería docente.
-   - Gestión y configuración de portales científicos sobre Open Journal Systems (OJS), metadatos Dublin Core e indexación.
-   - Protocolos de respaldo automatizado, contingencia técnica y mitigación de caídas en alta demanda transaccional.
+2. Centro de Espiritualidad y Pastoral Venezuela | Diseñador Web (Marzo 2026 - Julio 2026, Caracas):
+   - Arquitectura Web: Despliegue de plataforma nacional en WordPress, escalando de 7 a 11 páginas responsivas.
+   - Sistema de Diseño Oasis: Tokens y componentes alineados al manual de identidad jesuita.
+   - Componentes Dinámicos: Mapa interactivo SVG por estados y gestión responsiva de agenda pastoral.
+   - Auditoría e Integraciones: Conexión con API de Meta, Custom Post Types (CPT) y manual técnico integral.
 
-3. Desarrolladora Web & Soporte de Infraestructura TI (2019 - 2021):
-   - Soporte técnico especializado Nivel 2 y 3 a plataformas de gestión operativa, bases de datos relacionales y redes.
-   - Mantenimiento de sistemas transaccionales en PHP y SQL, asegurando integridad referencial y auditoría de accesos.
-   - Capacitación a usuarios finales y redacción de manuales operativos y documentación conforme a normativas de calidad.
+3. INGEDACA | Asistente de Presidencia & TI (Marzo 2026 - Abril 2026, Caracas):
+   - Arquitectura Web: Auditoría, optimización y mantenimiento de sitios corporativos e infraestructura digital.
+   - Gestión ERP: Estructuración e importación de datos en Odoo para optimizar procesos de procura y CRM.
+   - Seguridad e IT: Gestión de accesos corporativos, contraseñas, políticas de seguridad y documentación de procesos técnicos.
+
+4. Fe y Alegría Venezuela | Desarrolladora Full Stack (Agosto 2025 - Noviembre 2025):
+   - Sistema de Gestión de Donaciones: Desarrollo a medida en Laravel gestionando flujos transaccionales y usuarios seguros (app.donarfeyalegriavzla.org).
+   - Despliegue & DevOps: Gestión de entornos de hosting, migraciones de base de datos SQL y estabilidad para campañas de alto tráfico.
+   - Landing Page WordPress: Diseño de landing de alto rendimiento integrada con Google Analytics y SEO.
+
+5. CIDE Ecuador | Desarrolladora WordPress & Administradora CMS (Enero 2025 - Julio 2025):
+   - Plugin de WordPress personalizado: Consulta y validación de bases de datos en tiempo real (cidelatam.org/sistema-de-validacion-de-resultados-2025).
+   - LMS y Campus Virtual: Administración y optimización en LearnDash, Moodle y Eventin.
+   - Ecosistema CMS Académico: Mantenimiento y actualización de DSpace y Open Journal Systems (OJS), garantizando integridad y seguridad.
+
+6. Fe y Alegría Venezuela | Pasante Desarrolladora de Chatbots (Abril 2025 - Junio 2025):
+   - Chatbot IA: Prototipo funcional con HTML5, CSS3, JavaScript e integración con la API de Google Gemini para procesamiento de lenguaje natural (chatbotfya.web.app).
+
+7. Proyectos Académicos y Editoriales (2023 - 2024):
+   - Editorial Crisálidas, Fundación Agydes, Editorial Visiones: Instalación y personalización de Open Journal Systems (OJS) en hosting para revistas científicas indexadas.
 `;
 
 function getHeuristicTailoring(vacancy) {

@@ -130,9 +130,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const cvExperienceBullets = document.getElementById('cvExperienceBullets');
   const cvSkillsList = document.getElementById('cvSkillsList');
 
+  // Cover Letter Modal elements
+  const coverLetterModal = document.getElementById('coverLetterModal');
+  const btnOpenCoverLetterModal = document.getElementById('btnOpenCoverLetterModal');
+  const btnCloseCoverLetterModal = document.getElementById('btnCloseCoverLetterModal');
+  const coverLetterSubtext = document.getElementById('coverLetterSubtext');
+  const coverLetterCompanyBadge = document.getElementById('coverLetterCompanyBadge');
+  const coverLetterText = document.getElementById('coverLetterText');
+  const btnRegenerateCoverLetter = document.getElementById('btnRegenerateCoverLetter');
+  const regenerateLetterBtnText = document.getElementById('regenerateLetterBtnText');
+  const btnCopyCoverLetter = document.getElementById('btnCopyCoverLetter');
+  const btnPrintCoverLetter = document.getElementById('btnPrintCoverLetter');
 
-  // =========================================================================
-  // Toast Notification System
+  // Email Pitch Modal elements
+  const emailPitchModal = document.getElementById('emailPitchModal');
+  const btnOpenEmailModal = document.getElementById('btnOpenEmailModal');
+  const btnCloseEmailPitchModal = document.getElementById('btnCloseEmailPitchModal');
+  const emailPitchSubtext = document.getElementById('emailPitchSubtext');
+  const emailToInput = document.getElementById('emailToInput');
+  const emailSubjectInput = document.getElementById('emailSubjectInput');
+  const emailBodyInput = document.getElementById('emailBodyInput');
+  const btnCopyEmailSubject = document.getElementById('btnCopyEmailSubject');
+  const btnCopyEmailBody = document.getElementById('btnCopyEmailBody');
+  const btnRegenerateEmail = document.getElementById('btnRegenerateEmail');
+  const regenerateEmailBtnText = document.getElementById('regenerateEmailBtnText');
+  const btnLaunchMailClient = document.getElementById('btnLaunchMailClient');
+
+  // Interview Coach & FAQ Modal elements
+  const interviewCoachModal = document.getElementById('interviewCoachModal');
+  const btnOpenInterviewModal = document.getElementById('btnOpenInterviewModal');
+  const btnDetailInterviewCoach = document.getElementById('btnDetailInterviewCoach');
+  const btnCloseInterviewCoachModal = document.getElementById('btnCloseInterviewCoachModal');
+  const coachModalTitle = document.getElementById('coachModalTitle');
+  const coachModalSubtitle = document.getElementById('coachModalSubtitle');
+  const tabBtnFaqs = document.getElementById('tabBtnFaqs');
+  const tabBtnChat = document.getElementById('tabBtnChat');
+  const coachPanelFaqs = document.getElementById('coachPanelFaqs');
+  const coachPanelChat = document.getElementById('coachPanelChat');
+  const btnRefreshFaqs = document.getElementById('btnRefreshFaqs');
+  const coachFaqsContainer = document.getElementById('coachFaqsContainer');
+  const coachChatMessages = document.getElementById('coachChatMessages');
+  const coachChatForm = document.getElementById('coachChatForm');
+  const coachChatInput = document.getElementById('coachChatInput');
+  const btnSendCoachMessage = document.getElementById('btnSendCoachMessage');
+  const btnClearCoachChat = document.getElementById('btnClearCoachChat');
+
   // =========================================================================
   function showToast(message, type = 'success') {
     if (!toastContainer) return;
@@ -550,6 +592,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === vacancyModal) closeModal();
   });
 
+  if (btnDetailInterviewCoach) {
+    btnDetailInterviewCoach.addEventListener('click', () => {
+      if (activeModalVacancyId) {
+        const id = activeModalVacancyId;
+        closeModal();
+        openInterviewCoachModal(id);
+      }
+    });
+  }
+
   btnSaveModalChanges.addEventListener('click', () => {
     if (!activeModalVacancyId) return;
 
@@ -816,19 +868,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // CV Generator (Tailored Content, Templates, Photo & AI Optimization)
   // =========================================================================
 
-  // Initial Master CV Base (from cv_base_arianna.md)
+  // Initial Master CV Base (from cv_base_arianna.md & LinkedIn)
   const MASTER_CV = {
     role: 'Full Stack Developer & Especialista TI / Web',
-    summary: 'Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git y Netlify.',
+    summary: 'Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/Laravel/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), pasarelas de pago multimoneda y transaccionales (+900 tx/mes), construcción de interfaces de alto rendimiento (Core Web Vitals) y despliegues continuos con Git, Netlify y Supabase.',
     bullets: [
-      'Diseño, desarrollo y despliegue de aplicaciones web reactivas, optimizando Core Web Vitals en más de un 40%.',
-      'Integración de servicios Cloud (Supabase PostgreSQL con RLS y Netlify Functions) para persistencia y sincronización en tiempo real.',
-      'Implementación de pipelines asistidos por Inteligencia Artificial multimodal (Google Gemini 1.5) para procesamiento y extracción de datos.',
-      'Modernización de plataformas e-commerce y portales corporativos sobre WordPress y Shopify Headless con alta disponibilidad.'
+      'Colegio Gonzaga (2026): Desarrollo de Pasarela Multicuenta (Gonzaga Admin) para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 tx/mes), con conciliación y reportes GA4.',
+      'Fe y Alegría Venezuela (2025): Sistema de donaciones transaccional en Laravel con base de datos SQL segura, y desarrollo de Chatbot IA con Google Gemini 2.5 API y JavaScript.',
+      'CIDE Ecuador (2025): Plugin de WordPress personalizado para validación y consulta de datos en tiempo real, administración de Campus Virtual Moodle/LearnDash y revistas OJS.',
+      'Arquitectura Cloud & WPO: Optimización de Core Web Vitals en +40%, consumo de APIs REST de alta concurrencia y persistencia en tiempo real con Supabase PostgreSQL (RLS).'
     ],
     skills: {
-      relevant: 'JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance',
-      core: 'PHP, Python, Node.js, REST APIs, PostgreSQL (RLS), MySQL, SQL Server, JSON, Git, GitHub, Supabase Cloud',
+      relevant: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, APIs REST, Netlify Functions, Git/GitHub, Supabase Cloud',
+      core: 'Pasarelas de Pago (C2P, Pago Móvil, Zinli), Integración IA (Gemini 2.5), WordPress Headless/Plugins, Moodle LMS, OJS, Odoo ERP',
       methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa'
     }
   };
@@ -954,21 +1006,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const puesto = vacancy.puesto || 'Full Stack Developer';
     const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
       ? vacancy.requisitos
-      : ['JavaScript', 'PHP', 'React', 'SQL', 'Git'];
+      : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git'];
     const reqsText = reqs.slice(0, 3).join(', ');
 
     return {
       role: `${puesto} | Arianna Clemente`,
-      summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables y sistemas transaccionales. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código y diseño de arquitecturas eficientes orientadas a resultados.`,
+      summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables, sistemas transaccionales e integración de Inteligencia Artificial. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código, resolución de incidentes y diseño de arquitecturas eficientes orientadas a resultados.`,
       bullets: [
-        `Diseño e implementación de soluciones tecnológicas adaptadas a ${empresa}, aplicando ${reqsText} con foco en alta disponibilidad y rendimiento.`,
-        `Construcción de arquitecturas web modernas con optimización de Core Web Vitals (+40%) y consumo de APIs REST de alto desempeño.`,
-        `Automatización de flujos de trabajo e integración de servicios en la nube (Supabase PostgreSQL, Netlify Functions e Inteligencia Artificial).`,
-        `Liderazgo técnico en resolución de incidentes de misión crítica, mantenimiento de plataformas de alta demanda y metodologías ágiles.`
+        `Diseño e implementación de soluciones tecnológicas adaptadas a ${empresa}, aplicando ${reqsText} con foco en alta disponibilidad, seguridad y rendimiento.`,
+        `Experiencia probada en sistemas transaccionales críticos (+900 tx/mes en pasarela multicuenta Gonzaga Admin) y desarrollo con Laravel, PHP y APIs REST.`,
+        `Construcción de arquitecturas web modernas con optimización de Core Web Vitals (+40%) e integración de IA generativa (Google Gemini API) y servicios Cloud.`,
+        `Liderazgo técnico en resolución de incidentes de misión crítica, mantenimiento de plataformas de alta demanda (Moodle, OJS, WordPress) y metodologías ágiles.`
       ],
       skills: {
         relevant: `${reqs.join(', ')}`,
-        core: 'JavaScript (ES6+), React, PHP, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
+        core: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
         methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa.'
       }
     };
@@ -1104,6 +1156,844 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  // --- GZIP Compression / Decompression for Interview Chats & FAQs ---
+  async function compressGzip(str) {
+    if (!str || typeof str !== 'string') return '';
+    try {
+      const stream = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));
+      const buf = await new Response(stream).arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+      }
+      return btoa(binary);
+    } catch (err) {
+      console.warn('GZIP Compression fallback to raw text:', err);
+      return str;
+    }
+  }
+
+  async function decompressGzip(b64) {
+    if (!b64 || typeof b64 !== 'string') return null;
+    const trimmed = b64.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      return trimmed;
+    }
+    try {
+      const binary = atob(trimmed);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return await new Response(stream).text();
+    } catch (err) {
+      console.warn('GZIP Decompression fallback:', err);
+      return b64;
+    }
+  }
+
+  // =========================================================================
+  // Cover Letter Controller (Carta de Presentación Adaptada)
+  // =========================================================================
+  let currentCoverLetterVacancy = null;
+
+  async function openCoverLetterModal(vacancyId) {
+    const vacancies = window.appStorage.getVacancies();
+    let vacancy = vacancies.find(v => v.id === vacancyId);
+    if (!vacancy) {
+      vacancy = {
+        id: 'general',
+        empresa: 'Empresas Tech & Fintech',
+        puesto: 'Senior Full Stack Developer & Tech Lead',
+        modalidad: 'Remoto',
+        requisitos: ['JavaScript', 'PHP', 'Laravel', 'React', 'PostgreSQL', 'APIs REST', 'Cloud'],
+        notas: 'Especialista en desarrollo web, arquitecturas transaccionales y soluciones Cloud.'
+      };
+    }
+    currentCoverLetterVacancy = vacancy;
+
+    if (coverLetterCompanyBadge) {
+      coverLetterCompanyBadge.textContent = vacancy.empresa || 'Empresa';
+    }
+    if (coverLetterSubtext) {
+      coverLetterSubtext.textContent = `Generada con IA para ${vacancy.puesto || 'la vacante'}`;
+    }
+
+    coverLetterModal.classList.add('open');
+
+    // If already generated for this vacancy and has content, avoid duplicate API calls
+    if (coverLetterText.dataset.vacancyId === vacancy.id && coverLetterText.innerText.trim().length > 50) {
+      return;
+    }
+
+    await generateCoverLetter(vacancy);
+  }
+
+  async function generateCoverLetter(vacancy) {
+    if (!vacancy) return;
+    coverLetterText.dataset.vacancyId = vacancy.id;
+    coverLetterText.innerHTML = '<div style="color:var(--text-muted); font-style:italic;">Redactando carta de presentación personalizada con Gemini 2.5 Flash...</div>';
+    if (btnRegenerateCoverLetter) btnRegenerateCoverLetter.disabled = true;
+    if (regenerateLetterBtnText) regenerateLetterBtnText.textContent = 'Generando...';
+
+    try {
+      const settings = window.appStorage.getSettings();
+      const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+      let res = await fetch('/api/generate-cover-letter', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ vacancy })
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/generate-cover-letter', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ vacancy })
+        }).catch(() => null);
+      }
+
+      let letterData = null;
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          letterData = json.data;
+        }
+      }
+
+      if (letterData && letterData.letter) {
+        coverLetterText.innerText = letterData.letter;
+        showToast('Carta de presentación generada con IA', 'success');
+      } else {
+        const fallback = generateLocalCoverLetter(vacancy);
+        coverLetterText.innerText = fallback.letter;
+        showToast('Carta generada con plantilla inteligente', 'info');
+      }
+    } catch (err) {
+      console.error('Error generando cover letter:', err);
+      const fallback = generateLocalCoverLetter(vacancy);
+      coverLetterText.innerText = fallback.letter;
+      showToast('Carta generada con plantilla inteligente', 'info');
+    } finally {
+      if (btnRegenerateCoverLetter) btnRegenerateCoverLetter.disabled = false;
+      if (regenerateLetterBtnText) regenerateLetterBtnText.textContent = 'Regenerar con IA';
+    }
+  }
+
+  function generateLocalCoverLetter(vacancy) {
+    const empresa = vacancy.empresa || 'Equipo de Selección';
+    const puesto = vacancy.puesto || 'Desarrolladora Full Stack';
+    const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos.slice(0, 3).join(', ') : 'desarrollo web, integración de APIs y buenas prácticas';
+
+    const letter = `Estimado equipo de selección de ${empresa},
+
+Me dirijo a ustedes con gran entusiasmo para presentar mi postulación al puesto de ${puesto}. Cuento con una sólida trayectoria como Desarrolladora Full Stack y Especialista en Soluciones Web, combinando experiencia práctica en arquitecturas backend robustas, interfaces reactivas de alto rendimiento e integración de Inteligencia Artificial.
+
+A lo largo de mi trayectoria he liderado proyectos de alta responsabilidad transaccional y operativa. En el Colegio Gonzaga desarrollé e integré una pasarela de pagos multicuenta (Pago Móvil, transferencias bancarias, C2P Mercantil y Zinli USD) capaz de procesar más de 900 transacciones mensuales con conciliación automatizada. Asimismo, en Fe y Alegría construí un sistema integral de donaciones en Laravel con bases de datos relacionales seguras y diseñé chatbots inteligentes integrando APIs de Google Gemini, mientras que en CIDE desarrollé plugins personalizados de WordPress para validación de datos en tiempo real y gestioné plataformas LMS Moodle y revistas OJS a escala.
+
+Mi perfil encaja con los requerimientos de ${empresa}, especialmente en el dominio de ${reqs}. Me caracterizo por una rigurosa metodología de trabajo, mentalidad de entrega continua, optimización de Core Web Vitals y un compromiso genuino por resolver problemas complejos con código limpio y escalable en entornos remotos.
+
+Agradezco de antemano el tiempo dedicado a revisar mi perfil. Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede generar valor inmediato para su equipo.
+
+Atentamente,
+
+Arianna Clemente
+Full Stack Developer & Especialista TI / Web
+Caracas, Venezuela • Disponible para Trabajo Remoto Internacional
+Email: hello.ary.code@gmail.com
+LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
+
+    return { letter };
+  }
+
+  // Cover Letter Event Listeners
+  if (btnOpenCoverLetterModal) {
+    btnOpenCoverLetterModal.addEventListener('click', () => {
+      const selectedId = cvVacancySelect ? cvVacancySelect.value : 'general';
+      openCoverLetterModal(selectedId);
+    });
+  }
+
+  if (btnCloseCoverLetterModal) {
+    btnCloseCoverLetterModal.addEventListener('click', () => {
+      coverLetterModal.classList.remove('open');
+    });
+  }
+
+  if (coverLetterModal) {
+    coverLetterModal.addEventListener('click', (e) => {
+      if (e.target === coverLetterModal) coverLetterModal.classList.remove('open');
+    });
+  }
+
+  if (btnRegenerateCoverLetter) {
+    btnRegenerateCoverLetter.addEventListener('click', () => {
+      if (currentCoverLetterVacancy) {
+        generateCoverLetter(currentCoverLetterVacancy);
+      }
+    });
+  }
+
+  if (btnCopyCoverLetter) {
+    btnCopyCoverLetter.addEventListener('click', async () => {
+      const text = coverLetterText.innerText;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Carta de presentación copiada al portapapeles', 'success');
+      } catch (e) {
+        showToast('No se pudo copiar automáticamente', 'error');
+      }
+    });
+  }
+
+  if (btnPrintCoverLetter) {
+    btnPrintCoverLetter.addEventListener('click', () => {
+      const content = coverLetterText.innerText;
+      if (!content) return;
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast('Permite las ventanas emergentes para imprimir', 'error');
+        return;
+      }
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="utf-8">
+          <title>Carta de Presentación - Arianna Clemente</title>
+          <style>
+            body {
+              font-family: 'Georgia', 'Times New Roman', serif;
+              font-size: 11.5pt;
+              line-height: 1.65;
+              color: #1e293b;
+              padding: 1.5in;
+              margin: 0;
+              white-space: pre-wrap;
+            }
+            @media print {
+              body { padding: 0.8in; font-size: 11pt; }
+            }
+          </style>
+        </head>
+        <body>${escapeHtml(content)}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
+    });
+  }
+
+  // =========================================================================
+  // Email Pitch Controller (Correo de Postulación con CV y Portafolio)
+  // =========================================================================
+  let currentEmailVacancy = null;
+
+  async function openEmailPitchModal(vacancyId) {
+    const vacancies = window.appStorage.getVacancies();
+    let vacancy = vacancies.find(v => v.id === vacancyId);
+    if (!vacancy) {
+      vacancy = {
+        id: 'general',
+        empresa: 'Empresas Tech & Fintech',
+        puesto: 'Senior Full Stack Developer & Tech Lead',
+        modalidad: 'Remoto',
+        requisitos: ['JavaScript', 'PHP', 'Laravel', 'React', 'PostgreSQL', 'APIs REST'],
+        notas: 'Especialista en desarrollo web, arquitecturas transaccionales y soluciones Cloud.'
+      };
+    }
+    currentEmailVacancy = vacancy;
+
+    if (emailPitchSubtext) {
+      emailPitchSubtext.textContent = `Preparado para enviar con tu CV y Portafolio a ${vacancy.empresa}`;
+    }
+
+    if (emailToInput) {
+      const contact = (vacancy.contacto || '').trim();
+      emailToInput.value = contact.includes('@') ? contact : '';
+    }
+
+    emailPitchModal.classList.add('open');
+
+    if (emailSubjectInput.dataset.vacancyId === vacancy.id && emailBodyInput.value.trim().length > 30) {
+      updateMailtoLink();
+      return;
+    }
+
+    await generateEmailPitch(vacancy);
+  }
+
+  async function generateEmailPitch(vacancy) {
+    if (!vacancy) return;
+    emailSubjectInput.dataset.vacancyId = vacancy.id;
+    emailSubjectInput.value = `Postulación: ${vacancy.puesto || 'Full Stack Developer'} - Arianna Clemente`;
+    emailBodyInput.value = 'Generando correo persuasivo con Gemini 2.5 Flash...';
+    if (btnRegenerateEmail) btnRegenerateEmail.disabled = true;
+    if (regenerateEmailBtnText) regenerateEmailBtnText.textContent = 'Generando...';
+
+    try {
+      const settings = window.appStorage.getSettings();
+      const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+      let res = await fetch('/api/generate-cover-letter', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ vacancy })
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/generate-cover-letter', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ vacancy })
+        }).catch(() => null);
+      }
+
+      let emailData = null;
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          emailData = json.data;
+        }
+      }
+
+      if (emailData && emailData.emailBody) {
+        if (emailData.emailSubject) emailSubjectInput.value = emailData.emailSubject;
+        emailBodyInput.value = emailData.emailBody;
+        showToast('Email de postulación preparado con IA', 'success');
+      } else {
+        const fallback = generateLocalEmailPitch(vacancy);
+        emailSubjectInput.value = fallback.emailSubject;
+        emailBodyInput.value = fallback.emailBody;
+        showToast('Email preparado con plantilla inteligente', 'info');
+      }
+    } catch (err) {
+      console.error('Error generando email pitch:', err);
+      const fallback = generateLocalEmailPitch(vacancy);
+      emailSubjectInput.value = fallback.emailSubject;
+      emailBodyInput.value = fallback.emailBody;
+      showToast('Email preparado con plantilla inteligente', 'info');
+    } finally {
+      if (btnRegenerateEmail) btnRegenerateEmail.disabled = false;
+      if (regenerateEmailBtnText) regenerateEmailBtnText.textContent = 'Regenerar con IA';
+      updateMailtoLink();
+    }
+  }
+
+  function generateLocalEmailPitch(vacancy) {
+    const empresa = vacancy.empresa || 'Equipo de Selección';
+    const puesto = vacancy.puesto || 'Desarrolladora Full Stack';
+    const emailSubject = `Postulación: ${puesto} - Arianna Clemente | Full Stack Developer`;
+    const emailBody = `Estimado equipo de ${empresa},
+
+Espero que se encuentren muy bien. Les escribo para presentar formalmente mi postulación a la vacante de ${puesto}.
+
+Cuento con sólida experiencia comprobada en desarrollo Full Stack, pasarelas de pago transaccionales (+900 tx/mes), ecosistemas PHP/Laravel/JavaScript, optimización de rendimiento web (Core Web Vitals +40%) e integraciones con Inteligencia Artificial (Google Gemini API).
+
+Adjunto a este correo mi Currículum Vitae adaptado para la posición. Asimismo, les comparto los enlaces directos a mis proyectos en producción, certificaciones y código fuente:
+• Portafolio & GitHub: https://github.com/aryclemente
+• Perfil Profesional en LinkedIn: https://linkedin.com/in/aryclement
+
+Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede generar valor inmediato para ${empresa}.
+
+Atentamente,
+
+Arianna Clemente
+Full Stack Developer & Especialista TI / Web
+Caracas, Venezuela (Disponible para Remoto Internacional)
+hello.ary.code@gmail.com`;
+
+    return { emailSubject, emailBody };
+  }
+
+  function updateMailtoLink() {
+    if (!btnLaunchMailClient) return;
+    const to = emailToInput ? emailToInput.value.trim() : '';
+    const subject = emailSubjectInput ? emailSubjectInput.value.trim() : '';
+    const body = emailBodyInput ? emailBodyInput.value.trim() : '';
+
+    const href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    btnLaunchMailClient.setAttribute('href', href);
+  }
+
+  if (emailToInput) emailToInput.addEventListener('input', updateMailtoLink);
+  if (emailSubjectInput) emailSubjectInput.addEventListener('input', updateMailtoLink);
+  if (emailBodyInput) emailBodyInput.addEventListener('input', updateMailtoLink);
+
+  if (btnOpenEmailModal) {
+    btnOpenEmailModal.addEventListener('click', () => {
+      const selectedId = cvVacancySelect ? cvVacancySelect.value : 'general';
+      openEmailPitchModal(selectedId);
+    });
+  }
+
+  if (btnCloseEmailPitchModal) {
+    btnCloseEmailPitchModal.addEventListener('click', () => {
+      emailPitchModal.classList.remove('open');
+    });
+  }
+
+  if (emailPitchModal) {
+    emailPitchModal.addEventListener('click', (e) => {
+      if (e.target === emailPitchModal) emailPitchModal.classList.remove('open');
+    });
+  }
+
+  if (btnRegenerateEmail) {
+    btnRegenerateEmail.addEventListener('click', () => {
+      if (currentEmailVacancy) {
+        generateEmailPitch(currentEmailVacancy);
+      }
+    });
+  }
+
+  if (btnCopyEmailSubject) {
+    btnCopyEmailSubject.addEventListener('click', async () => {
+      const text = emailSubjectInput.value;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Asunto copiado al portapapeles', 'success');
+      } catch (e) {
+        showToast('No se pudo copiar el asunto', 'error');
+      }
+    });
+  }
+
+  if (btnCopyEmailBody) {
+    btnCopyEmailBody.addEventListener('click', async () => {
+      const text = emailBodyInput.value;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Cuerpo de correo copiado al portapapeles', 'success');
+      } catch (e) {
+        showToast('No se pudo copiar el correo', 'error');
+      }
+    });
+  }
+
+  // =========================================================================
+  // Interview Coach & FAQ Controller (Entrenador de Entrevistas con Gemini)
+  // =========================================================================
+  let currentCoachVacancy = null;
+  let currentCoachPrep = { faqs: [], chatHistory: [] };
+
+  async function openInterviewCoachModal(vacancyId) {
+    const vacancies = window.appStorage.getVacancies();
+    let vacancy = vacancies.find(v => v.id === vacancyId);
+    if (!vacancy) {
+      vacancy = {
+        id: 'general',
+        empresa: 'Empresas Tech & Fintech',
+        puesto: 'Senior Full Stack Developer & Tech Lead',
+        modalidad: 'Remoto',
+        requisitos: ['JavaScript', 'PHP', 'Laravel', 'React', 'PostgreSQL', 'APIs REST'],
+        notas: 'Preparación para preguntas de arquitectura, pasarelas de pago y metodología ágil.'
+      };
+    }
+    currentCoachVacancy = vacancy;
+
+    if (coachModalTitle) {
+      coachModalTitle.textContent = `Entrenador & FAQ: ${vacancy.puesto || 'Puesto'}`;
+    }
+    if (coachModalSubtitle) {
+      coachModalSubtitle.textContent = `Preparación personalizada para ${vacancy.empresa || 'la empresa'}`;
+    }
+
+    interviewCoachModal.classList.add('open');
+    switchCoachTab('faqs');
+
+    currentCoachPrep = { faqs: [], chatHistory: [] };
+
+    if (vacancy.interview_prep) {
+      try {
+        const decompressed = await decompressGzip(vacancy.interview_prep);
+        if (decompressed) {
+          const parsed = JSON.parse(decompressed);
+          currentCoachPrep.faqs = Array.isArray(parsed.faqs) ? parsed.faqs : [];
+          currentCoachPrep.chatHistory = Array.isArray(parsed.chatHistory) ? parsed.chatHistory : [];
+        }
+      } catch (e) {
+        console.warn('Error parseando interview_prep previo:', e);
+      }
+    }
+
+    if (currentCoachPrep.faqs && currentCoachPrep.faqs.length > 0) {
+      renderFaqsList(currentCoachPrep.faqs);
+    } else {
+      await fetchCoachFaqs(vacancy);
+    }
+
+    renderCoachChatMessages();
+  }
+
+  function switchCoachTab(tab) {
+    if (tab === 'faqs') {
+      tabBtnFaqs.style.borderBottomColor = 'var(--primary)';
+      tabBtnFaqs.style.color = 'var(--primary)';
+      tabBtnChat.style.borderBottomColor = 'transparent';
+      tabBtnChat.style.color = 'var(--text-muted)';
+      coachPanelFaqs.style.display = 'block';
+      coachPanelChat.style.display = 'none';
+    } else {
+      tabBtnChat.style.borderBottomColor = 'var(--primary)';
+      tabBtnChat.style.color = 'var(--primary)';
+      tabBtnFaqs.style.borderBottomColor = 'transparent';
+      tabBtnFaqs.style.color = 'var(--text-muted)';
+      coachPanelFaqs.style.display = 'none';
+      coachPanelChat.style.display = 'flex';
+      if (coachChatMessages) {
+        setTimeout(() => { coachChatMessages.scrollTop = coachChatMessages.scrollHeight; }, 50);
+      }
+    }
+  }
+
+  if (tabBtnFaqs) tabBtnFaqs.addEventListener('click', () => switchCoachTab('faqs'));
+  if (tabBtnChat) tabBtnChat.addEventListener('click', () => switchCoachTab('chat'));
+
+  async function fetchCoachFaqs(vacancy) {
+    if (!vacancy || !coachFaqsContainer) return;
+    coachFaqsContainer.innerHTML = '<div style="padding:2rem; text-align:center; color:var(--text-muted);"><div class="cloud-status-dot cloud-dot-syncing" style="margin-bottom:0.5rem;"></div><br>Analizando vacante y generando las 5 preguntas más determinantes con Gemini 2.5 Flash...</div>';
+    if (btnRefreshFaqs) btnRefreshFaqs.disabled = true;
+
+    try {
+      const settings = window.appStorage.getSettings();
+      const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+      let res = await fetch('/api/interview-coach', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: 'generate_faqs', vacancy })
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/interview-coach', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ action: 'generate_faqs', vacancy })
+        }).catch(() => null);
+      }
+
+      let faqs = null;
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && Array.isArray(json.data.faqs)) {
+          faqs = json.data.faqs;
+        }
+      }
+
+      if (!faqs || faqs.length === 0) {
+        faqs = generateLocalFaqs(vacancy);
+      }
+
+      currentCoachPrep.faqs = faqs;
+      renderFaqsList(faqs);
+      await saveCompressedPrep();
+      showToast('Preguntas frecuentes listas para practicar', 'success');
+    } catch (err) {
+      console.error('Error cargando FAQs:', err);
+      const fallback = generateLocalFaqs(vacancy);
+      currentCoachPrep.faqs = fallback;
+      renderFaqsList(fallback);
+      await saveCompressedPrep();
+    } finally {
+      if (btnRefreshFaqs) btnRefreshFaqs.disabled = false;
+    }
+  }
+
+  function renderFaqsList(faqs) {
+    if (!coachFaqsContainer) return;
+    if (!faqs || faqs.length === 0) {
+      coachFaqsContainer.innerHTML = '<div style="padding:1.5rem; text-align:center; color:var(--text-muted);">No hay preguntas registradas. Haz clic en "Regenerar FAQs".</div>';
+      return;
+    }
+
+    coachFaqsContainer.innerHTML = faqs.map((faq, idx) => `
+      <div class="faq-card">
+        <div class="faq-card-header">
+          <span class="faq-category-badge">${escapeHtml(faq.category || 'Pregunta de Entrevista')}</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">#${idx + 1}</span>
+        </div>
+        <div class="faq-question">${escapeHtml(faq.question)}</div>
+        ${faq.whyAsked ? `
+          <div class="faq-why-box">
+            <strong>💡 ¿Por qué lo preguntan?</strong> ${escapeHtml(faq.whyAsked)}
+          </div>
+        ` : ''}
+        ${faq.answerStrategy ? `
+          <div class="faq-strategy-box">
+            <strong>🎯 Estrategia recomendada:</strong> ${escapeHtml(faq.answerStrategy)}
+          </div>
+        ` : ''}
+        ${Array.isArray(faq.suggestedPoints) && faq.suggestedPoints.length > 0 ? `
+          <div style="font-size:0.8125rem; font-weight:700; color:var(--text-dark-secondary); margin-bottom:0.35rem;">📌 Puntos clave a mencionar:</div>
+          <ul class="faq-bullets-list">
+            ${faq.suggestedPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+          </ul>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+
+  function renderCoachChatMessages() {
+    if (!coachChatMessages) return;
+    const history = currentCoachPrep.chatHistory || [];
+
+    if (history.length === 0) {
+      const emp = currentCoachVacancy?.empresa || 'la empresa';
+      const rol = currentCoachVacancy?.puesto || 'Desarrolladora Full Stack';
+      coachChatMessages.innerHTML = `
+        <div class="coach-msg-row model">
+          <div class="coach-bubble coach-bubble-model">
+            ¡Hola Arianna! 👋 Soy tu entrevistador técnico para el puesto de <strong>${escapeHtml(rol)}</strong> en <strong>${escapeHtml(emp)}</strong>.<br><br>
+            He revisado tu perfil y me llaman mucho la atención tus logros en la pasarela multicuenta del Colegio Gonzaga y tus proyectos en Laravel y Gemini. ¿Te gustaría practicar tu presentación inicial (Elevator Pitch) o prefieres que te haga la primera pregunta técnica?
+            <div class="coach-bubble-meta">Simulador Gemini 2.5 Flash</div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    coachChatMessages.innerHTML = history.map(msg => {
+      const isUser = msg.role === 'user';
+      return `
+        <div class="coach-msg-row ${isUser ? 'user' : 'model'}">
+          <div class="coach-bubble ${isUser ? 'coach-bubble-user' : 'coach-bubble-model'}">
+            ${escapeHtml(msg.content)}
+            <div class="coach-bubble-meta" style="${isUser ? 'color:rgba(255,255,255,0.7);' : ''}">${isUser ? 'Tú' : 'Entrevistador IA'}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    coachChatMessages.scrollTop = coachChatMessages.scrollHeight;
+  }
+
+  async function handleCoachChatSubmit(e) {
+    e.preventDefault();
+    const text = coachChatInput ? coachChatInput.value.trim() : '';
+    if (!text || !currentCoachVacancy) return;
+
+    coachChatInput.value = '';
+
+    if (!currentCoachPrep.chatHistory) currentCoachPrep.chatHistory = [];
+    currentCoachPrep.chatHistory.push({ role: 'user', content: text, timestamp: new Date().toISOString() });
+    renderCoachChatMessages();
+
+    const typingRow = document.createElement('div');
+    typingRow.className = 'coach-msg-row model';
+    typingRow.id = 'coachTypingIndicator';
+    typingRow.innerHTML = `
+      <div class="coach-bubble coach-bubble-model" style="font-style:italic; color:var(--text-muted);">
+        El entrevistador está evaluando tu respuesta...
+      </div>
+    `;
+    coachChatMessages.appendChild(typingRow);
+    coachChatMessages.scrollTop = coachChatMessages.scrollHeight;
+
+    if (btnSendCoachMessage) btnSendCoachMessage.disabled = true;
+
+    try {
+      const settings = window.appStorage.getSettings();
+      const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+      const historyToSend = currentCoachPrep.chatHistory.slice(-10).map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      let res = await fetch('/api/interview-coach', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: 'chat',
+          vacancy: currentCoachVacancy,
+          message: text,
+          history: historyToSend
+        })
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/interview-coach', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            action: 'chat',
+            vacancy: currentCoachVacancy,
+            message: text,
+            history: historyToSend
+          })
+        }).catch(() => null);
+      }
+
+      let reply = null;
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && json.data.reply) {
+          reply = json.data.reply;
+        }
+      }
+
+      if (!reply) {
+        reply = `Excelente respuesta. Al defender tu perfil ante ${currentCoachVacancy.empresa}, asegúrate de cuantificar siempre el impacto de tus soluciones (por ejemplo, las +900 transacciones mensuales procesadas o la reducción en tiempos de respuesta). ¿Qué enfoque tomarías si el sistema debe responder a picos imprevistos de concurrencia?`;
+      }
+
+      const typingEl = document.getElementById('coachTypingIndicator');
+      if (typingEl) typingEl.remove();
+
+      currentCoachPrep.chatHistory.push({ role: 'assistant', content: reply, timestamp: new Date().toISOString() });
+      renderCoachChatMessages();
+
+      await saveCompressedPrep();
+    } catch (err) {
+      console.error('Error en simulador de entrevista:', err);
+      const typingEl = document.getElementById('coachTypingIndicator');
+      if (typingEl) typingEl.remove();
+      showToast('Error en la comunicación con el entrenador IA', 'error');
+    } finally {
+      if (btnSendCoachMessage) btnSendCoachMessage.disabled = false;
+    }
+  }
+
+  async function saveCompressedPrep() {
+    if (!currentCoachVacancy || currentCoachVacancy.id === 'general') return;
+    try {
+      const payloadStr = JSON.stringify({
+        updatedAt: new Date().toISOString(),
+        faqs: currentCoachPrep.faqs || [],
+        chatHistory: currentCoachPrep.chatHistory || []
+      });
+
+      const compressed = await compressGzip(payloadStr);
+      window.appStorage.saveInterviewPrep(currentCoachVacancy.id, compressed);
+    } catch (err) {
+      console.error('Error comprimiendo datos de entrevista:', err);
+    }
+  }
+
+  function generateLocalFaqs(vacancy) {
+    const empresa = vacancy.empresa || 'la empresa';
+    const puesto = vacancy.puesto || 'Desarrollador Full Stack';
+
+    return [
+      {
+        category: 'Arquitectura & Misión Crítica',
+        question: `¿Podrías hablarnos de un proyecto donde hayas gestionado transacciones críticas o arquitecturas complejas que prepare tu perfil para ${empresa}?`,
+        whyAsked: 'Evalúan tu capacidad para asumir responsabilidades técnicas con impacto real y sin margen de error.',
+        answerStrategy: 'Aplica el método STAR destacando el sistema de pagos multicuenta del Colegio Gonzaga o el sistema de donaciones en Laravel para Fe y Alegría.',
+        suggestedPoints: [
+          'Menciona las +900 transacciones mensuales procesadas con Pago Móvil, C2P Mercantil y Zinli USD.',
+          'Explica la conciliación en tiempo real y el manejo de errores en pasarelas bancarias.',
+          'Destaca la integridad de datos y seguridad transaccional.'
+        ]
+      },
+      {
+        category: 'Rendimiento & Core Web Vitals',
+        question: `¿Cómo abordas la optimización de rendimiento web (WPO) y Core Web Vitals en plataformas con alto tráfico?`,
+        whyAsked: 'Verifican que construyas soluciones rápidas, fluidas, accesibles y optimizadas para SEO.',
+        answerStrategy: 'Relata tu experiencia optimizando tiempos de carga y métricas en portales corporativos.',
+        suggestedPoints: [
+          'Uso de compresión de assets, carga diferida (lazy loading) y reducción de tiempo de bloqueo.',
+          'Optimización de consultas a bases de datos relacionales e indexación.',
+          'Mejora de métricas LCP, FID/INP y CLS en más de un 40%.'
+        ]
+      },
+      {
+        category: 'Integración de IA & Automatización',
+        question: `¿Qué experiencia práctica tienes integrando Inteligencia Artificial en flujos operativos y aplicaciones web?`,
+        whyAsked: 'Comprueban si estás a la vanguardia tecnológica y si puedes acelerar procesos de desarrollo de manera medible.',
+        answerStrategy: 'Menciona tus integraciones con Google Gemini 2.5 en chatbots para Fe y Alegría y en el ATS Vacantes by AryC.',
+        suggestedPoints: [
+          'Consumo de modelos multimodales (visión + texto) para extracción automatizada de datos a JSON.',
+          'Manejo de prompts estructurados, validación de esquemas y control de tokens.',
+          'Diseño de fallbacks heurísticos para garantizar 100% de disponibilidad.'
+        ]
+      },
+      {
+        category: 'Resolución de Incidentes & DevOps',
+        question: `Cuéntanos sobre una situación imprevista o caída de un servicio en producción y cómo la resolviste.`,
+        whyAsked: 'Miden tu templanza, capacidad diagnóstica y rigurosidad metodológica ante la presión.',
+        answerStrategy: 'Describe tu experiencia en soporte de Nivel 2/3 y gestión de contingencias en Moodle o pasarelas de pago.',
+        suggestedPoints: [
+          'Identificación de la causa raíz mediante logs y auditoría sistemática.',
+          'Mitigación inmediata del impacto para los usuarios.',
+          'Documentación y despliegue del parche definitivo en producción con Git.'
+        ]
+      },
+      {
+        category: 'Trabajo Remoto & Autonomía',
+        question: `¿Cómo te organizas para trabajar de forma remota y comunicarte asíncronamente con equipos distribuidos?`,
+        whyAsked: 'Buscan seguridad de que eres autónoma, proactiva y mantienes transparencia continua en tus avances.',
+        answerStrategy: 'Enfatiza tu experiencia con clientes en Venezuela, Ecuador y Perú usando Git, Slack y documentación técnica rigurosa.',
+        suggestedPoints: [
+          'Actualización continua del estado de tareas y blockers.',
+          'Manuales técnicos y especificaciones claras para evitar dependencias innecesarias.',
+          'Compromiso con entregas a tiempo y respeto a las zonas horarias.'
+        ]
+      }
+    ];
+  }
+
+  // Interview Coach Event Listeners
+  if (btnOpenInterviewModal) {
+    btnOpenInterviewModal.addEventListener('click', () => {
+      const selectedId = cvVacancySelect ? cvVacancySelect.value : 'general';
+      openInterviewCoachModal(selectedId);
+    });
+  }
+
+  if (btnCloseInterviewCoachModal) {
+    btnCloseInterviewCoachModal.addEventListener('click', () => {
+      interviewCoachModal.classList.remove('open');
+    });
+  }
+
+  if (interviewCoachModal) {
+    interviewCoachModal.addEventListener('click', (e) => {
+      if (e.target === interviewCoachModal) interviewCoachModal.classList.remove('open');
+    });
+  }
+
+  if (btnRefreshFaqs) {
+    btnRefreshFaqs.addEventListener('click', () => {
+      if (currentCoachVacancy) {
+        fetchCoachFaqs(currentCoachVacancy);
+      }
+    });
+  }
+
+  if (coachChatForm) {
+    coachChatForm.addEventListener('submit', handleCoachChatSubmit);
+  }
+
+  if (btnClearCoachChat) {
+    btnClearCoachChat.addEventListener('click', async () => {
+      if (confirm('¿Deseas reiniciar la conversación con el simulador para esta vacante?')) {
+        currentCoachPrep.chatHistory = [];
+        renderCoachChatMessages();
+        await saveCompressedPrep();
+        showToast('Historial de chat reiniciado', 'info');
+      }
+    });
   }
 
   // =========================================================================
