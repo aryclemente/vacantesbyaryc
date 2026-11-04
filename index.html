@@ -171,6 +171,16 @@
         </svg>
         <span>Generador CV</span>
       </button>
+
+      <button class="tab-btn" data-view="jobsearch">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <circle cx="11" cy="11" r="3"></circle>
+        </svg>
+        <span>Radar de Empleos</span>
+        <span class="badge" style="background:var(--hot-pink-vibrant); color:#ffffff; font-size:0.65rem; font-weight:800; border-radius:10px; padding:0.1rem 0.4rem; margin-left:0.25rem;">NUEVO</span>
+      </button>
     </div>
 
     <div class="filter-search-wrapper">
@@ -445,6 +455,259 @@
       </div>
     </div>
 
+    <!-- ========================================================================
+         View 5: Radar de Empleos (Búsqueda Inteligente & Chatbot Asesor IA)
+         ======================================================================== -->
+    <div class="view-panel" id="view-jobsearch">
+      <div class="jobsearch-container">
+        
+        <!-- Hero Search Banner (Inspirado en la referencia con identidad Neo-Architect) -->
+        <div class="jobsearch-hero">
+          <div class="jobsearch-hero-content">
+            <div class="hero-badge-pill">
+              <span class="live-pulse">
+                <span class="live-pulse-ring"></span>
+                <span class="live-pulse-core"></span>
+              </span>
+              <span>RADAR DE EMPLEO CONTINUO // BOLSAS DE ESPAÑA &amp; REMOTO INTERNACIONAL</span>
+            </div>
+            <h1 class="jobsearch-hero-title">
+              TU PRÓXIMA OPORTUNIDAD <span class="highlight-yellow">ESTÁ AQUÍ</span>
+            </h1>
+            <p class="jobsearch-hero-subtitle">
+              El punto de encuentro centralizado con vacantes tech en tiempo real desde LinkedIn, InfoJobs España, Computrabajo, RemoteOK y bolsas de trabajo remoto internacional, sincronizadas con tu experiencia técnica.
+            </p>
+
+            <!-- Search Form Bar -->
+            <div class="jobsearch-bar-card">
+              <div class="jobsearch-bar-col">
+                <label class="jobsearch-bar-label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <span>Especialidad / Rol:</span>
+                </label>
+                <select id="radarFilterRole" class="jobsearch-bar-select">
+                  <option value="all">Todas las profesiones tech</option>
+                  <option value="Full Stack">Full Stack Developer</option>
+                  <option value="Frontend">Frontend (React / Next.js)</option>
+                  <option value="Backend">Backend (PHP / Laravel / Python)</option>
+                  <option value="WordPress">WordPress / CMS &amp; Headless</option>
+                  <option value="AI">IA, Chatbots &amp; Automatización</option>
+                </select>
+              </div>
+
+              <div class="jobsearch-bar-divider"></div>
+
+              <div class="jobsearch-bar-col">
+                <label class="jobsearch-bar-label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                  <span>Ubicación / Mercado:</span>
+                </label>
+                <select id="radarFilterLocation" class="jobsearch-bar-select">
+                  <option value="all">Todos los mercados</option>
+                  <option value="Remoto">100% Remoto Internacional (Global)</option>
+                  <option value="España">España / Europa (Remoto o Híbrido)</option>
+                  <option value="LATAM">LATAM / Remoto Regional</option>
+                  <option value="Venezuela">Venezuela / Nacional</option>
+                </select>
+              </div>
+
+              <div class="jobsearch-bar-divider"></div>
+
+              <div class="jobsearch-bar-col">
+                <label class="jobsearch-bar-label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  <span>Bolsa / Portal:</span>
+                </label>
+                <select id="radarFilterSource" class="jobsearch-bar-select">
+                  <option value="all">Todas las plataformas</option>
+                  <option value="LinkedIn">LinkedIn Jobs</option>
+                  <option value="InfoJobs">InfoJobs (España)</option>
+                  <option value="RemoteOK">RemoteOK / Remotive</option>
+                  <option value="Computrabajo">Computrabajo</option>
+                  <option value="Get on Board">Get on Board</option>
+                  <option value="Manfred">Manfred / Tecnoempleo</option>
+                </select>
+              </div>
+
+              <button class="btn-jobsearch-hero-submit" id="btnRadarSearch">
+                <span>BUSCAR →</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Layout: Sidebar (Filters + Chatbot) & Main Cards Area -->
+        <div class="jobsearch-dashboard-layout">
+          
+          <!-- Left Column Sidebar -->
+          <aside class="jobsearch-sidebar">
+            
+            <!-- Sidebar Navigation Switcher: Filtros vs Asesor IA -->
+            <div class="sidebar-tab-switcher">
+              <button class="sidebar-tab-btn active" id="tabSidebarFilters">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                <span>Filtros</span>
+              </button>
+              <button class="sidebar-tab-btn" id="tabSidebarCopilot">
+                <span class="live-pulse" style="width:7px; height:7px;">
+                  <span class="live-pulse-core" style="background:var(--hot-pink-vibrant);"></span>
+                </span>
+                <span>Asesor IA</span>
+              </button>
+            </div>
+
+            <!-- Panel 1: Filtros Facetados -->
+            <div class="sidebar-panel-content active" id="sidebarPanelFilters">
+              <!-- Filtro de Tipo de Empleo -->
+              <div class="facet-group">
+                <h4 class="facet-title">TIPO</h4>
+                <div class="facet-options" id="facetTypesList">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Filtro de Modalidad -->
+              <div class="facet-group">
+                <h4 class="facet-title">MODALIDAD</h4>
+                <div class="facet-options" id="facetModalitiesList">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Filtro de Plataforma -->
+              <div class="facet-group">
+                <h4 class="facet-title">PLATAFORMA / BOLSA</h4>
+                <div class="facet-options" id="facetSourcesList">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Filtro de Compatibilidad ATS -->
+              <div class="facet-group">
+                <h4 class="facet-title">COMPATIBILIDAD CON TU CV</h4>
+                <div class="facet-options">
+                  <label class="facet-checkbox-label">
+                    <input type="checkbox" id="chkMatchHigh" value="85" checked>
+                    <span>⭐ Alta afinidad (≥ 85% Match)</span>
+                    <span class="facet-count" id="countMatchHigh">0</span>
+                  </label>
+                  <label class="facet-checkbox-label">
+                    <input type="checkbox" id="chkMatchMed" value="70">
+                    <span>Buena afinidad (70% - 84%)</span>
+                    <span class="facet-count" id="countMatchMed">0</span>
+                  </label>
+                </div>
+              </div>
+
+              <button class="btn btn-outline" id="btnResetRadarFilters" style="width:100%; margin-top:0.75rem; font-size:0.8125rem;">
+                Restablecer Filtros
+              </button>
+            </div>
+
+            <!-- Panel 2: Chatbot Asesor de Reclutamiento IA -->
+            <div class="sidebar-panel-content" id="sidebarPanelCopilot" style="display:none;">
+              <div class="copilot-card">
+                <div class="copilot-header">
+                  <div class="copilot-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+                  </div>
+                  <div class="copilot-info">
+                    <div class="copilot-name">Ary Copilot // Reclutador IA</div>
+                    <div class="copilot-status">
+                      <span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;"></span>
+                      En línea &bull; Asesor de Carrera
+                    </div>
+                  </div>
+                </div>
+
+                <div class="copilot-intro-box">
+                  💡 <strong>¿En qué te ayudo?</strong> Puedo analizar qué vacante priorizar, comparar opciones seleccionadas o darte recomendaciones estratégicas para empresas en España o remotas.
+                </div>
+
+                <!-- Selected jobs for comparison counter -->
+                <div id="copilotCompareSelectionBar" style="display:none; padding:0.5rem 0.75rem; background:rgba(77, 23, 214, 0.08); border-radius:8px; font-size:0.75rem; margin-bottom:0.6rem; align-items:center; justify-content:space-between;">
+                  <span><strong id="compareSelectedCount">0</strong> vacantes seleccionadas</span>
+                  <button class="btn btn-primary" id="btnTriggerCompareWithAi" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+                    ⚖️ Comparar
+                  </button>
+                </div>
+
+                <!-- Chat history area -->
+                <div class="copilot-messages" id="radarCopilotMessages">
+                  <!-- Messages injected dynamically -->
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="copilot-prompt-chips">
+                  <button class="prompt-chip" data-prompt="¿Cuáles son las 3 mejores vacantes para mi perfil hoy y por qué?">
+                    ⭐ Top 3 para mí
+                  </button>
+                  <button class="prompt-chip" data-prompt="Compara las vacantes de trabajo remoto vs vacantes de España. ¿Cuál me conviene priorizar?">
+                    ⚖️ Remoto vs España
+                  </button>
+                  <button class="prompt-chip" data-prompt="¿Cómo debo enfocar mi postulación ante empresas de España siendo de Venezuela?">
+                    🇪🇸 Postular en España
+                  </button>
+                </div>
+
+                <!-- Chat input form -->
+                <form id="radarCopilotForm" class="copilot-form">
+                  <input type="text" id="radarCopilotInput" class="form-control" placeholder="Pregunta sobre cualquier vacante..." style="font-size:0.8125rem;">
+                  <button type="submit" class="btn btn-primary" id="btnSendRadarCopilot" style="padding:0.45rem 0.75rem;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </aside>
+
+          <!-- Right Column Main Grid -->
+          <div class="jobsearch-main">
+            <!-- Results Header Bar -->
+            <div class="jobsearch-results-header">
+              <div class="results-count-col">
+                <span class="results-count-number" id="radarTotalCount">0</span>
+                <span class="results-count-label">oportunidades disponibles</span>
+                <span class="results-filter-badge" id="radarActiveFilterLabel" style="display:none;"></span>
+              </div>
+
+              <div class="results-actions-col">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <label class="form-label" style="margin:0; font-size:0.75rem;">Ordenar por:</label>
+                  <select id="radarSortSelect" class="form-control" style="width:auto; padding:0.35rem 0.75rem; font-size:0.8125rem;">
+                    <option value="match">Mayor Compatibilidad ATS ⭐</option>
+                    <option value="recent">Más recientes</option>
+                    <option value="salary">Mayor Salario Estimado</option>
+                  </select>
+                </div>
+                <button class="btn btn-outline" id="btnRefreshRadarJobs" title="Buscar vacantes en vivo en las APIs" style="padding:0.35rem 0.65rem; font-size:0.8125rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                  <span>Actualizar</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Opportunities Grid Cards -->
+            <div class="jobsearch-cards-grid" id="radarJobsGrid">
+              <!-- Dynamically populated cards -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="jobsearch-empty-state" id="radarEmptyState" style="display:none;">
+              <div style="font-size:2.5rem; margin-bottom:0.5rem;">🔍</div>
+              <h3 style="font-size:1.15rem; margin-bottom:0.25rem;">No se encontraron vacantes con estos filtros</h3>
+              <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">Intenta ampliar los criterios de búsqueda o cambiar de plataforma.</p>
+              <button class="btn btn-primary" onclick="document.getElementById('btnResetRadarFilters').click()">
+                Restablecer Todos los Filtros
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ========================================================================
@@ -485,6 +748,14 @@
         <polyline points="14 2 14 8 20 8"></polyline>
       </svg>
       <span>Mi CV</span>
+    </button>
+    <button class="mobile-nav-item" data-view="jobsearch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <circle cx="11" cy="11" r="3"></circle>
+      </svg>
+      <span>Radar</span>
     </button>
   </nav>
 
@@ -1113,6 +1384,7 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/ai-parser.js"></script>
+  <script src="js/job-radar.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

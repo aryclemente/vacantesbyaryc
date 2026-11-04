@@ -260,6 +260,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (viewName === 'cv') {
       populateCvSelector();
       updateCvPreview();
+    } else if (viewName === 'jobsearch') {
+      if (window.jobRadar && typeof window.jobRadar.render === 'function') {
+        window.jobRadar.render();
+      }
     }
   }
 
