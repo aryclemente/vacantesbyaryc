@@ -12,7 +12,9 @@ SendGrid
 
 ## Certifications
 
-Curso Profesional de Git y GitHub Curso de Inglés Práctico sobre Elementos de Trabajo Curso de Prework: Configuración de Entorno de Desarrollo en Windows Cómo y Por Qué Aprender Data Science e Inteligencia Artificial
+Curso Profesional de Git y GitHub Curso de Inglés Práctico sobre Elementos de Trabajo 
+Curso de Prework: Configuración de Entorno de Desarrollo en Windows 
+Cómo y Por Qué Aprender Data Science e Inteligencia Artificial
 
 Curso de Inglés Básico: Preguntas y Respuestas
 

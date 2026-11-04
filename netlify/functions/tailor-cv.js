@@ -62,6 +62,36 @@ Experiencia Laboral Detallada:
    - Editorial Crisálidas, Fundación Agydes, Editorial Visiones: Instalación y personalización de Open Journal Systems (OJS) en hosting para revistas científicas indexadas.
 `;
 
+function getHeuristicSummarySuggestions(vacancy) {
+  const empresa = vacancy.empresa || 'Empresas del sector';
+  const puesto = vacancy.puesto || 'Full Stack Developer & Especialista TI';
+  const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos.slice(0, 4).join(', ') : 'JavaScript, React, PHP, Laravel, PostgreSQL';
+
+  return [
+    {
+      id: 'tech',
+      title: 'Enfoque Técnico & Arquitectura',
+      tag: 'Ingeniería & Stack',
+      tagClass: 'tag-tech',
+      text: `Especialista en Desarrollo de Software y Arquitecturas Web Escalables con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas e integración de APIs REST y microservicios. Dominio en el ecosistema ${reqs}, bases de datos relacionales (PostgreSQL, MySQL), optimización de Core Web Vitals y despliegues serverless continuos con Git, Netlify y Supabase.`
+    },
+    {
+      id: 'metrics',
+      title: 'Impacto Transaccional & Métricas',
+      tag: 'Alto Tráfico (+900 tx/mes)',
+      tagClass: 'tag-metrics',
+      text: `Desarrolladora Full Stack orientada a la ingeniería de software de alto impacto y rendimiento transaccional. Experiencia comprobada en el desarrollo e integración de pasarelas de pago multimoneda con capacidad para procesar +900 transacciones mensuales, optimización de velocidad de carga (WPO) y continuidad operativa para sistemas de misión crítica en sectores corporativos y financieros.`
+    },
+    {
+      id: 'industry',
+      title: 'Soluciones & Adaptabilidad',
+      tag: 'Persuasión Sutil',
+      tagClass: 'tag-industry',
+      text: `Ingeniera de software con comprobada experiencia diseñando plataformas web modulares, automatización de flujos con Inteligencia Artificial (Gemini API) y resolución analítica de incidentes técnicos complejos. Trayectoria destacada en entrega ágil (Scrum/Kanban), rigurosidad metodológica y adaptabilidad rápida a arquitecturas tecnológicas exigentes en organizaciones dinámicas.`
+    }
+  ];
+}
+
 function getHeuristicTailoring(vacancy) {
   const empresa = vacancy.empresa || 'Empresa';
   const puesto = vacancy.puesto || 'Full Stack Developer';
@@ -70,7 +100,7 @@ function getHeuristicTailoring(vacancy) {
 
   return {
     role: `${puesto} | Arianna Clemente`,
-    summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables, sistemas transaccionales e integración de Inteligencia Artificial. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código, resolución de incidentes y diseño de arquitecturas eficientes orientadas a resultados.`,
+    summary: `Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (ecosistemas PHP/Laravel/JavaScript) y diseño de flujos transaccionales (+900 tx/mes). Dominio en integración de modelos de Inteligencia Artificial (Google Gemini API), optimización de rendimiento (WPO) y despliegues continuos con Git, Netlify y Supabase.`,
     experiences: [
       {
         company: 'Colegio Gonzaga',
@@ -185,6 +215,111 @@ exports.handler = async (event) => {
     const headers = event.headers || {};
     const apiKey = process.env.GEMINI_API_KEY || headers['x-gemini-api-key'] || headers['X-Gemini-Api-Key'];
 
+    // Modo dedicado: Generar 3 sugerencias de resúmenes profesionales
+    if (payload.mode === 'suggest-summaries') {
+      if (!apiKey) {
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            success: true,
+            source: 'heuristic',
+            data: getHeuristicSummarySuggestions(vacancy)
+          })
+        };
+      }
+
+      try {
+        const summaryPrompt = `
+Eres una consultora de carrera de élite para el mercado tech internacional y ATS.
+Genera EXACTAMENTE 3 opciones de "Resumen Profesional" (de 3 a 4 líneas cada una) para el Currículum de Arianna Clemente adaptadas para la vacante:
+- Empresa: ${vacancy.empresa || 'Empresa Tech'}
+- Puesto: ${vacancy.puesto || 'Full Stack Developer'}
+- Requisitos: ${(vacancy.requisitos || []).join(', ') || 'JavaScript, React, PHP, Laravel, PostgreSQL'}
+
+REGLA DE ORO DE PERSUASIÓN SUTIL (OBLIGATORIA):
+Queda ESTRICTAMENTE PROHIBIDO redactar resúmenes que digan que Arianna "es la persona para la vacante", "es la candidata idónea", "encaja perfectamente", o que usen auto-afirmaciones pretenciosas.
+El resumen debe describir su propuesta de valor, tecnologías dominadas y logros cuantificables (+900 transacciones/mes, pasarelas multimoneda, optimización WPO, integración de IA), de tal manera que el reclutador llegue NATURALMENTE a la conclusión de que es la candidata idónea.
+
+Genera 3 opciones con estos enfoques:
+1. "tech": Enfoque Técnico & Arquitectura (Stack moderno, APIs, microservicios, bases de datos).
+2. "metrics": Impacto Transaccional & Métricas (Alto tráfico, +900 tx/mes, pasarelas de pago, WPO).
+3. "industry": Soluciones & Adaptabilidad a la Vacante (Integración de IA, resolución analítica, metodología ágil).
+
+Responde ÚNICAMENTE con un JSON válido con la siguiente estructura:
+{
+  "options": [
+    {
+      "id": "tech",
+      "title": "Enfoque Técnico & Arquitectura",
+      "tag": "Ingeniería & Stack",
+      "tagClass": "tag-tech",
+      "text": "..."
+    },
+    {
+      "id": "metrics",
+      "title": "Impacto Transaccional & Métricas",
+      "tag": "Alto Tráfico (+900 tx/mes)",
+      "tagClass": "tag-metrics",
+      "text": "..."
+    },
+    {
+      "id": "industry",
+      "title": "Soluciones & Adaptabilidad",
+      "tag": "Persuasión Sutil",
+      "tagClass": "tag-industry",
+      "text": "..."
+    }
+  ]
+}
+`;
+
+        const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: summaryPrompt }] }],
+            generationConfig: {
+              temperature: 0.35,
+              topP: 0.9,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        if (geminiRes.ok) {
+          const geminiJson = await geminiRes.json();
+          const rawText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawText) {
+            const parsed = JSON.parse(rawText);
+            if (Array.isArray(parsed.options) && parsed.options.length > 0) {
+              return {
+                statusCode: 200,
+                headers: corsHeaders,
+                body: JSON.stringify({
+                  success: true,
+                  source: 'gemini-2.5-flash',
+                  data: parsed.options
+                })
+              };
+            }
+          }
+        }
+      } catch (sumErr) {
+        console.warn('Fallo llamada de resumen a Gemini, usando heurística:', sumErr);
+      }
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          success: true,
+          source: 'heuristic_fallback',
+          data: getHeuristicSummarySuggestions(vacancy)
+        })
+      };
+    }
+
     // Si no hay API key disponible en el entorno, devolver la adaptación heurística de alta calidad
     if (!apiKey) {
       const fallback = getHeuristicTailoring(vacancy);
@@ -228,7 +363,7 @@ REGLAS CRÍTICAS Y ESTRICTAS DE ESTRUCTURA:
    - Aplica el método STAR/XYZ ("Logré X medido por Y realizando Z").
    - Ajusta el vocabulario técnico para que resuene con las necesidades de ${vacancy.empresa} (${(vacancy.requisitos || []).slice(0, 3).join(', ')}), sin cambiar la verdad histórica de lo que hizo en esa empresa.
 4. "role": Título profesional adaptado (ej: "${vacancy.puesto} | Arianna Clemente").
-5. "summary": Párrafo profesional persuasivo de 3 a 4 líneas que conecte su trayectoria con los retos de ${vacancy.empresa}.
+5. "summary": Párrafo profesional de 3 a 4 líneas de alta persuasión técnica. REGLA ESTRICTA ANTI-AUTOBOMBO: Queda estrictamente PROHIBIDO usar frases de auto-declaración como "Arianna Clemente es la persona para la vacante...", "Perfil ideal para la empresa X", o "Es la candidata indicada". El resumen debe redactarse en tono profesional y describir hechos demostrables, alcance tecnológico y valor práctico, permitiendo que el reclutador deduzca su idoneidad de forma natural.
 6. "skills": Objeto con "relevant", "core" y "methodologies".
 
 Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura exacta:

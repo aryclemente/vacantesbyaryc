@@ -116,11 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnTailorCvAi = document.getElementById('btnTailorCvAi');
   const tailorCvBtnText = document.getElementById('tailorCvBtnText');
   const cvTemplateSelect = document.getElementById('cvTemplateSelect');
-  const cvTogglePhoto = document.getElementById('cvTogglePhoto');
-  const btnUploadPhoto = document.getElementById('btnUploadPhoto');
   const cvPhotoInput = document.getElementById('cvPhotoInput');
   const cvPhotoContainer = document.getElementById('cvPhotoContainer');
   const cvPhotoImg = document.getElementById('cvPhotoImg');
+  const cvPhotoStatusText = document.getElementById('cvPhotoStatusText');
+  const btnOpenPhotoConfig = document.getElementById('btnOpenPhotoConfig');
+  const btnManageExperiences = document.getElementById('btnManageExperiences');
+  const cvExpCountBadge = document.getElementById('cvExpCountBadge');
+  const btnOpenSummarySuggestions = document.getElementById('btnOpenSummarySuggestions');
   const btnPrintCv = document.getElementById('btnPrintCv');
   const btnToggleEditCv = document.getElementById('btnToggleEditCv');
   const editCvBtnText = document.getElementById('editCvBtnText');
@@ -129,6 +132,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const cvSummaryText = document.getElementById('cvSummaryText');
   const cvExperienceBullets = document.getElementById('cvExperienceBullets');
   const cvSkillsList = document.getElementById('cvSkillsList');
+
+  // Summary Suggestions Modal Elements
+  const summarySuggestionsModal = document.getElementById('summarySuggestionsModal');
+  const btnCloseSummaryModal = document.getElementById('btnCloseSummaryModal');
+  const btnDismissSummaryModal = document.getElementById('btnDismissSummaryModal');
+  const btnRegenerateSummaries = document.getElementById('btnRegenerateSummaries');
+  const btnRegenSummariesText = document.getElementById('btnRegenSummariesText');
+  const summarySuggestionsGrid = document.getElementById('summarySuggestionsGrid');
+  const summaryModalVacancyName = document.getElementById('summaryModalVacancyName');
+  const summaryQuickEditContainer = document.getElementById('summaryQuickEditContainer');
+  const summaryQuickEditTextarea = document.getElementById('summaryQuickEditTextarea');
+  const btnCancelQuickEdit = document.getElementById('btnCancelQuickEdit');
+  const btnApplyQuickEdit = document.getElementById('btnApplyQuickEdit');
+
+  // Manage Experiences Modal Elements
+  const manageExperiencesModal = document.getElementById('manageExperiencesModal');
+  const btnCloseManageExpModal = document.getElementById('btnCloseManageExpModal');
+  const btnApplyManageExperiences = document.getElementById('btnApplyManageExperiences');
+  const btnShowAllExperiences = document.getElementById('btnShowAllExperiences');
+  const manageExperiencesList = document.getElementById('manageExperiencesList');
+  const manageExpCountText = document.getElementById('manageExpCountText');
+
+  // Photo Config Modal Elements
+  const cvPhotoConfigModal = document.getElementById('cvPhotoConfigModal');
+  const btnClosePhotoModal = document.getElementById('btnClosePhotoModal');
+  const btnApplyPhotoConfig = document.getElementById('btnApplyPhotoConfig');
+  const modalTogglePhoto = document.getElementById('modalTogglePhoto');
+  const modalPhotoPreviewBox = document.getElementById('modalPhotoPreviewBox');
+  const modalPhotoPreviewImg = document.getElementById('modalPhotoPreviewImg');
+  const btnUseOfficialPhoto = document.getElementById('btnUseOfficialPhoto');
+  const btnModalUploadPhoto = document.getElementById('btnModalUploadPhoto');
+  const btnRemovePhoto = document.getElementById('btnRemovePhoto');
 
   // Cover Letter Modal elements
   const coverLetterModal = document.getElementById('coverLetterModal');
@@ -975,49 +1010,137 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // =========================================================================
+  // CV Generator State & Core Controllers
+  // =========================================================================
+
+  let cvActiveData = null; // Stores current role, summary, experiences, skills
+
   // --- Photo Management ---
+  const OFFICIAL_ARIANNA_PHOTO = 'assets/images/arianna_photo.jpg';
+
   function initCvPhoto() {
-    const savedPhoto = localStorage.getItem('aryc_cv_photo');
-    const photoEnabled = localStorage.getItem('aryc_cv_photo_enabled') === 'true';
+    const savedPhoto = localStorage.getItem('aryc_cv_photo') || OFFICIAL_ARIANNA_PHOTO;
+    const photoEnabled = localStorage.getItem('aryc_cv_photo_enabled') !== 'false';
+    const photoShape = localStorage.getItem('aryc_cv_photo_shape') || 'circle';
+    const photoPos = localStorage.getItem('aryc_cv_photo_pos') || 'top';
 
-    if (savedPhoto && cvPhotoImg) {
-      cvPhotoImg.src = savedPhoto;
-    }
-
-    if (cvTogglePhoto) {
-      cvTogglePhoto.checked = photoEnabled && !!savedPhoto;
-      applyPhotoVisibility(cvTogglePhoto.checked);
-    }
-  }
-
-  function applyPhotoVisibility(show) {
-    if (!cvPaper || !cvPhotoContainer) return;
-    const hasPhoto = cvPhotoImg && cvPhotoImg.src && !cvPhotoImg.src.endsWith('/#') && cvPhotoImg.src !== window.location.href;
-
-    if (show && hasPhoto) {
-      cvPaper.classList.remove('no-photo');
-      cvPhotoContainer.style.display = 'block';
-    } else {
-      cvPaper.classList.add('no-photo');
-      cvPhotoContainer.style.display = 'none';
-    }
-    localStorage.setItem('aryc_cv_photo_enabled', show ? 'true' : 'false');
-  }
-
-  if (cvTogglePhoto) {
-    cvTogglePhoto.addEventListener('change', () => {
-      const hasPhoto = cvPhotoImg && cvPhotoImg.src && !cvPhotoImg.src.endsWith('/#') && cvPhotoImg.src !== window.location.href;
-      if (cvTogglePhoto.checked && !hasPhoto) {
-        cvPhotoInput.click();
-      } else {
-        applyPhotoVisibility(cvTogglePhoto.checked);
-      }
+    applyPhotoSettings({
+      enabled: photoEnabled,
+      shape: photoShape,
+      pos: photoPos,
+      photoUrl: savedPhoto
     });
   }
 
-  if (btnUploadPhoto) {
-    btnUploadPhoto.addEventListener('click', () => {
-      cvPhotoInput.click();
+  function applyPhotoSettings({ enabled, shape, pos, photoUrl }) {
+    if (!cvPaper || !cvPhotoContainer) return;
+
+    if (photoUrl) {
+      if (cvPhotoImg) cvPhotoImg.src = photoUrl;
+      if (modalPhotoPreviewImg) modalPhotoPreviewImg.src = photoUrl;
+      localStorage.setItem('aryc_cv_photo', photoUrl);
+    }
+
+    if (shape) {
+      cvPhotoContainer.classList.remove('shape-circle', 'shape-rounded', 'shape-square');
+      cvPhotoContainer.classList.add(`shape-${shape}`);
+      if (modalPhotoPreviewBox) {
+        modalPhotoPreviewBox.classList.remove('shape-circle', 'shape-rounded', 'shape-square');
+        modalPhotoPreviewBox.classList.add(`shape-${shape}`);
+      }
+      document.querySelectorAll('#cvPhotoConfigModal .photo-shape-btn[data-shape]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.shape === shape);
+      });
+      localStorage.setItem('aryc_cv_photo_shape', shape);
+    }
+
+    if (pos) {
+      if (cvPhotoImg) {
+        cvPhotoImg.classList.remove('pos-top', 'pos-center');
+        cvPhotoImg.classList.add(`pos-${pos}`);
+      }
+      if (modalPhotoPreviewImg) {
+        modalPhotoPreviewImg.classList.remove('pos-top', 'pos-center');
+        modalPhotoPreviewImg.classList.add(`pos-${pos}`);
+      }
+      document.querySelectorAll('#cvPhotoConfigModal .photo-shape-btn[data-pos]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.pos === pos);
+      });
+      localStorage.setItem('aryc_cv_photo_pos', pos);
+    }
+
+    if (typeof enabled === 'boolean') {
+      if (enabled) {
+        cvPaper.classList.remove('no-photo');
+        cvPhotoContainer.style.display = 'block';
+      } else {
+        cvPaper.classList.add('no-photo');
+        cvPhotoContainer.style.display = 'none';
+      }
+      if (modalTogglePhoto) modalTogglePhoto.checked = enabled;
+      if (cvPhotoStatusText) cvPhotoStatusText.textContent = enabled ? 'Visible' : 'Oculta';
+      localStorage.setItem('aryc_cv_photo_enabled', enabled ? 'true' : 'false');
+    }
+  }
+
+  if (btnOpenPhotoConfig) {
+    btnOpenPhotoConfig.addEventListener('click', () => {
+      if (cvPhotoConfigModal) cvPhotoConfigModal.classList.add('open');
+    });
+  }
+
+  if (btnClosePhotoModal) {
+    btnClosePhotoModal.addEventListener('click', () => {
+      cvPhotoConfigModal.classList.remove('open');
+    });
+  }
+
+  if (btnApplyPhotoConfig) {
+    btnApplyPhotoConfig.addEventListener('click', () => {
+      cvPhotoConfigModal.classList.remove('open');
+      showToast('Configuración de fotografía guardada', 'success');
+    });
+  }
+
+  if (modalTogglePhoto) {
+    modalTogglePhoto.addEventListener('change', () => {
+      applyPhotoSettings({ enabled: modalTogglePhoto.checked });
+      showToast(modalTogglePhoto.checked ? 'Foto activada en el CV' : 'Foto ocultada del CV', 'info');
+    });
+  }
+
+  // Photo Shape Buttons
+  document.querySelectorAll('#cvPhotoConfigModal .photo-shape-btn[data-shape]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyPhotoSettings({ shape: btn.dataset.shape });
+    });
+  });
+
+  // Photo Position Buttons
+  document.querySelectorAll('#cvPhotoConfigModal .photo-shape-btn[data-pos]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyPhotoSettings({ pos: btn.dataset.pos });
+    });
+  });
+
+  if (btnUseOfficialPhoto) {
+    btnUseOfficialPhoto.addEventListener('click', () => {
+      applyPhotoSettings({ photoUrl: OFFICIAL_ARIANNA_PHOTO, enabled: true });
+      showToast('Foto oficial de Arianna restablecida', 'success');
+    });
+  }
+
+  if (btnModalUploadPhoto) {
+    btnModalUploadPhoto.addEventListener('click', () => {
+      if (cvPhotoInput) cvPhotoInput.click();
+    });
+  }
+
+  if (btnRemovePhoto) {
+    btnRemovePhoto.addEventListener('click', () => {
+      applyPhotoSettings({ enabled: false });
+      showToast('Fotografía desactivada en el CV', 'info');
     });
   }
 
@@ -1028,10 +1151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (evt) => {
           const b64 = evt.target.result;
-          cvPhotoImg.src = b64;
-          localStorage.setItem('aryc_cv_photo', b64);
-          cvTogglePhoto.checked = true;
-          applyPhotoVisibility(true);
+          applyPhotoSettings({ photoUrl: b64, enabled: true });
           showToast('Fotografía cargada exitosamente', 'success');
         };
         reader.readAsDataURL(file);
@@ -1100,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return {
       role: `${puesto} | Arianna Clemente`,
-      summary: `Especialista en Desarrollo de Soluciones Web y TI con amplia trayectoria optimizando plataformas escalables, sistemas transaccionales e integración de Inteligencia Artificial. Perfil altamente compatible con los estándares y requerimientos técnicos de ${empresa}, destacando en entrega continua, calidad de código, resolución de incidentes y diseño de arquitecturas eficientes orientadas a resultados.`,
+      summary: `Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas y diseño de flujos transaccionales (+900 tx/mes). Dominio en integración de modelos de Inteligencia Artificial (Google Gemini API), optimización de rendimiento (WPO) y despliegues continuos con Git, Netlify y Supabase.`,
       experiences: MASTER_CV.experiences.map(exp => ({
         company: exp.company,
         role: exp.role,
@@ -1116,38 +1236,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // --- Hidden Experiences Management by Vacancy ---
+  function getHiddenExperiences(vacancyId) {
+    try {
+      const stored = localStorage.getItem(`aryc_cv_hidden_exp_${vacancyId}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHiddenExperiences(vacancyId, list) {
+    localStorage.setItem(`aryc_cv_hidden_exp_${vacancyId}`, JSON.stringify(list));
+  }
+
   function applyTailoredCvData(data, vacancy) {
+    cvActiveData = { ...data };
+
     cvHeaderRole.textContent = data.role || `${vacancy.puesto || 'Full Stack Developer'} | Arianna Clemente`;
     cvSummaryText.textContent = data.summary || MASTER_CV.summary;
 
-    const expContainer = document.getElementById('cvExperienceContainer');
-    if (expContainer) {
-      const experiences = (Array.isArray(data.experiences) && data.experiences.length > 0)
-        ? data.experiences
-        : MASTER_CV.experiences;
-
-      expContainer.innerHTML = experiences.map(job => `
-        <div class="cv-job">
-          <div class="cv-job-header">
-            <span class="cv-job-role">${escapeHtml(job.role)}</span>
-            <span class="cv-job-period">${escapeHtml(job.period)}</span>
-          </div>
-          <div class="cv-job-sub">
-            <span class="cv-job-company"><strong>${escapeHtml(job.company)}</strong></span>
-            <span class="cv-job-location">${escapeHtml(job.location || 'Remoto')}</span>
-          </div>
-          <ul class="cv-bullets">
-            ${(job.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
-          </ul>
-        </div>
-      `).join('');
-
-      if (isCvEditMode) {
-        expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li').forEach(el => {
-          el.setAttribute('contenteditable', 'true');
-        });
-      }
-    }
+    renderCvExperiences();
 
     if (data.skills && typeof data.skills === 'object') {
       cvSkillsList.innerHTML = `
@@ -1157,6 +1266,456 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
   }
+
+  function renderCvExperiences() {
+    const expContainer = document.getElementById('cvExperienceContainer');
+    if (!expContainer || !cvActiveData) return;
+
+    const allExperiences = Array.isArray(cvActiveData.experiences) && cvActiveData.experiences.length > 0
+      ? cvActiveData.experiences
+      : MASTER_CV.experiences;
+
+    const currentVacancyId = cvVacancySelect ? cvVacancySelect.value : 'general';
+    const hiddenList = getHiddenExperiences(currentVacancyId);
+    const hiddenSet = new Set(hiddenList);
+
+    const visibleExperiences = allExperiences.filter(exp => !hiddenSet.has(exp.company));
+
+    // Update badges
+    if (cvExpCountBadge) {
+      cvExpCountBadge.textContent = `${visibleExperiences.length}/${allExperiences.length}`;
+    }
+    if (manageExpCountText) {
+      manageExpCountText.textContent = `${visibleExperiences.length} de ${allExperiences.length}`;
+    }
+
+    if (visibleExperiences.length === 0) {
+      expContainer.innerHTML = `
+        <div style="padding:1.5rem; text-align:center; color:var(--text-muted); font-size:0.875rem; border:1px dashed var(--border-slate); border-radius:8px;">
+          No hay experiencias visibles en este momento. 
+          <button class="btn btn-outline" style="margin-left:0.5rem; padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="document.getElementById('btnShowAllExperiences').click()">
+            Mostrar Todas
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    expContainer.innerHTML = visibleExperiences.map((job, idx) => `
+      <div class="cv-job" data-company="${escapeHtml(job.company)}">
+        <div class="cv-job-header">
+          <div class="cv-job-header-left">
+            <span class="cv-job-role">${escapeHtml(job.role)}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span class="cv-job-period">${escapeHtml(job.period)}</span>
+            <div class="cv-job-actions">
+              <button class="btn-job-action btn-hide-job" data-company="${escapeHtml(job.company)}" title="Ocultar del CV">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                <span>Ocultar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="cv-job-sub">
+          <span class="cv-job-company"><strong>${escapeHtml(job.company)}</strong></span>
+          <span class="cv-job-location">${escapeHtml(job.location || 'Remoto')}</span>
+        </div>
+        <ul class="cv-bullets">
+          ${(job.bullets || []).map(b => `
+            <li>
+              <span>${escapeHtml(b)}</span>
+              <button class="btn-bullet-remove" title="Eliminar viñeta">&times;</button>
+            </li>
+          `).join('')}
+        </ul>
+        <button class="btn-bullet-add" data-company="${escapeHtml(job.company)}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Agregar logro</span>
+        </button>
+      </div>
+    `).join('');
+
+    // Attach Hide Job event listeners
+    expContainer.querySelectorAll('.btn-hide-job').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const company = btn.dataset.company;
+        const currentVacancyId = cvVacancySelect.value;
+        const currentHidden = getHiddenExperiences(currentVacancyId);
+        if (!currentHidden.includes(company)) {
+          currentHidden.push(company);
+          saveHiddenExperiences(currentVacancyId, currentHidden);
+          renderCvExperiences();
+          showToast(`Puesto en "${company}" ocultado del CV`, 'info');
+        }
+      });
+    });
+
+    // Attach Bullet Remove event listeners
+    expContainer.querySelectorAll('.btn-bullet-remove').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const li = btn.closest('li');
+        if (li) li.remove();
+        showToast('Viñeta eliminada', 'info');
+      });
+    });
+
+    // Attach Bullet Add event listeners
+    expContainer.querySelectorAll('.btn-bullet-add').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const jobCard = btn.closest('.cv-job');
+        const ul = jobCard.querySelector('.cv-bullets');
+        if (ul) {
+          const newLi = document.createElement('li');
+          newLi.innerHTML = `
+            <span contenteditable="true">Nuevo logro cuantificable o tarea relevante...</span>
+            <button class="btn-bullet-remove" title="Eliminar viñeta">&times;</button>
+          `;
+          newLi.querySelector('.btn-bullet-remove').addEventListener('click', () => newLi.remove());
+          ul.appendChild(newLi);
+          const span = newLi.querySelector('span');
+          span.focus();
+        }
+      });
+    });
+
+    if (isCvEditMode) {
+      expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li span').forEach(el => {
+        el.setAttribute('contenteditable', 'true');
+      });
+    }
+  }
+
+  // --- Manage Experiences Modal Logic ---
+  if (btnManageExperiences) {
+    btnManageExperiences.addEventListener('click', () => {
+      openManageExperiencesModal();
+      manageExperiencesModal.classList.add('open');
+    });
+  }
+
+  if (btnCloseManageExpModal) {
+    btnCloseManageExpModal.addEventListener('click', () => {
+      manageExperiencesModal.classList.remove('open');
+    });
+  }
+
+  if (btnApplyManageExperiences) {
+    btnApplyManageExperiences.addEventListener('click', () => {
+      manageExperiencesModal.classList.remove('open');
+      showToast('Selección de experiencias actualizada', 'success');
+    });
+  }
+
+  function openManageExperiencesModal() {
+    if (!manageExperiencesList || !cvActiveData) return;
+
+    const allExperiences = Array.isArray(cvActiveData.experiences) && cvActiveData.experiences.length > 0
+      ? cvActiveData.experiences
+      : MASTER_CV.experiences;
+
+    const currentVacancyId = cvVacancySelect.value;
+    const hiddenList = getHiddenExperiences(currentVacancyId);
+    const hiddenSet = new Set(hiddenList);
+
+    manageExperiencesList.innerHTML = allExperiences.map(job => {
+      const isVisible = !hiddenSet.has(job.company);
+      return `
+        <div class="exp-manage-item ${isVisible ? '' : 'is-hidden'}" data-company="${escapeHtml(job.company)}">
+          <input type="checkbox" class="exp-checkbox" style="accent-color:var(--primary); width:18px; height:18px; cursor:pointer;" ${isVisible ? 'checked' : ''}>
+          <div class="exp-manage-item-info">
+            <span class="exp-manage-company">${escapeHtml(job.company)}</span>
+            <span class="exp-manage-meta">${escapeHtml(job.role)} &bull; ${escapeHtml(job.period)}</span>
+          </div>
+          <span class="tag-pill" style="margin:0; font-size:0.75rem; ${isVisible ? 'background:rgba(0, 210, 180, 0.12); color:var(--deep-teal);' : 'background:#f1f5f9; color:#94a3b8;'}">
+            ${isVisible ? 'Visible' : 'Oculta'}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+    // Attach checkbox changes
+    manageExperiencesList.querySelectorAll('.exp-manage-item').forEach(item => {
+      const checkbox = item.querySelector('.exp-checkbox');
+      const company = item.dataset.company;
+
+      const toggleAction = () => {
+        const currentVacancyId = cvVacancySelect.value;
+        let currentHidden = getHiddenExperiences(currentVacancyId);
+
+        if (checkbox.checked) {
+          currentHidden = currentHidden.filter(c => c !== company);
+        } else {
+          if (!currentHidden.includes(company)) currentHidden.push(company);
+        }
+
+        saveHiddenExperiences(currentVacancyId, currentHidden);
+        renderCvExperiences();
+        openManageExperiencesModal(); // refresh UI in modal
+      };
+
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleAction();
+      });
+
+      item.addEventListener('click', (e) => {
+        if (e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          toggleAction();
+        }
+      });
+    });
+  }
+
+  if (btnShowAllExperiences) {
+    btnShowAllExperiences.addEventListener('click', () => {
+      const currentVacancyId = cvVacancySelect.value;
+      saveHiddenExperiences(currentVacancyId, []);
+      renderCvExperiences();
+      openManageExperiencesModal();
+      showToast('Todas las experiencias ahora son visibles', 'success');
+    });
+  }
+
+  // --- Summary Suggestions Modal ("✨ Sugerir Resúmenes") ---
+  function getActiveVacancyForCv() {
+    const selectedId = cvVacancySelect ? cvVacancySelect.value : 'general';
+    const vacancies = window.appStorage.getVacancies();
+    return selectedId === 'general'
+      ? {
+          empresa: 'Empresas Tech & Fintech',
+          puesto: 'Senior Full Stack Developer & Especialista TI / Web',
+          modalidad: 'Remoto',
+          requisitos: ['JavaScript', 'React', 'PHP', 'Python', 'PostgreSQL', 'APIs REST', 'Cloud Architecture'],
+          notas: 'Perfil orientado a liderazgo técnico, calidad de software y arquitecturas cloud escalables.'
+        }
+      : (vacancies.find(v => v.id === selectedId) || {
+          empresa: 'Empresa',
+          puesto: 'Full Stack Developer',
+          requisitos: ['JavaScript', 'PHP', 'Laravel', 'React', 'PostgreSQL']
+        });
+  }
+
+  function generateLocalSummarySuggestions(vacancy) {
+    const empresa = vacancy.empresa || 'Empresas Tech';
+    const puesto = vacancy.puesto || 'Full Stack Developer';
+    const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
+      ? vacancy.requisitos.slice(0, 4).join(', ')
+      : 'JavaScript, React, PHP, Laravel, PostgreSQL';
+
+    return [
+      {
+        id: 'tech',
+        title: 'Enfoque Técnico & Arquitectura',
+        tag: 'Ingeniería & Stack',
+        tagClass: 'tag-tech',
+        text: `Especialista en Desarrollo de Software y Arquitecturas Web Escalables con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas e integración de APIs REST y microservicios. Dominio en el ecosistema ${reqs}, bases de datos relacionales (PostgreSQL, MySQL), optimización de Core Web Vitals y despliegues serverless continuos con Git, Netlify y Supabase.`
+      },
+      {
+        id: 'metrics',
+        title: 'Impacto Transaccional & Métricas',
+        tag: 'Alto Tráfico (+900 tx/mes)',
+        tagClass: 'tag-metrics',
+        text: `Desarrolladora Full Stack orientada a la ingeniería de software de alto impacto y rendimiento transaccional. Experiencia comprobada en el desarrollo e integración de pasarelas de pago multimoneda con capacidad para procesar +900 transacciones mensuales, optimización de velocidad de carga (WPO) y continuidad operativa para sistemas de misión crítica en sectores corporativos y financieros.`
+      },
+      {
+        id: 'industry',
+        title: 'Soluciones & Adaptabilidad',
+        tag: 'Persuasión Sutil',
+        tagClass: 'tag-industry',
+        text: `Ingeniera de software con comprobada experiencia diseñando plataformas web modulares, automatización de flujos con Inteligencia Artificial (Gemini API) y resolución analítica de incidentes técnicos complejos. Trayectoria destacada en entrega ágil (Scrum/Kanban), rigurosidad metodológica y adaptabilidad rápida a arquitecturas tecnológicas exigentes en organizaciones dinámicas.`
+      }
+    ];
+  }
+
+  async function fetchSummarySuggestions(vacancy) {
+    try {
+      const settings = window.appStorage.getSettings();
+      const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
+
+      let res = await fetch('/api/tailor-cv', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ vacancy, mode: 'suggest-summaries' })
+      }).catch(() => null);
+
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/tailor-cv', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ vacancy, mode: 'suggest-summaries' })
+        }).catch(() => null);
+      }
+
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          return json.data;
+        }
+      }
+    } catch (err) {
+      console.warn('Fallo llamada a sugerencias de resumen por API, usando heurística:', err);
+    }
+    return generateLocalSummarySuggestions(vacancy);
+  }
+
+  function renderSummarySuggestions(options) {
+    if (!summarySuggestionsGrid) return;
+
+    summarySuggestionsGrid.innerHTML = options.map((opt, i) => `
+      <div class="summary-card" data-index="${i}">
+        <div class="summary-card-header">
+          <div class="summary-card-title">
+            <span>${escapeHtml(opt.title)}</span>
+          </div>
+          <span class="summary-tag ${escapeHtml(opt.tagClass || 'tag-tech')}">
+            ${escapeHtml(opt.tag)}
+          </span>
+        </div>
+        <p class="summary-text-preview">${escapeHtml(opt.text)}</p>
+        <div class="summary-card-footer">
+          <button class="btn btn-outline btn-edit-summary" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>Editar y Aplicar</span>
+          </button>
+          <button class="btn btn-primary btn-apply-summary" style="padding:0.35rem 0.85rem; font-size:0.8125rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>✓ Aplicar al CV</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach card event listeners
+    summarySuggestionsGrid.querySelectorAll('.summary-card').forEach((card, idx) => {
+      const opt = options[idx];
+
+      card.querySelector('.btn-apply-summary').addEventListener('click', () => {
+        applySummaryToCv(opt.text);
+        summarySuggestionsModal.classList.remove('open');
+      });
+
+      card.querySelector('.btn-edit-summary').addEventListener('click', () => {
+        summaryQuickEditContainer.style.display = 'block';
+        summaryQuickEditTextarea.value = opt.text;
+        summaryQuickEditTextarea.scrollIntoView({ behavior: 'smooth' });
+        summaryQuickEditTextarea.focus();
+      });
+    });
+  }
+
+  function applySummaryToCv(text) {
+    if (cvSummaryText) {
+      cvSummaryText.textContent = text;
+      if (cvActiveData) cvActiveData.summary = text;
+
+      // Pulse animation effect
+      cvSummaryText.style.transition = 'background-color 0.4s ease';
+      cvSummaryText.style.backgroundColor = 'rgba(77, 23, 214, 0.12)';
+      setTimeout(() => {
+        cvSummaryText.style.backgroundColor = 'transparent';
+      }, 1000);
+
+      showToast('Resumen profesional actualizado en el CV', 'success');
+    }
+  }
+
+  if (btnOpenSummarySuggestions) {
+    btnOpenSummarySuggestions.addEventListener('click', async () => {
+      const vacancy = getActiveVacancyForCv();
+      if (summaryModalVacancyName) {
+        summaryModalVacancyName.textContent = `${vacancy.empresa || 'General'} (${vacancy.puesto || 'Full Stack Developer'})`;
+      }
+      if (summaryQuickEditContainer) summaryQuickEditContainer.style.display = 'none';
+
+      summarySuggestionsModal.classList.add('open');
+      summarySuggestionsGrid.innerHTML = `
+        <div style="padding:2rem; text-align:center; color:var(--text-muted); font-size:0.875rem;">
+          <div class="live-pulse" style="margin:0 auto 0.5rem auto;">
+            <span class="live-pulse-ring"></span>
+            <span class="live-pulse-core"></span>
+          </div>
+          Generando sugerencias de alto impacto...
+        </div>
+      `;
+
+      const options = await fetchSummarySuggestions(vacancy);
+      renderSummarySuggestions(options);
+    });
+  }
+
+  if (btnCloseSummaryModal) {
+    btnCloseSummaryModal.addEventListener('click', () => {
+      summarySuggestionsModal.classList.remove('open');
+    });
+  }
+
+  if (btnDismissSummaryModal) {
+    btnDismissSummaryModal.addEventListener('click', () => {
+      summarySuggestionsModal.classList.remove('open');
+    });
+  }
+
+  if (btnCancelQuickEdit) {
+    btnCancelQuickEdit.addEventListener('click', () => {
+      summaryQuickEditContainer.style.display = 'none';
+    });
+  }
+
+  if (btnApplyQuickEdit) {
+    btnApplyQuickEdit.addEventListener('click', () => {
+      const customText = summaryQuickEditTextarea.value.trim();
+      if (customText) {
+        applySummaryToCv(customText);
+        summarySuggestionsModal.classList.remove('open');
+      }
+    });
+  }
+
+  if (btnRegenerateSummaries) {
+    btnRegenerateSummaries.addEventListener('click', async () => {
+      const vacancy = getActiveVacancyForCv();
+      btnRegenerateSummaries.disabled = true;
+      if (btnRegenSummariesText) btnRegenSummariesText.textContent = 'Generando...';
+
+      const options = await fetchSummarySuggestions(vacancy);
+      renderSummarySuggestions(options);
+
+      btnRegenerateSummaries.disabled = false;
+      if (btnRegenSummariesText) btnRegenSummariesText.textContent = 'Regenerar con IA';
+    });
+  }
+
+  if (cvPhotoConfigModal) {
+    cvPhotoConfigModal.addEventListener('click', (e) => {
+      if (e.target === cvPhotoConfigModal) cvPhotoConfigModal.classList.remove('open');
+    });
+  }
+
+  if (manageExperiencesModal) {
+    manageExperiencesModal.addEventListener('click', (e) => {
+      if (e.target === manageExperiencesModal) manageExperiencesModal.classList.remove('open');
+    });
+  }
+
+  if (summarySuggestionsModal) {
+    summarySuggestionsModal.addEventListener('click', (e) => {
+      if (e.target === summarySuggestionsModal) summarySuggestionsModal.classList.remove('open');
+    });
+  }
+
+  // Global Escape key handler for all modals
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    }
+  });
 
   // --- AI Tailor CV Action Button ---
   if (btnTailorCvAi) {
@@ -1214,7 +1773,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         applyTailoredCvData(tailoredData, vacancy);
-        showToast(`¡CV adaptado exitosamente con IA para ${vacancy.empresa}!`, 'success');
+        showToast(`¡CV adaptado exitosamente para ${vacancy.empresa}!`, 'success');
       } catch (err) {
         console.error('Error al adaptar CV con IA:', err);
         const fallback = generateLocalTailoredCv(vacancy);
@@ -1239,7 +1798,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const expContainer = document.getElementById('cvExperienceContainer');
     if (expContainer) {
-      expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li').forEach(el => {
+      expContainer.querySelectorAll('.cv-job-role, .cv-job-period, .cv-job-company, .cv-job-location, .cv-bullets li span').forEach(el => {
         el.setAttribute('contenteditable', isCvEditMode ? 'true' : 'false');
       });
     }
