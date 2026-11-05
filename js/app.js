@@ -376,7 +376,13 @@ document.addEventListener('DOMContentLoaded', () => {
               <option value="${c.id}" ${v.estado === c.id ? 'selected' : ''}>Mover: ${c.label.split('/')[0].trim()}</option>
             `).join('')}
           </select>
-          <span style="color:var(--primary); font-weight:700;">Ver &rarr;</span>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <button class="btn-card-ai" onclick="event.stopPropagation(); window.openCopilotForAtsVacancy('${v.id}');" title="Analizar esta vacante con el Asesor IA">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></svg>
+              <span>Asesor IA</span>
+            </button>
+            <span style="color:var(--primary); font-weight:700;">Ver &rarr;</span>
+          </div>
         </div>
       </div>
     `;

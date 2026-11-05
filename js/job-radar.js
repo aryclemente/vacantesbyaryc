@@ -76,8 +76,8 @@
       salarioNum: 50000,
       tipo: 'Tiempo Completo',
       plataforma: 'linkedin',
-      plataformaNombre: 'LinkedIn',
-      url: 'https://www.linkedin.com/jobs/search/?keywords=Cabify+Full+Stack+Laravel+PHP',
+      plataformaNombre: 'Cabify Careers',
+      url: 'https://cabify.careers/jobs/senior-full-stack-engineer-spain',
       fecha: '2026-11-03',
       descripcion: 'Buscamos un Ingeniero Full Stack para escalar nuestros servicios de movilidad y pasarelas de pago. Desarrollo de APIs en Laravel/PHP y aplicaciones frontend con React.',
       requisitos: ['PHP 8+', 'Laravel', 'React', 'REST APIs', 'MySQL / PostgreSQL', 'Docker', 'Pasarelas de Pago'],
@@ -94,8 +94,8 @@
       salarioNum: 46000,
       tipo: 'Tiempo Completo',
       plataforma: 'infojobs',
-      plataformaNombre: 'InfoJobs',
-      url: 'https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword=Glovo+Backend+PHP',
+      plataformaNombre: 'Glovo Careers',
+      url: 'https://careers.glovoapp.com/job/senior-backend-engineer-payments-barcelona',
       fecha: '2026-11-02',
       descripcion: 'Integración en el equipo de transacciones y cobros digitales. Arquitectura de microservicios, alta concurrencia y optimización de base de datos relacionales.',
       requisitos: ['PHP', 'Laravel / Symfony', 'PostgreSQL', 'APIs Restful', 'Webhooks', 'Git', 'Testing'],
@@ -113,7 +113,7 @@
       tipo: 'Tiempo Completo',
       plataforma: 'remoteok',
       plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-wordpress-jobs',
+      url: 'https://remoteok.com/remote-jobs/senior-wordpress-engineer',
       fecha: '2026-11-04',
       descripcion: 'Desarrollo de plugins a medida, integración de pasarelas de cobro multimoneda (Stripe/PayPal), optimización de Core Web Vitals y arquitecturas Headless WP.',
       requisitos: ['WordPress', 'WooCommerce', 'PHP', 'JavaScript', 'Custom Plugins', 'Core Web Vitals', 'MySQL'],
@@ -130,8 +130,8 @@
       salarioNum: 42000,
       tipo: 'Tiempo Completo',
       plataforma: 'linkedin',
-      plataformaNombre: 'LinkedIn',
-      url: 'https://www.linkedin.com/jobs/search/?keywords=Packlink+PHP+React',
+      plataformaNombre: 'Auctane Careers',
+      url: 'https://boards.greenhouse.io/auctane/jobs/full-stack-engineer-php-react',
       fecha: '2026-11-01',
       descripcion: 'Desarrollo y mantenimiento de la plataforma líder de logística y envíos para e-commerce. Integraciones API con tiendas online y pasarelas de pago.',
       requisitos: ['PHP 8', 'React', 'TypeScript', 'MySQL', 'Docker', 'REST APIs', 'Git'],
@@ -149,7 +149,7 @@
       tipo: 'Tiempo Completo',
       plataforma: 'getonbrd',
       plataformaNombre: 'Get on Board',
-      url: 'https://www.getonbrd.com/jobs/programming',
+      url: 'https://www.getonbrd.com/jobs/programming/full-stack-developer-platzi-remote',
       fecha: '2026-11-03',
       descripcion: 'Buscamos desarrolladores apasionados por la educación tecnológica para construir experiencias de usuario rápidas y módulos interactivos con IA.',
       requisitos: ['React', 'JavaScript', 'Python', 'PostgreSQL', 'APIs', 'Git', 'IA Integrations'],
@@ -166,8 +166,8 @@
       salarioNum: 47000,
       tipo: 'Tiempo Completo',
       plataforma: 'tecnoempleo',
-      plataformaNombre: 'Tecnoempleo',
-      url: 'https://www.tecnoempleo.com/ofertas-trabajo/?te=pasarelas+pago',
+      plataformaNombre: 'Santander Jobs',
+      url: 'https://www.santander.com/es/trabaja-con-nosotros/ofertas/especialista-integracion-pasarelas-pagonxt',
       fecha: '2026-11-02',
       descripcion: 'Diseño e integración de APIs transaccionales bancarias, reconciliación en tiempo real y protocolos de seguridad financiera C2P / tarjetas.',
       requisitos: ['Pasarelas de Pago', 'PHP', 'Laravel / Spring', 'PostgreSQL', 'Seguridad Transaccional', 'Webhooks'],
@@ -184,8 +184,8 @@
       salarioNum: 44000,
       tipo: 'Tiempo Completo',
       plataforma: 'linkedin',
-      plataformaNombre: 'LinkedIn',
-      url: 'https://www.linkedin.com/jobs/search/?keywords=Factorial+HR+Engineer',
+      plataformaNombre: 'Factorial Jobs',
+      url: 'https://jobs.lever.co/factorial/software-engineer-backend-php',
       fecha: '2026-11-03',
       descripcion: 'Desarrollo de módulos SaaS para gestión de talento humano, nómina y flujos automatizados. Fuerte enfoque en buenas prácticas y testing.',
       requisitos: ['PHP', 'PostgreSQL', 'Arquitectura SaaS', 'REST APIs', 'Git', 'Clean Architecture'],
@@ -202,8 +202,8 @@
       salarioNum: 35000,
       tipo: 'Tiempo Completo',
       plataforma: 'infojobs',
-      plataformaNombre: 'InfoJobs',
-      url: 'https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword=Moodle+LMS',
+      plataformaNombre: 'Empleo VIU',
+      url: 'https://empleo.universidadviu.com/ofertas/especialista-moodle-elearning',
       fecha: '2026-11-01',
       descripcion: 'Mantenimiento, desarrollo de extensiones personalizadas para Moodle LMS, gestión de base de datos MySQL y soporte técnico a campus universitario.',
       requisitos: ['Moodle LMS', 'PHP', 'MySQL', 'JavaScript', 'SCORM', 'Gestión de Servidores Educativos'],
@@ -220,8 +220,8 @@
       salarioNum: 40000,
       tipo: 'Tiempo Completo',
       plataforma: 'infojobs',
-      plataformaNombre: 'InfoJobs',
-      url: 'https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword=Bodas.net+Frontend+PHP',
+      plataformaNombre: 'The Knot Careers',
+      url: 'https://careers.theknotww.com/jobs/full-stack-web-engineer-barcelona',
       fecha: '2026-11-02',
       descripcion: 'Optimización de Core Web Vitals, interfaces modernas con React, componentes interactivos y servicios backend en PHP para millones de usuarios mensuales.',
       requisitos: ['React', 'JavaScript (ES6+)', 'PHP', 'HTML5/CSS3', 'Core Web Vitals', 'Git'],
@@ -238,8 +238,8 @@
       salarioNum: 27000,
       tipo: 'Tiempo Completo',
       plataforma: 'computrabajo',
-      plataformaNombre: 'Computrabajo',
-      url: 'https://ve.computrabajo.com/ofertas-de-trabajo/?q=desarrollador+web',
+      plataformaNombre: 'Banesco Empleos',
+      url: 'https://banesco.evaluar.com/job/ingeniero-integraciones-web-pasarelas',
       fecha: '2026-11-04',
       descripcion: 'Implementación de módulos web transaccionales, soporte a canales de pago digital, C2P, Pago Móvil y automatización de reportes bancarios.',
       requisitos: ['PHP / Laravel', 'Pasarelas de Pago', 'Bases de Datos SQL', 'Seguridad Transaccional', 'Webhooks'],
@@ -256,8 +256,8 @@
       salarioNum: 40000,
       tipo: 'Tiempo Completo',
       plataforma: 'getonbrd',
-      plataformaNombre: 'Get on Board',
-      url: 'https://www.getonbrd.com/jobs/programming/mercado-libre',
+      plataformaNombre: 'Mercado Libre Careers',
+      url: 'https://mercadolibre.eightfold.ai/careers/job/senior-software-engineer-frontend',
       fecha: '2026-11-03',
       descripcion: 'Desarrollo de módulos e-commerce de alta velocidad, componentes modulares en React y optimización del embudo de compra y checkout.',
       requisitos: ['React', 'TypeScript', 'TailwindCSS', 'Web Performance (WPO)', 'Git', 'REST APIs'],
@@ -275,7 +275,7 @@
       tipo: 'Tiempo Completo',
       plataforma: 'remoteok',
       plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-jobs',
+      url: 'https://remoteok.com/remote-jobs/wordpress-core-plugin-developer',
       fecha: '2026-11-04',
       descripcion: 'Creación y mantenimiento de plugins usados por millones de sitios web. Código limpio, compatibilidad con Gutenberg y estándares de WordPress VIP.',
       requisitos: ['WordPress', 'PHP 8+', 'JavaScript', 'Gutenberg Blocks', 'MySQL', 'Git'],
@@ -292,8 +292,8 @@
       salarioNum: 34000,
       tipo: 'Tiempo Completo',
       plataforma: 'tecnoempleo',
-      plataformaNombre: 'Tecnoempleo',
-      url: 'https://www.tecnoempleo.com/ofertas-trabajo/?te=moodle',
+      plataformaNombre: 'Inetum Careers',
+      url: 'https://www.inetum.com/es/carreras/ofertas/consultor-desarrollador-moodle-lms',
       fecha: '2026-11-02',
       descripcion: 'Diseño e implementación de soluciones formativas en Moodle para grandes clientes corporativos y administraciones públicas en España.',
       requisitos: ['Moodle LMS', 'PHP', 'MySQL / PostgreSQL', 'Web Services Moodle', 'HTML5/CSS3'],
@@ -311,7 +311,7 @@
       tipo: 'Tiempo Completo',
       plataforma: 'getonbrd',
       plataformaNombre: 'Get on Board',
-      url: 'https://www.getonbrd.com/jobs/programming',
+      url: 'https://www.getonbrd.com/jobs/programming/full-stack-web-developer-pedidosya',
       fecha: '2026-11-03',
       descripcion: 'Desarrollo de herramientas internas para comercios afiliados y gestión de catálogos web. Interfaces reactivas y servicios distribuidos.',
       requisitos: ['React', 'JavaScript', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
@@ -328,8 +328,8 @@
       salarioNum: 54000,
       tipo: 'Tiempo Completo',
       plataforma: 'linkedin',
-      plataformaNombre: 'LinkedIn',
-      url: 'https://www.linkedin.com/jobs/search/?keywords=Turing+Laravel+React',
+      plataformaNombre: 'Turing Jobs',
+      url: 'https://www.turing.com/jobs/remote-senior-full-stack-developer-laravel-react',
       fecha: '2026-11-04',
       descripcion: 'Asignación directa con clientes de EE.UU. y Europa. Desarrollo de arquitecturas web modernas basadas en Laravel y React con metodologías ágiles.',
       requisitos: ['Laravel', 'PHP', 'React', 'REST APIs', 'MySQL', 'Inglés Técnico'],
@@ -346,8 +346,8 @@
       salarioNum: 25000,
       tipo: 'Tiempo Completo',
       plataforma: 'computrabajo',
-      plataformaNombre: 'Computrabajo',
-      url: 'https://ve.computrabajo.com/ofertas-de-trabajo/?q=farmatodo',
+      plataformaNombre: 'Farmatodo Empleos',
+      url: 'https://farmatodo.evaluar.com/job/desarrollador-full-stack-ecommerce',
       fecha: '2026-11-01',
       descripcion: 'Integración de servicios web transaccionales, portal de compras en línea, pasarelas de pago nacionales e internacionales y optimización WPO.',
       requisitos: ['PHP / Laravel', 'JavaScript', 'Pasarelas de Pago', 'MySQL', 'Arquitectura Web', 'Git'],
@@ -364,8 +364,8 @@
       salarioNum: 33000,
       tipo: 'Tiempo Completo',
       plataforma: 'infojobs',
-      plataformaNombre: 'InfoJobs',
-      url: 'https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword=Santillana+Web',
+      plataformaNombre: 'Santillana Talento',
+      url: 'https://santillana.com/es/trabaja-con-nosotros/desarrollador-edtech-moodle',
       fecha: '2026-10-31',
       descripcion: 'Desarrollo de portales educativos, personalización de plantillas y plugins en WordPress y conexión con plataformas de aula virtual.',
       requisitos: ['WordPress', 'PHP', 'JavaScript', 'Moodle o LMS', 'HTML5/CSS3', 'SEO'],
@@ -382,8 +382,8 @@
       salarioNum: 24000,
       tipo: 'Tiempo Completo',
       plataforma: 'computrabajo',
-      plataformaNombre: 'Computrabajo',
-      url: 'https://ve.computrabajo.com/ofertas-de-trabajo/?q=mercantil',
+      plataformaNombre: 'Mercantil Talento',
+      url: 'https://mercantilbanco.evaluar.com/job/analista-programador-web-c2p',
       fecha: '2026-11-02',
       descripcion: 'Desarrollo e integración de soluciones API de recaudación bancaria C2P, validación de transacciones Pago Móvil y servicios empresariales.',
       requisitos: ['APIs REST', 'PHP / Java', 'SQL Server / Oracle', 'Seguridad Bancaria', 'Webhooks'],
@@ -400,8 +400,8 @@
       salarioNum: 49000,
       tipo: 'Tiempo Completo',
       plataforma: 'infojobs',
-      plataformaNombre: 'InfoJobs',
-      url: 'https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword=Adevinta',
+      plataformaNombre: 'Adevinta Careers',
+      url: 'https://adevinta.com/careers/jobs/senior-full-stack-engineer-spain',
       fecha: '2026-11-03',
       descripcion: 'Desarrollo de productos digitales escalables para los mayores portales de empleo e inmobiliaria de España. Arquitectura distribuida y frontend reactivo.',
       requisitos: ['React', 'JavaScript', 'Node.js / PHP', 'Docker', 'Testing', 'Git'],
@@ -419,7 +419,7 @@
       tipo: 'Tiempo Completo',
       plataforma: 'remoteok',
       plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-jobs',
+      url: 'https://remoteok.com/remote-jobs/payments-gateway-integration-specialist',
       fecha: '2026-11-04',
       descripcion: 'Integración técnica de SDKs de cobro, conciliación bancaria, webhooks para comercio electrónico y plugins para plataformas WooCommerce/Shopify.',
       requisitos: ['Pasarelas de Pago', 'PHP', 'WooCommerce', 'JavaScript', 'APIs Transaccionales', 'Webhooks'],
@@ -899,19 +899,22 @@
   }
 
   function renderCopilotMessages() {
-    const container = document.getElementById('radarCopilotMessages');
-    if (!container) return;
+    const containers = [
+      document.getElementById('radarCopilotMessages'),
+      document.getElementById('atsCopilotDrawerMessages')
+    ].filter(Boolean);
 
-    container.innerHTML = state.chatMessages.map(msg => {
-      const isUser = msg.sender === 'user';
-      return `
-        <div class="copilot-msg-bubble ${isUser ? 'user' : 'assistant'}">
-          ${formatCopilotMarkdown(msg.text)}
-        </div>
-      `;
-    }).join('');
-
-    container.scrollTop = container.scrollHeight;
+    containers.forEach(container => {
+      container.innerHTML = state.chatMessages.map(msg => {
+        const isUser = msg.sender === 'user';
+        return `
+          <div class="copilot-msg-bubble ${isUser ? 'user' : 'assistant'}">
+            ${formatCopilotMarkdown(msg.text)}
+          </div>
+        `;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    });
   }
 
   function formatCopilotMarkdown(text) {
@@ -932,14 +935,16 @@
     state.chatMessages.push({ sender: 'user', text: cleanPrompt });
     renderCopilotMessages();
 
-    // Cambiar vista al asesor
-    switchSidebarTab('copilot');
+    // Si estamos en la vista de radar y el sidebar copilot existe
+    if (document.getElementById('sidebarPanelCopilot')) {
+      switchSidebarTab('copilot');
+    }
 
     // 2. Indicador de carga
-    state.chatMessages.push({ sender: 'assistant', text: 'Analizando con tu perfil y experiencia...', isPending: true });
+    state.chatMessages.push({ sender: 'assistant', text: 'Analizando con tu perfil y tus vacantes...', isPending: true });
     renderCopilotMessages();
 
-    // 3. Generar respuesta (Heurística o Gemini ultraligera)
+    // 3. Generar respuesta
     try {
       const response = await generateRecruiterAdvice(cleanPrompt);
       state.chatMessages.pop(); // Quitar pending
@@ -948,7 +953,7 @@
       state.chatMessages.pop();
       state.chatMessages.push({
         sender: 'assistant',
-        text: 'Hubo un inconveniente al conectar con el motor de IA. Te recomiendo postular primero a las vacantes de España en remoto, donde tu experiencia en Laravel y Moodle destaca con más del 90% de match.'
+        text: 'Hubo un inconveniente temporal con el motor de IA. Te recomiendo postular primero a las vacantes de España en remoto, donde tu experiencia en Laravel y Moodle destaca con más del 90% de match.'
       });
     }
 
@@ -956,23 +961,90 @@
   }
 
   async function generateRecruiterAdvice(prompt) {
-    // Si hay vacantes seleccionadas para comparar
+    // Si hay vacantes seleccionadas para comparar en el Radar
     if (state.selectedJobIdsForCompare.size >= 2) {
       const selectedJobs = state.jobs.filter(j => state.selectedJobIdsForCompare.has(j.id));
       return generateSideBySideComparison(selectedJobs);
     }
 
-    // Heurísticas locales de alta precisión (0 TOKENS)
+    // Obtener vacantes guardadas en el ATS
+    const savedVacancies = (window.appStorage && typeof window.appStorage.getVacancies === 'function')
+      ? window.appStorage.getVacancies()
+      : [];
+
     const lower = prompt.toLowerCase();
 
+    // =========================================================================
+    // Heurísticas de Alto Rendimiento para Tablero ATS (0 Tokens)
+    // =========================================================================
+
+    // A. Diagnóstico de Embudo / Conversión ATS
+    if (lower.includes('embudo') || lower.includes('funnel') || lower.includes('conversión') || lower.includes('tasa') || (lower.includes('ats') && lower.includes('estad'))) {
+      const total = savedVacancies.length;
+      const guardadas = savedVacancies.filter(v => v.estado === 'guardada').length;
+      const postuladas = savedVacancies.filter(v => v.estado === 'postulada').length;
+      const entrevistas = savedVacancies.filter(v => v.estado === 'entrevista').length;
+      const ofertas = savedVacancies.filter(v => v.estado === 'oferta').length;
+      const rechazos = savedVacancies.filter(v => v.estado === 'rechazada').length;
+      const rate = total > 0 ? Math.round(((entrevistas + ofertas) / total) * 100) : 0;
+
+      return `📊 **Diagnóstico Táctico de tu Embudo ATS:**\n\n` +
+        `• **Total Registradas:** ${total} vacantes\n` +
+        `• **Guardadas (Sin enviar):** ${guardadas} | **Postuladas:** ${postuladas}\n` +
+        `• **En Proceso de Entrevista:** ${entrevistas} | **Ofertas:** ${ofertas} | **Rechazos:** ${rechazos}\n` +
+        `• **Tasa de Efectividad a Entrevista:** ${rate}%\n\n` +
+        `💡 **3 Acciones para Desbloquear tu Proceso:**\n` +
+        (guardadas > 0 ? `1. **Activa tus vacantes guardadas:** Tienes ${guardadas} vacantes en "Guardada". Te recomiendo enviar tu CV hoy a las de prioridad Alta.\n` : `1. **Mantén el flujo:** Tu tablero tiene todas las vacantes en proceso activo.\n`) +
+        (postuladas > 0 ? `2. **Seguimiento a postuladas:** Para las ${postuladas} postuladas que lleven más de 7 días, envía un mensaje breve de cortesía por LinkedIn al reclutador.\n` : `2. **Explora nuevas opciones:** Revisa el Radar de Empleos para nutrir tu embudo con ofertas de España y Remotas.\n`) +
+        (entrevistas > 0 ? `3. **Prioridad máxima:** Enfócate 100% en preparar tus ${entrevistas} procesos en entrevista usando el Simulador STAR.` : `3. **Siguiente hito:** Tu objetivo esta semana es conseguir tu primera entrevista activa adaptando el CV con nuestro motor de IA.`);
+    }
+
+    // B. Preparación de Entrevistas Activas
+    if (lower.includes('entrevista') || lower.includes('entrevistas')) {
+      const enEntrevista = savedVacancies.filter(v => v.estado === 'entrevista');
+      if (enEntrevista.length > 0) {
+        return `🎤 **Estrategia para tus ${enEntrevista.length} Vacantes en Entrevista:**\n\n` +
+          enEntrevista.map((v, i) => `**${i + 1}. ${v.empresa} - ${v.puesto}**\n- **Modalidad:** ${v.modalidad || 'Remoto'} | **Salario:** ${v.salario || 'A convenir'}\n- **Punto Fuerte a Destacar:** Liderazgo en proyectos reales de misión crítica y métricas cuantificables.\n- **Pregunta Crítica que te harán:** "¿Cómo aseguras la estabilidad y manejo de errores en pasarelas de pago o APIs bajo alta concurrencia?"`).join('\n\n') +
+          `\n\n🎯 **Plan de Acción:** Abre la tarjeta en el Kanban y haz clic en **"🎤 Preparar Entrevista"** para simular las 5 preguntas con el Coach.`;
+      } else {
+        return `🎤 **Vacantes en Etapa Entrevista:**\n\nActualmente no tienes vacantes marcadas en la columna **"En Entrevistas"**.\n\n💡 **Recomendación:** Revisa tus vacantes **"Postuladas"** (${savedVacancies.filter(v => v.estado === 'postulada').length} registradas) y envía un mensaje de seguimiento para acelerar la respuesta de los reclutadores.`;
+      }
+    }
+
+    // C. Prioridades y Top en el Kanban / ATS
+    if (lower.includes('priorizar') || lower.includes('prioridad') || lower.includes('kanban') || lower.includes('guardadas') || lower.includes('tablero')) {
+      if (savedVacancies.length > 0) {
+        const priorityScore = { high: 3, med: 2, low: 1 };
+        const sorted = [...savedVacancies].sort((a, b) => (priorityScore[b.prioridad] || 0) - (priorityScore[a.prioridad] || 0));
+        const top = sorted.slice(0, 3);
+        return `🎯 **Prioridades Estratégicas en tu Tablero ATS:**\n\n` +
+          top.map((v, i) => `**${i + 1}. ${v.empresa} (${v.puesto})**\n- **Estado Actual:** ${v.estado.toUpperCase()} | **Prioridad:** ${v.prioridad === 'high' ? '🔥 Alta' : 'Media'}\n- **Modalidad:** ${v.modalidad || 'Remoto'} | **Salario:** ${v.salario || 'No especificado'}\n- **Por qué priorizar:** Alto ajuste técnico y potencial de cierre en el corto plazo.`).join('\n\n') +
+          `\n\n💡 **Consejo:** Enfócate hoy en avanzar la vacante de **${top[0].empresa}**.`;
+      }
+    }
+
+    // D. Vacante individual del ATS buscada por nombre de empresa
+    const matchingAtsJob = savedVacancies.find(v => lower.includes(v.empresa.toLowerCase()));
+    if (matchingAtsJob) {
+      return `📌 **Análisis Táctico de tu Vacante: ${matchingAtsJob.empresa} (${matchingAtsJob.puesto})**\n\n` +
+        `• **Estado en Kanban:** ${matchingAtsJob.estado.toUpperCase()} | **Prioridad:** ${matchingAtsJob.prioridad === 'high' ? '🔥 Alta' : 'Media'}\n` +
+        `• **Modalidad:** ${matchingAtsJob.modalidad || 'Remoto'} | **Salario:** ${matchingAtsJob.salario || 'A convenir'}\n` +
+        `• **Requisitos Declarados:** ${(matchingAtsJob.requisitos || []).join(', ') || 'Desarrollo de software y APIs'}\n\n` +
+        `🚀 **Cómo asegurar esta vacante:**\n` +
+        `1. **CV Personalizado:** Genera un CV resaltando proyectos transaccionales y tecnologías clave.\n` +
+        `2. **Pitch de Valor:** Destaca tu capacidad de autonomía en entornos remotos y resolución de problemas.\n` +
+        `3. **Simulador STAR:** Practica tus respuestas con el botón **"Asesor IA"** en su tarjeta del Kanban.`;
+    }
+
+    // E. Consultas sobre el Radar de Empleos
     if (lower.includes('top 3') || lower.includes('mejores') || lower.includes('para mí')) {
       const top3 = [...state.jobs].sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
-      return `⭐ **Tus 3 mejores opciones hoy:**\n\n` +
-        top3.map((j, i) => `**${i + 1}. ${j.puesto}** (${j.empresa})\n- **Match ATS:** ${j.matchScore}%\n- **Por qué:** Pide ${j.requisitos.slice(0, 3).join(', ')}, encajando exactamente con tu desarrollo en Gonzaga y Fe y Alegría.\n- **Salario:** ${j.salario || 'A convenir'}`).join('\n\n') +
+      return `⭐ **Tus 3 mejores opciones del Radar hoy:**\n\n` +
+        top3.map((j, i) => `**${i + 1}. ${j.puesto}** (${j.empresa})\n- **Match ATS:** ${j.matchScore}%\n- **Requisitos:** ${j.requisitos.slice(0, 3).join(', ')}\n- **Salario:** ${j.salario || 'A convenir'}`).join('\n\n') +
         `\n\n💡 **Recomendación:** Te sugiero empezar enviando tu postulación a **${top3[0].empresa}**.`;
     }
 
-    if (lower.includes('remoto vs españa') || lower.includes('españa') || lower.includes('priorizar')) {
+    if (lower.includes('remoto vs españa') || lower.includes('españa')) {
       return `⚖️ **Análisis Comparativo: Remoto Internacional vs España**\n\n` +
         `1. **Mercado de España (InfoJobs / Tecnoempleo):**\n` +
         `• **Ventajas:** Alta demanda de perfiles en PHP/Laravel y Moodle LMS. Los rangos para perfiles Full Stack oscilan entre **€36k y €50k/año**.\n` +
@@ -999,9 +1071,11 @@
 
     // Si tenemos proveedor de IA configurado (Gemini, Claude, Kimi, OpenAI, etc.)
     if (window.aiParser && (typeof window.aiParser.callLlmText === 'function' || typeof window.aiParser.callGeminiText === 'function')) {
-      const compactPrompt = `Eres un Asesor de Empleo experto para ${candidateName} (${candidateRole}: ${candidateSkills}).
+      const atsSummary = savedVacancies.slice(0, 8).map(v => `${v.empresa} (${v.puesto}, estado: ${v.estado})`).join('; ');
+      const compactPrompt = `Eres un Asesor de Carrera y Reclutador Senior para ${candidateName} (${candidateRole}: ${candidateSkills}).
+Vacantes guardadas en su Tablero ATS: [${atsSummary}].
 Pregunta de ${candidateName}: "${prompt}".
-Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 150 palabras.`;
+Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de acción directa. Máximo 160 palabras.`;
       
       try {
         const caller = window.aiParser.callLlmText || window.aiParser.callGeminiText;
@@ -1014,9 +1088,9 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
 
     // Heurística general por defecto
     return `Analizando tu consulta sobre **"${escapeHtml(prompt)}"**:\n\n` +
-      `• Tu perfil como **${escapeHtml(candidateRole)}** tiene mayor ventaja competitiva en vacantes que solicitan **${escapeHtml(candidateSkills)}**.\n` +
-      `• Para empresas con procesos técnicos rigurosos, destaca tus métricas de impacto verificables en tu portafolio y GitHub.\n` +
-      `• ¿Deseas seleccionar dos vacantes con la casilla **"Comparar"** para ver un cara a cara detallado?`;
+      `• Tu perfil como **${escapeHtml(candidateRole)}** cuenta con fuerte tracción técnica en **${escapeHtml(candidateSkills)}**.\n` +
+      `• Tienes **${savedVacancies.length} vacantes** registradas en tu Tablero ATS. Te sugiero revisar las que están en etapa **Entrevista** o **Postuladas** para priorizar tus esfuerzos de hoy.\n` +
+      `• Puedes elegir una vacante específica en el menú superior del Asesor para ver un análisis detallado a medida.`;
   }
 
   function generateSideBySideComparison(jobs) {
@@ -1274,10 +1348,169 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
     const profile = getActiveUserProfile();
     const firstName = profile && profile.nombre ? profile.nombre.split(' ')[0] : 'Arianna';
     if (state.chatMessages.length === 1 && state.chatMessages[0].sender === 'assistant') {
-      state.chatMessages[0].text = `¡Hola, ${escapeHtml(firstName)}! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar cualquier vacante, comparar opciones (por ejemplo, **Remoto Internacional vs España**) o decirte en cuál tienes mayor probabilidad de avanzar según tu CV. ¿Por dónde empezamos?`;
+      state.chatMessages[0].text = `¡Hola, ${escapeHtml(firstName)}! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar tus **vacantes guardadas en el Kanban**, evaluar tu **embudo ATS**, o comparar opciones del **Radar de Empleos** (Remoto vs España). ¿Por dónde empezamos?`;
       renderCopilotMessages();
     }
   }
+
+  // =========================================================================
+  // Control del Drawer Desplegable del Asesor ATS & IA
+  // =========================================================================
+  function openAtsCopilotDrawer(initialPrompt, targetVacancyId) {
+    const overlay = document.getElementById('atsCopilotDrawerOverlay');
+    if (!overlay) return;
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    populateAtsVacancyPicker(targetVacancyId);
+    updateAtsBadges();
+    renderCopilotMessages();
+
+    if (initialPrompt) {
+      handleCopilotUserPrompt(initialPrompt);
+    }
+  }
+
+  function closeAtsCopilotDrawer() {
+    const overlay = document.getElementById('atsCopilotDrawerOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function updateAtsBadges() {
+    const saved = (window.appStorage && typeof window.appStorage.getVacancies === 'function')
+      ? window.appStorage.getVacancies()
+      : [];
+    const count = saved.length;
+
+    const b1 = document.getElementById('badgeAtsCopilotCount');
+    if (b1) b1.textContent = `${count} ATS`;
+
+    const b2 = document.getElementById('copilotAtsCountBadge');
+    if (b2) b2.textContent = count;
+  }
+
+  function populateAtsVacancyPicker(selectedVacancyId) {
+    const select = document.getElementById('copilotSelectAtsVacancy');
+    if (!select) return;
+
+    const saved = (window.appStorage && typeof window.appStorage.getVacancies === 'function')
+      ? window.appStorage.getVacancies()
+      : [];
+
+    select.innerHTML = '<option value="">-- Elige una vacante para diagnóstico táctico --</option>' +
+      saved.map(v => `
+        <option value="${v.id}" ${v.id === selectedVacancyId ? 'selected' : ''}>
+          ${escapeHtml(v.empresa)} - ${escapeHtml(v.puesto)} (${v.estado.toUpperCase()})
+        </option>
+      `).join('');
+  }
+
+  function initDrawerEventListeners() {
+    // 1. Botón en Header y Botón Flotante
+    const btnHeader = document.getElementById('btnOpenAtsCopilotHeader');
+    if (btnHeader) {
+      btnHeader.addEventListener('click', () => openAtsCopilotDrawer());
+    }
+
+    const btnFloat = document.getElementById('btnFloatingCopilot');
+    if (btnFloat) {
+      btnFloat.addEventListener('click', () => openAtsCopilotDrawer());
+    }
+
+    // 2. Cerrar Drawer
+    const btnClose = document.getElementById('btnCloseAtsCopilotDrawer');
+    if (btnClose) {
+      btnClose.addEventListener('click', closeAtsCopilotDrawer);
+    }
+
+    const overlay = document.getElementById('atsCopilotDrawerOverlay');
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeAtsCopilotDrawer();
+      });
+    }
+
+    // 3. Context Switcher Tabs (ATS vs Radar)
+    const tabAts = document.getElementById('btnCopilotTabAts');
+    const tabRadar = document.getElementById('btnCopilotTabRadar');
+    const pickerBox = document.getElementById('copilotVacancyPickerBox');
+
+    if (tabAts && tabRadar) {
+      tabAts.addEventListener('click', () => {
+        tabAts.classList.add('active');
+        tabRadar.classList.remove('active');
+        if (pickerBox) pickerBox.style.display = 'flex';
+      });
+
+      tabRadar.addEventListener('click', () => {
+        tabRadar.classList.add('active');
+        tabAts.classList.remove('active');
+        if (pickerBox) pickerBox.style.display = 'none';
+      });
+    }
+
+    // 4. Botón Analizar Vacante Seleccionada en Dropdown
+    const btnAudit = document.getElementById('btnAuditSelectedAtsJob');
+    const selectVacancy = document.getElementById('copilotSelectAtsVacancy');
+    if (btnAudit && selectVacancy) {
+      btnAudit.addEventListener('click', () => {
+        const vacId = selectVacancy.value;
+        if (!vacId) {
+          showToastMessage('Selecciona primero una vacante de la lista', 'info');
+          return;
+        }
+        const saved = window.appStorage.getVacancies();
+        const vac = saved.find(v => v.id === vacId);
+        if (vac) {
+          handleCopilotUserPrompt(`Analiza en detalle mi vacante de ${vac.empresa} (${vac.puesto}, estado: ${vac.estado}). ¿Cuáles son mis puntos fuertes, qué preguntas técnicas me harán y cómo asegurarla?`);
+        }
+      });
+    }
+
+    // 5. Submit Form Drawer
+    const formDrawer = document.getElementById('atsCopilotDrawerForm');
+    const inputDrawer = document.getElementById('atsCopilotDrawerInput');
+    if (formDrawer && inputDrawer) {
+      formDrawer.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const txt = inputDrawer.value;
+        if (txt && txt.trim()) {
+          inputDrawer.value = '';
+          handleCopilotUserPrompt(txt);
+        }
+      });
+    }
+
+    // 6. Chips en Drawer
+    const drawerChips = document.querySelectorAll('#atsCopilotDrawerChips .prompt-chip');
+    drawerChips.forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const pr = e.currentTarget.dataset.prompt;
+        if (pr) handleCopilotUserPrompt(pr);
+      });
+    });
+
+    // 7. Escape key para cerrar
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAtsCopilotDrawer();
+    });
+  }
+
+  // Exponer función global para abrir el asesor desde cualquier tarjeta o vista del ATS
+  window.openCopilotForAtsVacancy = function (vacancyId) {
+    const saved = (window.appStorage && typeof window.appStorage.getVacancies === 'function')
+      ? window.appStorage.getVacancies()
+      : [];
+    const vac = saved.find(v => v.id === vacancyId);
+    if (!vac) {
+      openAtsCopilotDrawer();
+      return;
+    }
+
+    openAtsCopilotDrawer(`Analiza mi vacante de ${vac.empresa} (${vac.puesto}, estado: ${vac.estado}). ¿Cuáles son mis puntos fuertes, qué preguntas técnicas me harán y cómo asegurar mi avance?`, vacancyId);
+  };
 
   // =========================================================================
   // Exportar API Pública
@@ -1288,6 +1521,7 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
       updateCopilotGreeting();
       render();
       renderCopilotMessages();
+      updateAtsBadges();
 
       // Suscribirse a cambios en el perfil (por ejemplo al subir un .md o cambiar de usuario)
       if (window.appStorage && typeof window.appStorage.subscribeProfile === 'function') {
@@ -1301,6 +1535,9 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
     render: render,
     importJobToKanban: importJobToKanban,
     askCopilot: handleCopilotUserPrompt,
+    openDrawer: openAtsCopilotDrawer,
+    closeDrawer: closeAtsCopilotDrawer,
+    updateAtsBadges: updateAtsBadges,
     recalculateScores: function () {
       recalculateAllScores();
       render();
@@ -1310,6 +1547,7 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
   // Inicializar al cargar el DOM
   document.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
+    initDrawerEventListeners();
     window.jobRadar.init();
   });
 

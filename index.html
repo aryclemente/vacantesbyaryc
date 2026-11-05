@@ -52,6 +52,11 @@
           </svg>
           <span>Nueva Vacante</span>
         </button>
+        <button class="btn btn-outline" id="btnOpenAtsCopilotHeader" title="Asesor Reclutador IA para tu Tablero ATS" style="border-color: rgba(77, 23, 214, 0.35); color: var(--primary); gap:0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+          <span>Asesor IA</span>
+          <span class="badge" id="badgeAtsCopilotCount" style="background:var(--primary); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800;">ATS</span>
+        </button>
         <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro">
           <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;">AC</span>
           <span id="headerUserName">Mi Perfil</span>
@@ -1529,6 +1534,90 @@
     </div>
   </div>
 
+
+  <!-- ========================================================================
+       Drawer Desplegable: Asesor de Reclutamiento IA (Tablero ATS & Radar)
+       ======================================================================== -->
+  <div class="copilot-drawer-overlay" id="atsCopilotDrawerOverlay">
+    <div class="copilot-drawer-panel" id="atsCopilotDrawer">
+      <!-- Header -->
+      <div class="copilot-drawer-header">
+        <div class="copilot-drawer-brand">
+          <div class="copilot-avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+          </div>
+          <div>
+            <div class="copilot-name">Ary Copilot // Asesor de Carrera & ATS</div>
+            <div class="copilot-status" id="copilotDrawerStatus">
+              <span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;"></span>
+              Conectado a tus vacantes y perfil
+            </div>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAtsCopilotDrawer" title="Cerrar Asesor" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+      </div>
+
+      <!-- Segmented Switcher: ATS vs Radar -->
+      <div class="copilot-context-switcher">
+        <button class="copilot-tab-btn active" id="btnCopilotTabAts" data-mode="ats">
+          📋 Mis Vacantes ATS (<span id="copilotAtsCountBadge">0</span>)
+        </button>
+        <button class="copilot-tab-btn" id="btnCopilotTabRadar" data-mode="radar">
+          🌐 Radar de Empleos (20)
+        </button>
+      </div>
+
+      <!-- Quick Vacancy Selector from Kanban -->
+      <div class="copilot-vacancy-picker-box" id="copilotVacancyPickerBox">
+        <label for="copilotSelectAtsVacancy">🎯 Analizar vacante de mi Kanban:</label>
+        <div style="display:flex; gap:0.4rem;">
+          <select id="copilotSelectAtsVacancy" class="form-control" style="font-size:0.8125rem; flex:1;">
+            <option value="">-- Elige una vacante para diagnóstico táctico --</option>
+          </select>
+          <button type="button" class="btn btn-secondary" id="btnAuditSelectedAtsJob" style="padding:0.35rem 0.65rem; font-size:0.75rem; white-space:nowrap;">
+            Analizar
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="copilot-drawer-messages" id="atsCopilotDrawerMessages">
+        <!-- Message bubbles injected dynamically -->
+      </div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="copilot-drawer-chips" id="atsCopilotDrawerChips">
+        <button class="prompt-chip" data-prompt="Analiza mi embudo de selección del ATS: ¿Cómo va mi tasa de conversión y qué debo hacer para mejorarla?">
+          📊 Analizar mi embudo ATS
+        </button>
+        <button class="prompt-chip" data-prompt="¿Cuáles de mis vacantes en etapa Entrevista debo priorizar y qué preguntas técnicas me harán?">
+          🎤 Preparar mis entrevistas activas
+        </button>
+        <button class="prompt-chip" data-prompt="De todas mis vacantes guardadas en el Kanban, ¿cuáles tienen mayor compatibilidad con mi CV y salario?">
+          ⭐ Top prioridades en mi Kanban
+        </button>
+        <button class="prompt-chip" data-prompt="¿Cuáles son las 3 mejores vacantes del Radar de Empleos para mi perfil hoy?">
+          🌐 Top 3 del Radar de Empleos
+        </button>
+      </div>
+
+      <!-- Input Form -->
+      <form id="atsCopilotDrawerForm" class="copilot-form" style="padding:0.75rem 1rem; border-top:1px solid var(--border-slate); background:var(--surface); margin:0;">
+        <input type="text" id="atsCopilotDrawerInput" class="form-control" placeholder="Pregunta sobre tus vacantes guardadas o el radar..." style="font-size:0.8125rem;">
+        <button type="submit" class="btn btn-primary" id="btnSendAtsCopilotDrawer" style="padding:0.5rem 0.85rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Botón Flotante para Acceso Rápido al Asesor IA -->
+  <div class="floating-copilot-bubble" id="btnFloatingCopilot" title="Abrir Asesor de Reclutamiento IA">
+    <div class="floating-copilot-inner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+      <span class="floating-copilot-label">Asesor Reclutador IA</span>
+    </div>
+  </div>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>

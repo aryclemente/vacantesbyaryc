@@ -16,3 +16,7 @@ node_modules/
 .env
 .env.local
 .env.*.local
+
+# MCP Configs
+.mcp.json
+.agents/mcp_config.json
