@@ -88,6 +88,39 @@ function getHeuristicFaqs(vacancy) {
   ];
 }
 
+function formatProfileToCvBase(userProfile) {
+  if (!userProfile) return DEFAULT_MASTER_CV;
+  const name = userProfile.nombre || 'Arianna Clemente';
+  const role = userProfile.titular || 'Full Stack Developer & Especialista TI / Web';
+  const email = userProfile.email || 'hello.ary.code@gmail.com';
+  const phone = userProfile.telefono || '';
+  const location = userProfile.ubicacion || 'Remoto';
+  const skills = Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : '';
+  const summary = userProfile.resumen || '';
+
+  let expText = '';
+  if (Array.isArray(userProfile.experiencias) && userProfile.experiencias.length > 0) {
+    expText = userProfile.experiencias.map((e, idx) => {
+      const bullets = Array.isArray(e.bullets) ? e.bullets.map(b => `   - ${b}`).join('\n') : '';
+      return `${idx + 1}. ${e.company || ''} | ${e.role || ''} (${e.period || ''}, ${e.location || ''}):\n${bullets}`;
+    }).join('\n\n');
+  }
+
+  return `Nombre: ${name}
+Rol Principal: ${role}
+Ubicación: ${location}
+Contacto: ${email} ${phone ? '| ' + phone : ''}
+
+Perfil Profesional:
+${summary}
+
+Competencias Técnicas:
+${skills}
+
+Experiencia Laboral Detallada:
+${expText}`.trim();
+}
+
 exports.handler = async (event) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -106,7 +139,9 @@ exports.handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    const { action = 'generate_faqs', vacancy, message = '', history = [], cvBase = DEFAULT_MASTER_CV } = payload;
+    const { action = 'generate_faqs', vacancy, message = '', history = [], userProfile } = payload;
+    const candidateName = (userProfile && userProfile.nombre) || 'Arianna Clemente';
+    const cvBase = payload.cvBase || (userProfile ? formatProfileToCvBase(userProfile) : DEFAULT_MASTER_CV);
 
     if (!vacancy) {
       return {
@@ -130,9 +165,9 @@ exports.handler = async (event) => {
       }
 
       const prompt = `
-Eres un Líder Técnico y Reclutador de Élite que va a entrevistar a Arianna Clemente para el puesto de "${vacancy.puesto}" en la empresa "${vacancy.empresa}".
+Eres un Líder Técnico y Reclutador de Élite que va a entrevistar a ${candidateName} para el puesto de "${vacancy.puesto}" en la empresa "${vacancy.empresa}".
 
-Perfil de Arianna Clemente (CV):
+Perfil de ${candidateName} (CV):
 ${cvBase}
 
 Detalles de la Vacante:
@@ -143,8 +178,8 @@ Detalles de la Vacante:
 - Notas: ${vacancy.notas || ''}
 
 Tu tarea:
-Genera las 5 preguntas más probables y determinantes que le harán a Arianna en esta entrevista (2 técnicas de su stack, 1 sobre arquitectura/rendimiento, 1 de resolución de incidentes/STAR y 1 de ajuste cultural/remoto).
-Para cada pregunta, indica el motivo por el cual se la preguntan, la estrategia de respuesta recomendada conectando con sus proyectos reales (Gonzaga pasarela de pagos, Fe y Alegría Laravel/Chatbots, CIDE Moodle/OJS), y 3 viñetas con los puntos exactos que debe mencionar.
+Genera las 5 preguntas más probables y determinantes que le harán a ${candidateName} en esta entrevista (2 técnicas de su stack, 1 sobre arquitectura/rendimiento, 1 de resolución de incidentes/STAR y 1 de ajuste cultural/remoto).
+Para cada pregunta, indica el motivo por el cual se la preguntan, la estrategia de respuesta recomendada conectando con sus proyectos reales, y 3 viñetas con los puntos exactos que debe mencionar.
 
 Responde ÚNICAMENTE en formato JSON estrictamente válido:
 {
@@ -205,7 +240,7 @@ Responde ÚNICAMENTE en formato JSON estrictamente válido:
       }
 
       const systemInstruction = `
-Eres el Coach de Entrevistas Técnicas para Arianna Clemente, preparándola para una entrevista clave en "${vacancy.empresa}" como "${vacancy.puesto}".
+Eres el Coach de Entrevistas Técnicas para ${candidateName}, preparándole para una entrevista clave en "${vacancy.empresa}" como "${vacancy.puesto}".
 Conoces todo su perfil real:
 ${cvBase}
 
@@ -216,9 +251,9 @@ Vacante objetivo:
 
 Directrices de conversación:
 - Eres constructiva, profesional, empática pero rigurosa.
-- Ayuda a Arianna a brillar conectando sus proyectos reales (Gonzaga pagos, Laravel donaciones, Moodle/OJS, Chatbots Gemini) con lo que busca ${vacancy.empresa}.
-- Si ella te hace una pregunta, respóndele de forma concisa, práctica y con ejemplos concretos.
-- Si ella te pide simular una pregunta de entrevista, hazle una pregunta técnica o conductual desafiante y pídele su respuesta para darle feedback.
+- Ayuda a ${candidateName} a brillar conectando sus proyectos reales con lo que busca ${vacancy.empresa}.
+- Si te hace una pregunta, respóndele de forma concisa, práctica y con ejemplos concretos.
+- Si te pide simular una pregunta de entrevista, hazle una pregunta técnica o conductual desafiante y pídele su respuesta para darle feedback.
 - Mantén las respuestas en 2 a 4 párrafos claros y directos.
 `;
 

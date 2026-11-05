@@ -5,6 +5,118 @@
 
 const STORAGE_KEY = 'aryc_vacancies_data';
 const SETTINGS_KEY = 'aryc_app_settings';
+const PROFILE_KEY = 'aryc_master_profile';
+
+// Perfil Maestro de Arianna Clemente (Garantía de Preservación de Datos 100%)
+const ARIANNA_MASTER_PROFILE = {
+  nombre: 'Arianna Clemente',
+  titular: 'Full Stack Developer & Especialista en Soluciones TI / Web',
+  email: 'hello.ary.code@gmail.com',
+  telefono: '+58 412 000 0000',
+  ubicacion: 'Caracas, Venezuela (Disponible Remoto Internacional)',
+  enlaces: {
+    github: 'github.com/aryclemente',
+    linkedin: 'linkedin.com/in/aryclement',
+    portafolio: 'https://portfoliodevariannaclemente.framer.website/',
+    web: ''
+  },
+  resumen: 'Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas LMS Moodle, ecosistemas PHP/Laravel/JavaScript y pasarelas de pago transaccionales.',
+  habilidades: [
+    'PHP', 'Laravel', 'React', 'JavaScript', 'WordPress', 'WooCommerce',
+    'Moodle LMS', 'PostgreSQL', 'MySQL', 'Pasarelas de Pago', 'Supabase',
+    'Docker', 'REST APIs', 'Git', 'Google Gemini API', 'TailwindCSS', 'Core Web Vitals'
+  ],
+  educacion: [
+    {
+      titulo: 'Técnico Superior en Informática',
+      institucion: 'Instituto Universitario Jesús Obrero (IUJO)',
+      periodo: '2022 - 2025'
+    },
+    {
+      titulo: 'Técnico Medio en Programación Informática',
+      institucion: 'Instituto Técnico Jesús Obrero (ITJO)',
+      periodo: '2016 - 2019'
+    }
+  ],
+  experiencias: [
+    {
+      id: 'exp-gonzaga',
+      empresa: 'Colegio Gonzaga',
+      puesto: 'Desarrollador de sistemas',
+      periodo: 'Febrero 2026 - Octubre 2026',
+      ubicacion: 'Maracaibo / Remoto',
+      bullets: [
+        'Rediseño & UX/UI: Optimización de rendimiento web (WPO) y reestructuración completa de la arquitectura del portal colegiogonzaga.org.ve.',
+        'Pasarela Multicuenta: Desarrollo e integración de Gonzaga Admin para procesar Pago Móvil, Transferencias Bs, Mercantil C2P y Zinli USD (+900 transacciones mensuales).',
+        'Analítica & Automatización: Configuración de GA4, reportes en tiempo real, alertas de tesorería y re-consultas con la API Banco Mercantil.'
+      ]
+    },
+    {
+      id: 'exp-pastoral',
+      empresa: 'Centro de Espiritualidad y Pastoral Venezuela',
+      puesto: 'Diseñador Web & Desarrollador WordPress',
+      periodo: 'Marzo 2026 - Julio 2026',
+      ubicacion: 'Caracas, Venezuela',
+      bullets: [
+        'Arquitectura Web: Despliegue de plataforma nacional en WordPress, escalando de 7 a 11 páginas responsivas.',
+        'Sistema de Diseño Oasis: Tokens y componentes alineados al manual de identidad jesuita.',
+        'Componentes Dinámicos: Mapa interactivo SVG por estados y gestión responsiva de agenda pastoral.',
+        'Auditoría e Integraciones: Conexión con API de Meta, Custom Post Types (CPT) y manual técnico integral.'
+      ]
+    },
+    {
+      id: 'exp-ingedaca',
+      empresa: 'INGEDACA',
+      puesto: 'Asistente de Presidencia & TI',
+      periodo: 'Marzo 2026 - Abril 2026',
+      ubicacion: 'Caracas, Venezuela',
+      bullets: [
+        'Arquitectura Web: Auditoría, optimización y mantenimiento de sitios corporativos e infraestructura digital.',
+        'Gestión ERP: Estructuración e importación de datos en Odoo para optimizar procesos de procura y CRM.',
+        'Seguridad e IT: Gestión de accesos corporativos, contraseñas, políticas de seguridad y documentación de procesos técnicos.'
+      ]
+    },
+    {
+      id: 'exp-feyalegria-dev',
+      empresa: 'Fe y Alegría Venezuela',
+      puesto: 'Desarrolladora Full Stack',
+      periodo: 'Agosto 2025 - Noviembre 2025',
+      ubicacion: 'Caracas / Remoto',
+      bullets: [
+        'Sistema de Gestión de Donaciones: Desarrollo a medida en Laravel gestionando flujos transaccionales y usuarios seguros.',
+        'Despliegue & DevOps: Gestión de entornos de hosting, migraciones de base de datos SQL y estabilidad para campañas de alto tráfico.',
+        'Landing Page WordPress: Diseño de landing de alto rendimiento integrada con Google Analytics y SEO.'
+      ]
+    },
+    {
+      id: 'exp-cide',
+      empresa: 'CIDE Ecuador',
+      puesto: 'Desarrolladora WordPress & Administradora CMS',
+      periodo: 'Enero 2025 - Julio 2025',
+      ubicacion: 'Remoto Internacional',
+      bullets: [
+        'Plugin de WordPress personalizado: Consulta y validación de bases de datos en tiempo real.',
+        'LMS y Campus Virtual: Administración y optimización en LearnDash, Moodle y Eventin.',
+        'Ecosistema CMS Académico: Mantenimiento y actualización de DSpace y Open Journal Systems (OJS).'
+      ]
+    },
+    {
+      id: 'exp-feyalegria-bot',
+      empresa: 'Fe y Alegría Venezuela',
+      puesto: 'Pasante Desarrolladora de Chatbots con IA',
+      periodo: 'Abril 2025 - Junio 2025',
+      ubicacion: 'Caracas, Venezuela',
+      bullets: [
+        'Chatbot IA: Prototipo funcional con HTML5, CSS3, JavaScript e integración con la API de Google Gemini para procesamiento de lenguaje natural.'
+      ]
+    }
+  ],
+  foto_url: '',
+  foto_config: { forma: 'rounded', mostrar: true, zoom: 100 },
+  ai_provider: 'gemini',
+  ai_settings: {},
+  onboarding_completed: true
+};
 
 // 16 Vacantes iniciales extraídas del historial de Gemini de Arianna Clemente
 const SEED_VACANCIES = [
@@ -269,7 +381,9 @@ const SEED_VACANCIES = [
 class StorageService {
   constructor() {
     this.listeners = [];
+    this.profileListeners = [];
     this.cache = null;
+    this.profileCache = null;
     this.syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error' | 'offline'
     this.syncListeners = [];
     this.init();
@@ -277,15 +391,21 @@ class StorageService {
 
   init() {
     // 1. Cargar caché inmediato desde localStorage
-    const existing = localStorage.getItem(STORAGE_KEY);
+    const key = this.getStorageKey();
+    const existing = localStorage.getItem(key);
     if (!existing) {
-      this.cache = [...SEED_VACANCIES];
-      this.saveLocalVacancies(this.cache);
+      // Si no hay usuario autenticado, cargar semillas iniciales
+      if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
+        this.cache = [...SEED_VACANCIES];
+        this.saveLocalVacancies(this.cache);
+      } else {
+        this.cache = [];
+      }
     } else {
       try {
         this.cache = JSON.parse(existing);
       } catch (e) {
-        this.cache = [...SEED_VACANCIES];
+        this.cache = [];
       }
     }
 
@@ -294,6 +414,7 @@ class StorageService {
       this.syncStatus = 'syncing';
       this.notifySyncStatus();
       this.syncWithSupabase();
+      this.syncProfileWithSupabase();
     });
 
     window.addEventListener('offline', () => {
@@ -305,15 +426,146 @@ class StorageService {
     this.setupSupabaseIntegration();
   }
 
+  getStorageKey() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    return user ? `aryc_vacancies_${user.id}` : STORAGE_KEY;
+  }
+
+  getProfileKey() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    return user ? `aryc_profile_${user.id}` : PROFILE_KEY;
+  }
+
+  getProfile() {
+    if (this.profileCache) return this.profileCache;
+    const key = this.getProfileKey();
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        this.profileCache = JSON.parse(data);
+        return this.profileCache;
+      }
+    } catch (e) {
+      console.warn('Error leyendo perfil de localStorage:', e);
+    }
+
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    if (user) {
+      const fallback = {
+        ...ARIANNA_MASTER_PROFILE,
+        nombre: user.user_metadata?.nombre || user.email.split('@')[0],
+        email: user.email,
+        onboarding_completed: false
+      };
+      this.profileCache = fallback;
+      return fallback;
+    }
+
+    this.profileCache = { ...ARIANNA_MASTER_PROFILE };
+    return this.profileCache;
+  }
+
+  saveProfile(profile, syncToCloud = true) {
+    this.profileCache = { ...profile };
+    const key = this.getProfileKey();
+    try {
+      localStorage.setItem(key, JSON.stringify(this.profileCache));
+    } catch (e) {
+      console.error('Error guardando perfil local:', e);
+    }
+
+    this.notifyProfileSubscribers();
+
+    // Sincronizar con Supabase si está autenticado
+    if (syncToCloud && window.appSupabase && window.appSupabase.isAuthenticated()) {
+      const user = window.appSupabase.getUser();
+      const payload = {
+        id: user.id,
+        nombre: this.profileCache.nombre || '',
+        titular: this.profileCache.titular || '',
+        email: this.profileCache.email || user.email,
+        telefono: this.profileCache.telefono || '',
+        ubicacion: this.profileCache.ubicacion || '',
+        enlaces: this.profileCache.enlaces || {},
+        resumen: this.profileCache.resumen || '',
+        habilidades: this.profileCache.habilidades || [],
+        educacion: this.profileCache.educacion || [],
+        experiencias: this.profileCache.experiencias || [],
+        foto_url: this.profileCache.foto_url || '',
+        foto_config: this.profileCache.foto_config || {},
+        preferencias_empleo: this.profileCache.preferencias_empleo || {},
+        ai_provider: this.profileCache.ai_provider || 'gemini',
+        onboarding_completed: Boolean(this.profileCache.onboarding_completed)
+      };
+
+      window.appSupabase.client
+        .from('perfiles')
+        .upsert(payload, { onConflict: 'id' })
+        .then(({ error }) => {
+          if (error) console.error('Error sincronizando perfil con Supabase:', error);
+        });
+    }
+
+    return this.profileCache;
+  }
+
+  subscribeProfile(callback) {
+    if (typeof callback === 'function') {
+      this.profileListeners.push(callback);
+      callback(this.getProfile());
+    }
+  }
+
+  notifyProfileSubscribers() {
+    const profile = this.getProfile();
+    this.profileListeners.forEach(cb => {
+      try {
+        cb(profile);
+      } catch (e) {
+        console.error('Error in profile subscriber:', e);
+      }
+    });
+  }
+
+  async syncProfileWithSupabase() {
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
+    const user = window.appSupabase.getUser();
+    try {
+      const { data, error } = await window.appSupabase.client
+        .from('perfiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        this.saveProfile(data, false);
+      } else if (!data) {
+        // Primera vez del usuario: registrar perfil inicial
+        this.saveProfile(this.getProfile(), true);
+      }
+    } catch (e) {
+      console.warn('Error al sincronizar perfil desde Supabase:', e);
+    }
+  }
+
   setupSupabaseIntegration() {
     if (window.appSupabase) {
       window.appSupabase.onAuthStateChange(async (event, session) => {
         if (session?.user) {
+          // Usuario inició sesión: cambiar a su espacio de trabajo aislado
+          this.cache = null;
+          this.profileCache = null;
+          await this.syncProfileWithSupabase();
           await this.syncWithSupabase();
           this.setupRealtimeSubscription();
         } else {
+          // Usuario cerró sesión: limpiar caché en memoria
+          this.cache = null;
+          this.profileCache = null;
           this.syncStatus = 'local';
           this.notifySyncStatus();
+          this.notifySubscribers();
+          this.notifyProfileSubscribers();
         }
       });
     } else {
@@ -379,8 +631,11 @@ class StorageService {
         this.cache = data;
         this.saveLocalVacancies(data);
       } else if (this.cache && this.cache.length > 0) {
-        // El usuario está conectado pero la nube está vacía: podemos sugerir o migrar
-        console.info('Cuenta en la nube sin vacantes. Se puede migrar el almacenamiento local.');
+        // El usuario está conectado pero la nube está vacía
+        console.info('Cuenta en la nube sin vacantes.');
+      } else {
+        this.cache = [];
+        this.saveLocalVacancies(this.cache);
       }
 
       this.syncStatus = 'synced';
@@ -492,17 +747,27 @@ class StorageService {
   }
 
   getLocalVacancies() {
+    const key = this.getStorageKey();
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : SEED_VACANCIES;
+      const data = localStorage.getItem(key);
+      if (data) return JSON.parse(data);
     } catch (e) {
-      return SEED_VACANCIES;
+      console.warn('Error leyendo vacantes de localStorage:', e);
     }
+
+    // Si es un usuario autenticado y su almacenamiento local está vacío, devolver []
+    if (window.appSupabase && window.appSupabase.isAuthenticated()) {
+      return [];
+    }
+
+    // Modo invitado / demo: semillas de Arianna
+    return SEED_VACANCIES;
   }
 
   saveLocalVacancies(vacancies) {
+    const key = this.getStorageKey();
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(vacancies));
+      localStorage.setItem(key, JSON.stringify(vacancies));
     } catch (e) {
       console.error('Error guardando en localStorage:', e);
     }
@@ -635,9 +900,9 @@ class StorageService {
   getSettings() {
     try {
       const settings = localStorage.getItem(SETTINGS_KEY);
-      return settings ? JSON.parse(settings) : { geminiApiKey: '' };
+      return settings ? JSON.parse(settings) : { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
     } catch (e) {
-      return { geminiApiKey: '' };
+      return { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
     }
   }
 

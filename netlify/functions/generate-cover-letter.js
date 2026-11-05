@@ -44,46 +44,91 @@ Experiencia Laboral Real:
    - Configuración y despliegue de OJS (Open Journal Systems) y Moodle.
 `;
 
-function getHeuristicCoverLetter(vacancy) {
+function formatProfileToCvBase(userProfile) {
+  if (!userProfile) return DEFAULT_MASTER_CV;
+  const name = userProfile.nombre || 'Arianna Clemente';
+  const role = userProfile.titular || 'Full Stack Developer & Especialista TI / Web';
+  const email = userProfile.email || 'hello.ary.code@gmail.com';
+  const phone = userProfile.telefono || '';
+  const location = userProfile.ubicacion || 'Remoto';
+  const skills = Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : '';
+  const summary = userProfile.resumen || '';
+
+  let expText = '';
+  if (Array.isArray(userProfile.experiencias) && userProfile.experiencias.length > 0) {
+    expText = userProfile.experiencias.map((e, idx) => {
+      const bullets = Array.isArray(e.bullets) ? e.bullets.map(b => `   - ${b}`).join('\n') : '';
+      return `${idx + 1}. ${e.company || ''} | ${e.role || ''} (${e.period || ''}, ${e.location || ''}):\n${bullets}`;
+    }).join('\n\n');
+  }
+
+  return `Nombre: ${name}
+Rol Principal: ${role}
+Ubicación: ${location}
+Contacto: ${email} ${phone ? '| ' + phone : ''}
+
+Perfil Profesional:
+${summary}
+
+Competencias Técnicas:
+${skills}
+
+Experiencia Laboral Detallada:
+${expText}`.trim();
+}
+
+function getHeuristicCoverLetter(vacancy, userProfile) {
   const empresa = vacancy.empresa || 'Equipo de Selección';
   const puesto = vacancy.puesto || 'Desarrolladora Full Stack';
   const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos.slice(0, 3).join(', ') : 'desarrollo web, integración de APIs y buenas prácticas';
 
+  const candidateName = (userProfile && userProfile.nombre) || 'Arianna Clemente';
+  const candidateRole = (userProfile && userProfile.titular) || 'Full Stack Developer & Especialista TI / Web';
+  const candidateEmail = (userProfile && userProfile.email) || 'hello.ary.code@gmail.com';
+  const candidateLocation = (userProfile && userProfile.ubicacion) || 'Caracas, Venezuela • Disponible para Trabajo Remoto Internacional';
+  const candidateGithub = (userProfile && userProfile.enlaces && userProfile.enlaces.github) || 'https://github.com/aryclemente';
+  const candidateLinkedin = (userProfile && userProfile.enlaces && userProfile.enlaces.linkedin) || 'https://linkedin.com/in/aryclement';
+
+  let highlightProjects = 'A lo largo de mi trayectoria he liderado proyectos de alta responsabilidad transaccional y operativa. En el Colegio Gonzaga desarrollé e integré una pasarela de pagos multicuenta (+900 tx/mes), en Fe y Alegría construí un sistema integral en Laravel e integré IA con Google Gemini, y en CIDE desarrollé plugins personalizados en WordPress y gestioné plataformas LMS Moodle.';
+  if (userProfile && userProfile.resumen) {
+    highlightProjects = userProfile.resumen;
+  }
+
   const letter = `Estimado equipo de selección de ${empresa},
 
-Me dirijo a ustedes con gran entusiasmo para presentar mi postulación al puesto de ${puesto}. Cuento con una sólida trayectoria como Desarrolladora Full Stack y Especialista en Soluciones Web, combinando experiencia práctica en arquitecturas backend robustas, interfaces reactivas de alto rendimiento e integración de Inteligencia Artificial.
+Me dirijo a ustedes con gran entusiasmo para presentar mi postulación al puesto de ${puesto}. Cuento con una sólida trayectoria como ${candidateRole}, combinando experiencia práctica en arquitecturas backend robustas, interfaces reactivas de alto rendimiento e integración de soluciones tecnológicas avanzadas.
 
-A lo largo de mi trayectoria he liderado proyectos de alta responsabilidad transaccional y operativa. En el Colegio Gonzaga desarrollé e integré una pasarela de pagos multicuenta (Pago Móvil, transferencias bancarias, C2P Mercantil y Zinli USD) capaz de procesar más de 900 transacciones mensuales con conciliación automatizada. Asimismo, en Fe y Alegría construí un sistema integral de donaciones en Laravel con bases de datos relacionales seguras y diseñé chatbots inteligentes integrando APIs de Google Gemini, mientras que en CIDE desarrollé plugins personalizados de WordPress para validación de datos en tiempo real y gestioné plataformas LMS Moodle y revistas OJS a escala.
+${highlightProjects}
 
-Mi perfil encaja con los requerimientos de ${empresa}, especialmente en el dominio de ${reqs}. Me caracterizo por una rigurosa metodología de trabajo, mentalidad de entrega continua, optimización de Core Web Vitals y un compromiso genuino por resolver problemas complejos con código limpio y escalable en entornos remotos.
+Mi perfil encaja con los requerimientos de ${empresa}, especialmente en el dominio de ${reqs}. Me caracterizo por una rigurosa metodología de trabajo, mentalidad de entrega continua y un compromiso genuino por resolver problemas complejos con código limpio y escalable en entornos remotos.
 
 Agradezco de antemano el tiempo dedicado a revisar mi perfil. Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede generar valor inmediato para su equipo.
 
 Atentamente,
 
-Arianna Clemente
-Full Stack Developer & Especialista TI / Web
-Caracas, Venezuela • Disponible para Trabajo Remoto Internacional
-Email: hello.ary.code@gmail.com
-LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
+${candidateName}
+${candidateRole}
+${candidateLocation}
+Email: ${candidateEmail}
+LinkedIn: ${candidateLinkedin} | GitHub: ${candidateGithub}`;
 
-  const emailSubject = `Postulación: ${puesto} - Arianna Clemente | Full Stack Developer`;
+  const emailSubject = `Postulación: ${puesto} - ${candidateName} | ${candidateRole}`;
   
   const emailBody = `Estimado equipo de ${empresa},
 
 Espero que se encuentren muy bien. Les escribo para postularme a la vacante de ${puesto}.
 
-Cuento con experiencia comprobada en desarrollo Full Stack, integración de pasarelas de pago y APIs (Laravel, PHP, JavaScript, React, SQL), arquitecturas escalables y soluciones con Inteligencia Artificial.
+Cuento con experiencia comprobada en desarrollo de software, integración de APIs, arquitecturas escalables y soluciones orientadas a resultados.
 
 Adjunto a este correo mi Currículum Vitae adaptado para la posición. También pueden explorar mis proyectos en producción y código fuente en mis perfiles profesionales:
-• GitHub: https://github.com/aryclemente
-• LinkedIn: https://linkedin.com/in/aryclement
+• GitHub: ${candidateGithub}
+• LinkedIn: ${candidateLinkedin}
 
 Quedo a su disposición para conversar en una entrevista cuando les sea más conveniente.
 
 Saludos cordiales,
-Arianna Clemente
-hello.ary.code@gmail.com`;
+${candidateName}
+${candidateEmail}`;
 
   return { letter, emailSubject, emailBody };
 }
@@ -106,7 +151,9 @@ exports.handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    const { vacancy, cvBase = DEFAULT_MASTER_CV } = payload;
+    const { vacancy, userProfile } = payload;
+    const candidateName = (userProfile && userProfile.nombre) || 'Arianna Clemente';
+    const cvBase = payload.cvBase || (userProfile ? formatProfileToCvBase(userProfile) : DEFAULT_MASTER_CV);
 
     if (!vacancy) {
       return {
@@ -120,7 +167,7 @@ exports.handler = async (event) => {
     const apiKey = process.env.GEMINI_API_KEY || headers['x-gemini-api-key'] || headers['X-Gemini-Api-Key'];
 
     if (!apiKey) {
-      const fallback = getHeuristicCoverLetter(vacancy);
+      const fallback = getHeuristicCoverLetter(vacancy, userProfile);
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -131,11 +178,11 @@ exports.handler = async (event) => {
     const prompt = `
 Eres una redactora experta en empleabilidad técnica y estratega de carrera.
 Tu objetivo es redactar:
-1. Una Carta de Presentación (Cover Letter) profesional, persuasiva y personalizada para Arianna Clemente.
+1. Una Carta de Presentación (Cover Letter) profesional, persuasiva y personalizada para ${candidateName}.
 2. El Asunto de Correo Electrónico ideal.
 3. El Cuerpo de Correo Electrónico (Email Pitch) breve para acompañar el CV y Portafolio.
 
-Perfil Real de Arianna Clemente:
+Perfil Real de ${candidateName}:
 ${cvBase}
 
 Vacante a la que postula:
@@ -148,11 +195,11 @@ Vacante a la que postula:
 Instrucciones Estrictas:
 1. La carta debe tener 4 párrafos claros y contundentes:
    - Párrafo 1: Saludo, mención del puesto en ${vacancy.empresa} y propuesta de valor inicial.
-   - Párrafo 2: Casos de éxito y proyectos reales más relevantes de Arianna que conecten con la vacante (ej: pasarela multicuenta en Colegio Gonzaga +900 tx/mes, sistema de donaciones en Laravel en Fe y Alegría, plugins en WordPress/Moodle en CIDE, o chatbots con Gemini).
+   - Párrafo 2: Casos de éxito y proyectos reales más relevantes de ${candidateName} que conecten con la vacante.
    - Párrafo 3: Por qué encaja con la cultura y requisitos técnicos de ${vacancy.empresa}.
    - Párrafo 4: Cierre profesional y disponibilidad para entrevista.
 2. El Asunto del Email debe ser profesional y directo.
-3. El Cuerpo del Email debe ser conciso (máximo 12 líneas), directo al grano, mencionando el CV adjunto y enlaces a GitHub y LinkedIn.
+3. El Cuerpo del Email debe ser conciso (máximo 12 líneas), directo al grano, mencionando el CV adjunto y enlaces profesionales.
 
 Responde ÚNICAMENTE en formato JSON estrictamente válido:
 {

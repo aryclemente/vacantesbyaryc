@@ -1218,23 +1218,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function generateLocalTailoredCv(vacancy) {
     const empresa = vacancy.empresa || 'la empresa';
     const puesto = vacancy.puesto || 'Full Stack Developer';
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
     const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
       ? vacancy.requisitos
-      : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git'];
+      : (currentProfile.habilidades && currentProfile.habilidades.length > 0 ? currentProfile.habilidades.slice(0, 6) : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git']);
+
+    const profileExperiences = (currentProfile.experiencias && currentProfile.experiencias.length > 0)
+      ? currentProfile.experiencias.map(exp => ({
+          company: exp.empresa || exp.company,
+          role: exp.puesto || exp.role,
+          period: exp.periodo || exp.period,
+          location: exp.ubicacion || exp.location || 'Remoto',
+          bullets: exp.bullets || []
+        }))
+      : MASTER_CV.experiences;
 
     return {
-      role: `${puesto} | Arianna Clemente`,
-      summary: `Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas y diseño de flujos transaccionales (+900 tx/mes). Dominio en integración de modelos de Inteligencia Artificial (Google Gemini API), optimización de rendimiento (WPO) y despliegues continuos con Git, Netlify y Supabase.`,
-      experiences: MASTER_CV.experiences.map(exp => ({
-        company: exp.company,
-        role: exp.role,
-        period: exp.period,
-        location: exp.location,
-        bullets: [...exp.bullets]
-      })),
+      role: `${puesto} | ${currentProfile.nombre || 'Arianna Clemente'}`,
+      summary: currentProfile.resumen || MASTER_CV.summary,
+      experiences: profileExperiences,
       skills: {
         relevant: `${reqs.join(', ')}`,
-        core: 'JavaScript (ES6+), React, PHP, Laravel, Python, PostgreSQL (RLS), MySQL, REST APIs, Git/GitHub, Netlify, Supabase Cloud.',
+        core: currentProfile.habilidades ? currentProfile.habilidades.join(', ') : MASTER_CV.skills.core,
         methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa.'
       }
     };
@@ -1256,9 +1261,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyTailoredCvData(data, vacancy) {
     cvActiveData = { ...data };
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
 
-    cvHeaderRole.textContent = data.role || `${vacancy.puesto || 'Full Stack Developer'} | Arianna Clemente`;
-    cvSummaryText.textContent = data.summary || MASTER_CV.summary;
+    const cvHeaderName = document.getElementById('cvHeaderName');
+    const cvHeaderContacts = document.getElementById('cvHeaderContacts');
+
+    if (cvHeaderName) {
+      cvHeaderName.textContent = currentProfile.nombre || 'Arianna Clemente';
+    }
+
+    if (cvHeaderContacts) {
+      const links = currentProfile.enlaces || {};
+      const linksStr = [links.github, links.linkedin, links.portafolio].filter(Boolean).join(' • ');
+      cvHeaderContacts.innerHTML = `
+        <div>${escapeHtml(currentProfile.ubicacion || 'Remoto Internacional')}</div>
+        <div>${escapeHtml(currentProfile.email || 'hello.ary.code@gmail.com')}${currentProfile.telefono ? ` &bull; ${escapeHtml(currentProfile.telefono)}` : ''}</div>
+        <div>${escapeHtml(linksStr || '')}</div>
+      `;
+    }
+
+    cvHeaderRole.textContent = data.role || `${vacancy.puesto || currentProfile.titular || 'Full Stack Developer'} | ${currentProfile.nombre || 'Arianna Clemente'}`;
+    cvSummaryText.textContent = data.summary || currentProfile.resumen || MASTER_CV.summary;
 
     renderCvExperiences();
 
@@ -1275,9 +1298,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const expContainer = document.getElementById('cvExperienceContainer');
     if (!expContainer || !cvActiveData) return;
 
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+    const profileExpList = (currentProfile.experiencias && currentProfile.experiencias.length > 0)
+      ? currentProfile.experiencias.map(exp => ({
+          company: exp.empresa || exp.company,
+          role: exp.puesto || exp.role,
+          period: exp.periodo || exp.period,
+          location: exp.ubicacion || exp.location || 'Remoto',
+          bullets: exp.bullets || []
+        }))
+      : MASTER_CV.experiences;
+
     const allExperiences = Array.isArray(cvActiveData.experiences) && cvActiveData.experiences.length > 0
       ? cvActiveData.experiences
-      : MASTER_CV.experiences;
+      : profileExpList;
 
     const currentVacancyId = cvVacancySelect ? cvVacancySelect.value : 'general';
     const hiddenList = getHiddenExperiences(currentVacancyId);
@@ -1543,17 +1577,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const headers = { 'Content-Type': 'application/json' };
       if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
 
+      const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
       let res = await fetch('/api/tailor-cv', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ vacancy, mode: 'suggest-summaries' })
+        body: JSON.stringify({ vacancy, userProfile: currentProfile, mode: 'suggest-summaries' })
       }).catch(() => null);
 
       if (!res || !res.ok) {
         res = await fetch('/.netlify/functions/tailor-cv', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ vacancy, mode: 'suggest-summaries' })
+          body: JSON.stringify({ vacancy, userProfile: currentProfile, mode: 'suggest-summaries' })
         }).catch(() => null);
       }
 
@@ -1750,17 +1786,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = { 'Content-Type': 'application/json' };
         if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
 
+        const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
         let res = await fetch('/api/tailor-cv', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ vacancy })
+          body: JSON.stringify({ vacancy, userProfile: currentProfile })
         }).catch(() => null);
 
         if (!res || !res.ok) {
           res = await fetch('/.netlify/functions/tailor-cv', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ vacancy })
+            body: JSON.stringify({ vacancy, userProfile: currentProfile })
           }).catch(() => null);
         }
 
@@ -1931,17 +1969,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const headers = { 'Content-Type': 'application/json' };
       if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
 
+      const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
       let res = await fetch('/api/generate-cover-letter', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ vacancy })
+        body: JSON.stringify({ vacancy, userProfile: currentProfile })
       }).catch(() => null);
 
       if (!res || !res.ok) {
         res = await fetch('/.netlify/functions/generate-cover-letter', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ vacancy })
+          body: JSON.stringify({ vacancy, userProfile: currentProfile })
         }).catch(() => null);
       }
 
@@ -2134,17 +2174,19 @@ LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
       const headers = { 'Content-Type': 'application/json' };
       if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
 
+      const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
       let res = await fetch('/api/generate-cover-letter', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ vacancy })
+        body: JSON.stringify({ vacancy, userProfile: currentProfile })
       }).catch(() => null);
 
       if (!res || !res.ok) {
         res = await fetch('/.netlify/functions/generate-cover-letter', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ vacancy })
+          body: JSON.stringify({ vacancy, userProfile: currentProfile })
         }).catch(() => null);
       }
 
@@ -2362,17 +2404,19 @@ hello.ary.code@gmail.com`;
       const headers = { 'Content-Type': 'application/json' };
       if (localApiKey) headers['x-gemini-api-key'] = localApiKey;
 
+      const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
       let res = await fetch('/api/interview-coach', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ action: 'generate_faqs', vacancy })
+        body: JSON.stringify({ action: 'generate_faqs', vacancy, userProfile: currentProfile })
       }).catch(() => null);
 
       if (!res || !res.ok) {
         res = await fetch('/.netlify/functions/interview-coach', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ action: 'generate_faqs', vacancy })
+          body: JSON.stringify({ action: 'generate_faqs', vacancy, userProfile: currentProfile })
         }).catch(() => null);
       }
 
@@ -2506,12 +2550,15 @@ hello.ary.code@gmail.com`;
         content: m.content
       }));
 
+      const currentProfile = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : null;
+
       let res = await fetch('/api/interview-coach', {
         method: 'POST',
         headers,
         body: JSON.stringify({
           action: 'chat',
           vacancy: currentCoachVacancy,
+          userProfile: currentProfile,
           message: text,
           history: historyToSend
         })
@@ -2524,6 +2571,7 @@ hello.ary.code@gmail.com`;
           body: JSON.stringify({
             action: 'chat',
             vacancy: currentCoachVacancy,
+            userProfile: currentProfile,
             message: text,
             history: historyToSend
           })
@@ -2905,9 +2953,366 @@ hello.ary.code@gmail.com`;
     populateCvSelector();
   });
 
+  // =========================================================================
+  // User Profile & Settings Module (Multi-Tenant & Smart Onboarding)
+  // =========================================================================
+  function initUserProfileAndSettings() {
+    function updateHeaderProfileUI() {
+      const profile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+      const headerUserName = document.getElementById('headerUserName');
+      const headerUserAvatar = document.getElementById('headerUserAvatar');
+
+      if (headerUserName) {
+        headerUserName.textContent = profile.nombre ? profile.nombre.split(' ')[0] : 'Mi Perfil';
+      }
+      if (headerUserAvatar) {
+        const initials = profile.nombre
+          ? profile.nombre.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
+          : 'AC';
+        headerUserAvatar.textContent = initials;
+      }
+    }
+
+    // Settings Modal Controller
+    const selectAiProvider = document.getElementById('selectAiProvider');
+    const labelAiApiKey = document.getElementById('labelAiApiKey');
+
+    if (btnSettings && settingsModal) {
+      btnSettings.addEventListener('click', () => {
+        const settings = window.appStorage.getSettings();
+        if (selectAiProvider) selectAiProvider.value = settings.aiProvider || 'gemini';
+        if (inputApiKey) inputApiKey.value = settings.aiApiKey || settings.geminiApiKey || '';
+        settingsModal.classList.add('open');
+      });
+    }
+
+    if (btnCloseSettingsModal && settingsModal) {
+      btnCloseSettingsModal.addEventListener('click', () => {
+        settingsModal.classList.remove('open');
+      });
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.classList.remove('open');
+      });
+    }
+
+    if (selectAiProvider) {
+      selectAiProvider.addEventListener('change', () => {
+        const prov = selectAiProvider.value;
+        const placeholders = {
+          gemini: 'AIzaSy... (Google AI Studio)',
+          claude: 'sk-ant-api03-... (Anthropic)',
+          kimi: 'sk-... (Moonshot AI)',
+          openai: 'sk-proj-... (OpenAI)',
+          openrouter: 'sk-or-v1-... (OpenRouter)'
+        };
+        if (inputApiKey) inputApiKey.placeholder = placeholders[prov] || 'Ingresa tu API Key...';
+        if (labelAiApiKey) labelAiApiKey.textContent = `API Key de ${selectAiProvider.options[selectAiProvider.selectedIndex].text}`;
+      });
+    }
+
+    if (btnSaveSettings) {
+      btnSaveSettings.addEventListener('click', () => {
+        const provider = selectAiProvider ? selectAiProvider.value : 'gemini';
+        const apiKey = inputApiKey ? inputApiKey.value.trim() : '';
+
+        window.appStorage.saveSettings({
+          aiProvider: provider,
+          aiApiKey: apiKey,
+          geminiApiKey: apiKey
+        });
+
+        showToast('Configuración de IA guardada exitosamente', 'success');
+        if (settingsModal) settingsModal.classList.remove('open');
+      });
+    }
+
+    if (btnExportJson) {
+      btnExportJson.addEventListener('click', () => {
+        window.appStorage.exportDataJson();
+      });
+    }
+
+    if (btnTriggerImport && importFileInput) {
+      btnTriggerImport.addEventListener('click', () => {
+        importFileInput.click();
+      });
+
+      importFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const success = window.appStorage.importDataJson(evt.target.result);
+          if (success) {
+            showToast('Postulaciones importadas correctamente', 'success');
+            if (settingsModal) settingsModal.classList.remove('open');
+          } else {
+            showToast('Formato JSON no válido', 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    if (btnResetSeed) {
+      btnResetSeed.addEventListener('click', () => {
+        if (confirm('¿Restablecer el tablero a las vacantes de ejemplo?')) {
+          window.appStorage.resetToSeedData();
+          showToast('Tablero restablecido', 'info');
+          if (settingsModal) settingsModal.classList.remove('open');
+        }
+      });
+    }
+
+    // User Profile Modal & Smart Dropzone
+    const profileModal = document.getElementById('profileModal');
+    const btnOpenProfileModal = document.getElementById('btnOpenProfileModal');
+    const btnCloseProfileModal = document.getElementById('btnCloseProfileModal');
+    const btnUploadProfileFile = document.getElementById('btnUploadProfileFile');
+    const profileFileInput = document.getElementById('profileFileInput');
+    const btnTogglePasteProfile = document.getElementById('btnTogglePasteProfile');
+    const pasteProfileArea = document.getElementById('pasteProfileArea');
+    const profilePasteTextarea = document.getElementById('profilePasteTextarea');
+    const btnProcessPastedProfile = document.getElementById('btnProcessPastedProfile');
+    const profileExtractLoading = document.getElementById('profileExtractLoading');
+    const btnSaveProfile = document.getElementById('btnSaveProfile');
+    const btnResetToAriannaProfile = document.getElementById('btnResetToAriannaProfile');
+    const btnAddEmptyExp = document.getElementById('btnAddEmptyExp');
+
+    // Form inputs
+    const profNombre = document.getElementById('profNombre');
+    const profTitular = document.getElementById('profTitular');
+    const profEmail = document.getElementById('profEmail');
+    const profTelefono = document.getElementById('profTelefono');
+    const profUbicacion = document.getElementById('profUbicacion');
+    const profLinkedin = document.getElementById('profLinkedin');
+    const profGithub = document.getElementById('profGithub');
+    const profResumen = document.getElementById('profResumen');
+    const profHabilidades = document.getElementById('profHabilidades');
+    const profSkillsChips = document.getElementById('profSkillsChips');
+    const profExpList = document.getElementById('profExpList');
+    const profExpCount = document.getElementById('profExpCount');
+
+    let currentFormExperiences = [];
+
+    function populateProfileForm(profile) {
+      if (!profile) return;
+      if (profNombre) profNombre.value = profile.nombre || '';
+      if (profTitular) profTitular.value = profile.titular || '';
+      if (profEmail) profEmail.value = profile.email || '';
+      if (profTelefono) profTelefono.value = profile.telefono || '';
+      if (profUbicacion) profUbicacion.value = profile.ubicacion || '';
+      if (profLinkedin) profLinkedin.value = profile.enlaces?.linkedin || '';
+      if (profGithub) profGithub.value = profile.enlaces?.github || '';
+      if (profResumen) profResumen.value = profile.resumen || '';
+      if (profHabilidades) profHabilidades.value = (profile.habilidades || []).join(', ');
+
+      renderFormSkillsChips(profile.habilidades || []);
+
+      currentFormExperiences = Array.isArray(profile.experiencias)
+        ? JSON.parse(JSON.stringify(profile.experiencias))
+        : [];
+      renderFormExperiences();
+    }
+
+    function renderFormSkillsChips(skills) {
+      if (!profSkillsChips) return;
+      profSkillsChips.innerHTML = skills.map(skill => `
+        <span class="job-tag" style="background:rgba(77,23,214,0.08); color:var(--primary); font-weight:700;">
+          ${escapeHtml(skill)}
+        </span>
+      `).join('');
+    }
+
+    if (profHabilidades) {
+      profHabilidades.addEventListener('input', () => {
+        const raw = profHabilidades.value.split(',').map(s => s.trim()).filter(Boolean);
+        renderFormSkillsChips(raw);
+      });
+    }
+
+    function renderFormExperiences() {
+      if (!profExpList) return;
+      if (profExpCount) profExpCount.textContent = currentFormExperiences.length;
+
+      if (currentFormExperiences.length === 0) {
+        profExpList.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:1rem; border:1px dashed var(--border-slate); border-radius:6px;">
+            No hay experiencias añadidas aún. Sube un archivo Profile.md o añade una manualmente.
+          </div>
+        `;
+        return;
+      }
+
+      profExpList.innerHTML = currentFormExperiences.map((exp, idx) => `
+        <div style="background:var(--surface-container-low); border:1px solid var(--border-slate); border-radius:6px; padding:0.6rem; font-size:0.8125rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
+            <div>
+              <strong>${escapeHtml(exp.empresa || exp.company || 'Empresa')}</strong> &ndash; 
+              <span>${escapeHtml(exp.puesto || exp.role || 'Puesto')}</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-remove-form-exp" data-idx="${idx}" style="padding:0.15rem 0.4rem; font-size:0.7rem; color:var(--error);" title="Eliminar experiencia">
+              &times;
+            </button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">
+            ${escapeHtml(exp.periodo || exp.period || '')} &bull; ${escapeHtml(exp.ubicacion || exp.location || '')}
+          </div>
+          <ul style="padding-left:1.1rem; margin:0; font-size:0.75rem; color:var(--text-dark-secondary);">
+            ${(exp.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+
+      profExpList.querySelectorAll('.btn-remove-form-exp').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.idx, 10);
+          currentFormExperiences.splice(idx, 1);
+          renderFormExperiences();
+        });
+      });
+    }
+
+    if (btnAddEmptyExp) {
+      btnAddEmptyExp.addEventListener('click', () => {
+        const empresa = prompt('Nombre de la Empresa o Proyecto:');
+        if (!empresa) return;
+        const puesto = prompt('Cargo o Rol desempeñado:', 'Desarrollador de Software');
+        const logro = prompt('Describe tu logro o responsabilidad principal:');
+
+        currentFormExperiences.unshift({
+          id: 'exp-' + Date.now(),
+          empresa,
+          puesto: puesto || 'Desarrollador',
+          periodo: '2025 - Presente',
+          ubicacion: 'Remoto',
+          bullets: logro ? [logro] : ['Desarrollo e implementación técnica.']
+        });
+
+        renderFormExperiences();
+      });
+    }
+
+    if (btnOpenProfileModal && profileModal) {
+      btnOpenProfileModal.addEventListener('click', () => {
+        const profile = window.appStorage.getProfile();
+        populateProfileForm(profile);
+        profileModal.classList.add('open');
+      });
+    }
+
+    if (btnCloseProfileModal && profileModal) {
+      btnCloseProfileModal.addEventListener('click', () => {
+        profileModal.classList.remove('open');
+      });
+      profileModal.addEventListener('click', (e) => {
+        if (e.target === profileModal) profileModal.classList.remove('open');
+      });
+    }
+
+    if (btnTogglePasteProfile && pasteProfileArea) {
+      btnTogglePasteProfile.addEventListener('click', () => {
+        pasteProfileArea.style.display = pasteProfileArea.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    async function processProfileText(text, filename) {
+      if (!text || !text.trim()) {
+        showToast('El texto o archivo está vacío', 'error');
+        return;
+      }
+
+      if (profileExtractLoading) profileExtractLoading.style.display = 'flex';
+
+      try {
+        const extracted = await window.aiParser.parseProfileFromText(text, filename);
+        if (extracted) {
+          populateProfileForm(extracted);
+          showToast(`¡Perfil de "${extracted.nombre}" extraído correctamente!`, 'success');
+          if (pasteProfileArea) pasteProfileArea.style.display = 'none';
+        }
+      } catch (err) {
+        showToast('Error procesando perfil: ' + err.message, 'error');
+      } finally {
+        if (profileExtractLoading) profileExtractLoading.style.display = 'none';
+      }
+    }
+
+    if (btnProcessPastedProfile && profilePasteTextarea) {
+      btnProcessPastedProfile.addEventListener('click', () => {
+        processProfileText(profilePasteTextarea.value, 'PegadoManual.md');
+      });
+    }
+
+    if (btnUploadProfileFile && profileFileInput) {
+      btnUploadProfileFile.addEventListener('click', () => {
+        profileFileInput.click();
+      });
+
+      profileFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          processProfileText(evt.target.result, file.name);
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    if (btnResetToAriannaProfile) {
+      btnResetToAriannaProfile.addEventListener('click', () => {
+        if (confirm('¿Cargar el perfil maestro predeterminado de Arianna Clemente?')) {
+          populateProfileForm(ARIANNA_MASTER_PROFILE);
+          showToast('Perfil de Arianna Clemente cargado en el formulario', 'info');
+        }
+      });
+    }
+
+    if (btnSaveProfile) {
+      btnSaveProfile.addEventListener('click', () => {
+        const rawSkills = profHabilidades ? profHabilidades.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        const updatedProfile = {
+          nombre: profNombre ? profNombre.value.trim() : 'Usuario',
+          titular: profTitular ? profTitular.value.trim() : 'Desarrollador Tech',
+          email: profEmail ? profEmail.value.trim() : '',
+          telefono: profTelefono ? profTelefono.value.trim() : '',
+          ubicacion: profUbicacion ? profUbicacion.value.trim() : '',
+          enlaces: {
+            linkedin: profLinkedin ? profLinkedin.value.trim() : '',
+            github: profGithub ? profGithub.value.trim() : '',
+            portafolio: '',
+            web: ''
+          },
+          resumen: profResumen ? profResumen.value.trim() : '',
+          habilidades: rawSkills,
+          experiencias: currentFormExperiences,
+          onboarding_completed: true
+        };
+
+        window.appStorage.saveProfile(updatedProfile, true);
+        showToast('¡Perfil guardado y sincronizado exitosamente!', 'success');
+        updateHeaderProfileUI();
+        updateCvPreview();
+        if (window.jobRadar) window.jobRadar.render();
+        if (profileModal) profileModal.classList.remove('open');
+      });
+    }
+
+    // Subscribe to profile changes
+    window.appStorage.subscribeProfile(() => {
+      updateHeaderProfileUI();
+    });
+
+    updateHeaderProfileUI();
+  }
+
   // Initial load
   renderKanban();
   renderTable();
   initCvPhoto();
   initCvTemplate();
+  initUserProfileAndSettings();
 });

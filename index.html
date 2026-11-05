@@ -52,6 +52,10 @@
           </svg>
           <span>Nueva Vacante</span>
         </button>
+        <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro">
+          <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;">AC</span>
+          <span id="headerUserName">Mi Perfil</span>
+        </button>
         <button class="btn btn-outline cloud-sync-btn" id="btnOpenCloudModal" title="Sincronización en la Nube">
           <span class="cloud-status-dot" id="headerCloudDot"></span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -405,10 +409,10 @@
               <img id="cvPhotoImg" src="" alt="Arianna Clemente" class="cv-photo-avatar pos-top">
             </div>
             <div class="cv-header-info">
-              <div class="cv-name">Arianna Clemente</div>
+              <div class="cv-name" id="cvHeaderName">Arianna Clemente</div>
               <div class="cv-role" id="cvHeaderRole">Full Stack Developer &amp; Especialista TI / Web</div>
             </div>
-            <div class="cv-contacts">
+            <div class="cv-contacts" id="cvHeaderContacts">
               <div>Caracas, Venezuela &bull; Remoto Internacional</div>
               <div>hello.ary.code@gmail.com</div>
               <div>github.com/aryclemente &bull; linkedin.com/in/aryclement</div>
@@ -878,11 +882,19 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Google Gemini API Key (Opcional)</label>
-          <input type="password" id="inputApiKey" class="form-control" placeholder="AIzaSy...">
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">
-            Tu clave se guarda <strong>únicamente en tu navegador</strong> (privado y seguro). Si la agregas, podrás usar los modelos multimodales de Google AI para extraer capturas de pantalla de alta precisión.
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary); font-weight:700;">Obtener API Key gratuita &rarr;</a>
+          <label class="form-label">Proveedor de Inteligencia Artificial (BYOK)</label>
+          <select id="selectAiProvider" class="form-control" style="margin-bottom:0.75rem; font-size:0.875rem;">
+            <option value="gemini">Google Gemini (Gemini 2.5 Flash / Pro)</option>
+            <option value="claude">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
+            <option value="kimi">Kimi / Moonshot AI (Moonshot v1)</option>
+            <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+            <option value="openrouter">OpenRouter (DeepSeek / Multi-LLM)</option>
+          </select>
+
+          <label class="form-label" id="labelAiApiKey">API Key del Proveedor Seleccionado</label>
+          <input type="password" id="inputApiKey" class="form-control" placeholder="AIzaSy... / sk-ant-... / sk-...">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;" id="aiProviderHelpText">
+            Tu clave se guarda <strong>únicamente en tu navegador</strong> (privado y seguro). Si no tienes clave configurada, la aplicación opera al 100% con el motor heurístico local sin coste.
           </div>
         </div>
 
@@ -1369,6 +1381,150 @@
 
       <div class="modal-footer" style="display:flex; justify-content:flex-end;">
         <button class="btn btn-primary" id="btnApplyPhotoConfig">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       User Profile & Smart Onboarding Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-card" style="max-width: 780px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.875rem;">
+            👤
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.15rem;">Mi Perfil Profesional & CV Maestro</h3>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Gestiona tu identidad, trayectoria y stack para personalizar tu CV y el Radar de Empleos</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseProfileModal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="max-height: calc(85vh - 120px); overflow-y: auto;">
+        
+        <!-- Smart Dropzone: Cero Formularios Gigantes -->
+        <div class="profile-dropzone-card" style="border: 2px dashed var(--primary); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; background: rgba(77, 23, 214, 0.03); margin-bottom: 1.5rem;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem; color: var(--text-dark-primary);">
+            Importación Automática de Perfil
+          </h4>
+          <p style="font-size: 0.8125rem; color: var(--text-muted); max-width: 520px; margin: 0 auto 1rem;">
+            Suelta tu archivo <strong>Profile.md</strong> (Markdown) o la <strong>descarga en PDF de tu perfil de LinkedIn</strong>. La IA estructurará tu perfil en 10 segundos sin formularios manuales.
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="btnUploadProfileFile" style="padding: 0.5rem 1.1rem; font-size: 0.8125rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Subir Archivo (.md, .pdf, .txt)</span>
+            </button>
+            <input type="file" id="profileFileInput" accept=".md,.pdf,.txt" style="display:none;">
+            
+            <button class="btn btn-outline" id="btnTogglePasteProfile" style="padding: 0.5rem 0.9rem; font-size: 0.8125rem;">
+              <span>📝 Pegar Texto / Markdown</span>
+            </button>
+          </div>
+
+          <!-- Collapsible text area for paste -->
+          <div id="pasteProfileArea" style="display:none; margin-top: 1rem; text-align: left;">
+            <textarea id="profilePasteTextarea" class="form-control" rows="5" placeholder="Pega aquí el contenido de tu CV o perfil en Markdown o texto plano..." style="font-size: 0.8125rem; font-family: monospace;"></textarea>
+            <div style="display:flex; justify-content:flex-end; margin-top:0.5rem;">
+              <button class="btn btn-primary" id="btnProcessPastedProfile" style="padding:0.4rem 0.9rem; font-size:0.75rem;">
+                Procesar e Importar
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading state -->
+          <div id="profileExtractLoading" style="display:none; margin-top:1rem; align-items:center; justify-content:center; gap:0.5rem; font-size:0.8125rem; color:var(--primary); font-weight:700;">
+            <span class="live-pulse"><span class="live-pulse-core" style="background:var(--primary);"></span></span>
+            <span>Extrayendo experiencia, stack y datos de perfil...</span>
+          </div>
+        </div>
+
+        <!-- Perfil Form / Review Card -->
+        <div id="profileFormCard">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+            <h4 style="font-size: 0.9375rem; margin:0; color:var(--text-dark-primary);">Datos del Perfil</h4>
+            <span class="badge" id="profileExtractionBadge" style="background:rgba(0,210,180,0.15); color:#008270; font-size:0.7rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:999px;">
+              ✓ Activo
+            </span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">Nombre Completo</label>
+              <input type="text" id="profNombre" class="form-control" placeholder="Ej. Juan Pérez">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">Titular / Cargo Objetivo</label>
+              <input type="text" id="profTitular" class="form-control" placeholder="Ej. Senior Full Stack Engineer">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">Correo Electrónico</label>
+              <input type="email" id="profEmail" class="form-control" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">Teléfono</label>
+              <input type="text" id="profTelefono" class="form-control" placeholder="+34 600 000 000">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">Ubicación</label>
+              <input type="text" id="profUbicacion" class="form-control" placeholder="Madrid, España / Remoto">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">LinkedIn (URL o usuario)</label>
+              <input type="text" id="profLinkedin" class="form-control" placeholder="linkedin.com/in/usuario">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.75rem;">GitHub / Portafolio</label>
+              <input type="text" id="profGithub" class="form-control" placeholder="github.com/usuario">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label" style="font-size:0.75rem;">Resumen Profesional</label>
+            <textarea id="profResumen" class="form-control" rows="3" placeholder="Describe tu trayectoria, fortalezas y valor..." style="font-size:0.8125rem;"></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label" style="font-size:0.75rem;">Habilidades Técnicas & Stack (Separadas por coma)</label>
+            <input type="text" id="profHabilidades" class="form-control" placeholder="JavaScript, React, Python, PostgreSQL, Docker, Git">
+            <div id="profSkillsChips" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.4rem;"></div>
+          </div>
+
+          <div style="border-top:1px solid var(--border-slate); padding-top:0.75rem; margin-top:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <label class="form-label" style="margin:0; font-size:0.8125rem; font-weight:700;">Experiencias Laborales Registradas (<span id="profExpCount">0</span>)</label>
+              <button type="button" class="btn btn-outline" id="btnAddEmptyExp" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+                + Añadir Experiencia
+              </button>
+            </div>
+            <div id="profExpList" style="display:flex; flex-direction:column; gap:0.6rem; max-height:220px; overflow-y:auto; padding:0.25rem 0;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.75rem; color:var(--text-muted);" id="profileSaveStatus">Sincronizado con Supabase Cloud</span>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn btn-outline" id="btnResetToAriannaProfile" style="font-size:0.75rem;" title="Restablecer perfil predeterminado de Arianna">
+            Cargar Perfil Arianna
+          </button>
+          <button class="btn btn-primary" id="btnSaveProfile">Guardar Perfil</button>
+        </div>
       </div>
     </div>
   </div>

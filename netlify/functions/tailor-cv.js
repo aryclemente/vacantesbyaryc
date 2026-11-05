@@ -62,9 +62,41 @@ Experiencia Laboral Detallada:
    - Editorial Crisálidas, Fundación Agydes, Editorial Visiones: Instalación y personalización de Open Journal Systems (OJS) en hosting para revistas científicas indexadas.
 `;
 
-function getHeuristicSummarySuggestions(vacancy) {
-  const empresa = vacancy.empresa || 'Empresas del sector';
-  const puesto = vacancy.puesto || 'Full Stack Developer & Especialista TI';
+function formatProfileToCvBase(userProfile) {
+  if (!userProfile) return DEFAULT_MASTER_CV;
+  const name = userProfile.nombre || 'Arianna Clemente';
+  const role = userProfile.titular || 'Full Stack Developer & Especialista en Soluciones TI';
+  const email = userProfile.email || 'hello.ary.code@gmail.com';
+  const phone = userProfile.telefono || '';
+  const location = userProfile.ubicacion || 'Remoto';
+  const skills = Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : '';
+  const summary = userProfile.resumen || '';
+
+  let expText = '';
+  if (Array.isArray(userProfile.experiencias) && userProfile.experiencias.length > 0) {
+    expText = userProfile.experiencias.map((e, idx) => {
+      const bullets = Array.isArray(e.bullets) ? e.bullets.map(b => `   - ${b}`).join('\n') : '';
+      return `${idx + 1}. ${e.company || ''} | ${e.role || ''} (${e.period || ''}, ${e.location || ''}):\n${bullets}`;
+    }).join('\n\n');
+  }
+
+  return `Nombre: ${name}
+Rol Principal: ${role}
+Ubicación: ${location}
+Contacto: ${email} ${phone ? '| ' + phone : ''}
+
+Perfil Profesional:
+${summary}
+
+Competencias Técnicas Clave:
+${skills}
+
+Experiencia Laboral Detallada:
+${expText}`.trim();
+}
+
+function getHeuristicSummarySuggestions(vacancy, userProfile) {
+  const candidateRole = (userProfile && userProfile.titular) || 'Full Stack Developer & Especialista TI';
   const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos.slice(0, 4).join(', ') : 'JavaScript, React, PHP, Laravel, PostgreSQL';
 
   return [
@@ -73,30 +105,42 @@ function getHeuristicSummarySuggestions(vacancy) {
       title: 'Enfoque Técnico & Arquitectura',
       tag: 'Ingeniería & Stack',
       tagClass: 'tag-tech',
-      text: `Especialista en Desarrollo de Software y Arquitecturas Web Escalables con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas e integración de APIs REST y microservicios. Dominio en el ecosistema ${reqs}, bases de datos relacionales (PostgreSQL, MySQL), optimización de Core Web Vitals y despliegues serverless continuos con Git, Netlify y Supabase.`
+      text: `Especialista en Desarrollo de Software y Arquitecturas Web Escalables (${candidateRole}) con sólida trayectoria en desarrollo Frontend y Backend, modernización de plataformas críticas e integración de APIs REST y microservicios. Dominio en el ecosistema ${reqs}, bases de datos relacionales (PostgreSQL, MySQL), optimización de Core Web Vitals y despliegues serverless continuos.`
     },
     {
       id: 'metrics',
       title: 'Impacto Transaccional & Métricas',
       tag: 'Alto Tráfico (+900 tx/mes)',
       tagClass: 'tag-metrics',
-      text: `Desarrolladora Full Stack orientada a la ingeniería de software de alto impacto y rendimiento transaccional. Experiencia comprobada en el desarrollo e integración de pasarelas de pago multimoneda con capacidad para procesar +900 transacciones mensuales, optimización de velocidad de carga (WPO) y continuidad operativa para sistemas de misión crítica en sectores corporativos y financieros.`
+      text: `Profesional orientada a la ingeniería de software de alto impacto y rendimiento transaccional. Experiencia comprobada en el desarrollo e integración de pasarelas de pago multimoneda con capacidad para procesar +900 transacciones mensuales, optimización de velocidad de carga (WPO) y continuidad operativa para sistemas de misión crítica en sectores corporativos y financieros.`
     },
     {
       id: 'industry',
       title: 'Soluciones & Adaptabilidad',
       tag: 'Persuasión Sutil',
       tagClass: 'tag-industry',
-      text: `Ingeniera de software con comprobada experiencia diseñando plataformas web modulares, automatización de flujos con Inteligencia Artificial (Gemini API) y resolución analítica de incidentes técnicos complejos. Trayectoria destacada en entrega ágil (Scrum/Kanban), rigurosidad metodológica y adaptabilidad rápida a arquitecturas tecnológicas exigentes en organizaciones dinámicas.`
+      text: `Ingeniería de software con comprobada experiencia diseñando plataformas web modulares, automatización de flujos con Inteligencia Artificial (Google Gemini API) y resolución analítica de incidentes técnicos complejos. Trayectoria destacada en entrega ágil (Scrum/Kanban), rigurosidad metodológica y adaptabilidad rápida a arquitecturas tecnológicas exigentes.`
     }
   ];
 }
 
-function getHeuristicTailoring(vacancy) {
-  const empresa = vacancy.empresa || 'Empresa';
+function getHeuristicTailoring(vacancy, userProfile) {
   const puesto = vacancy.puesto || 'Full Stack Developer';
-  const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git'];
-  const reqsJoined = reqs.slice(0, 3).join(', ');
+  const candidateName = (userProfile && userProfile.nombre) || 'Arianna Clemente';
+
+  if (userProfile && Array.isArray(userProfile.experiencias) && userProfile.experiencias.length > 0) {
+    return {
+      role: `${puesto} | ${candidateName}`,
+      summary: userProfile.resumen || `Especialista en Desarrollo de Software y Arquitecturas Web Escalables con sólida experiencia liderando proyectos técnicos de alto impacto.`,
+      experiences: userProfile.experiencias.map(exp => ({
+        company: exp.company || '',
+        role: exp.role || '',
+        period: exp.period || '',
+        location: exp.location || '',
+        bullets: Array.isArray(exp.bullets) && exp.bullets.length > 0 ? exp.bullets : ['Liderazgo y ejecución técnica orientada a resultados medibles y entrega ágil.']
+      }))
+    };
+  }
 
   return {
     role: `${puesto} | Arianna Clemente`,
@@ -202,7 +246,10 @@ exports.handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    const { vacancy, cvBase = DEFAULT_MASTER_CV } = payload;
+    const { vacancy, userProfile } = payload;
+    const candidateName = (userProfile && userProfile.nombre) || 'Arianna Clemente';
+    const candidateRole = (userProfile && userProfile.titular) || 'Full Stack Developer';
+    const cvBase = payload.cvBase || (userProfile ? formatProfileToCvBase(userProfile) : DEFAULT_MASTER_CV);
 
     if (!vacancy) {
       return {
@@ -224,7 +271,7 @@ exports.handler = async (event) => {
           body: JSON.stringify({
             success: true,
             source: 'heuristic',
-            data: getHeuristicSummarySuggestions(vacancy)
+            data: getHeuristicSummarySuggestions(vacancy, userProfile)
           })
         };
       }
@@ -232,13 +279,13 @@ exports.handler = async (event) => {
       try {
         const summaryPrompt = `
 Eres una consultora de carrera de élite para el mercado tech internacional y ATS.
-Genera EXACTAMENTE 3 opciones de "Resumen Profesional" (de 3 a 4 líneas cada una) para el Currículum de Arianna Clemente adaptadas para la vacante:
+Genera EXACTAMENTE 3 opciones de "Resumen Profesional" (de 3 a 4 líneas cada una) para el Currículum de ${candidateName} adaptadas para la vacante:
 - Empresa: ${vacancy.empresa || 'Empresa Tech'}
 - Puesto: ${vacancy.puesto || 'Full Stack Developer'}
 - Requisitos: ${(vacancy.requisitos || []).join(', ') || 'JavaScript, React, PHP, Laravel, PostgreSQL'}
 
 REGLA DE ORO DE PERSUASIÓN SUTIL (OBLIGATORIA):
-Queda ESTRICTAMENTE PROHIBIDO redactar resúmenes que digan que Arianna "es la persona para la vacante", "es la candidata idónea", "encaja perfectamente", o que usen auto-afirmaciones pretenciosas.
+Queda ESTRICTAMENTE PROHIBIDO redactar resúmenes que digan que ${candidateName} "es la persona para la vacante", "es la candidata idónea", "encaja perfectamente", o que usen auto-afirmaciones pretenciosas.
 El resumen debe describir su propuesta de valor, tecnologías dominadas y logros cuantificables (+900 transacciones/mes, pasarelas multimoneda, optimización WPO, integración de IA), de tal manera que el reclutador llegue NATURALMENTE a la conclusión de que es la candidata idónea.
 
 Genera 3 opciones con estos enfoques:
@@ -322,7 +369,7 @@ Responde ÚNICAMENTE con un JSON válido con la siguiente estructura:
 
     // Si no hay API key disponible en el entorno, devolver la adaptación heurística de alta calidad
     if (!apiKey) {
-      const fallback = getHeuristicTailoring(vacancy);
+      const fallback = getHeuristicTailoring(vacancy, userProfile);
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -336,9 +383,9 @@ Responde ÚNICAMENTE con un JSON válido con la siguiente estructura:
 
     const prompt = `
 Eres una asesora de carrera de élite y reclutadora técnica sénior (Senior Tech Recruiter & ATS Strategist).
-Tu misión es adaptar el Currículum de Arianna Clemente para postular a la vacante objetivo, maximizando su compatibilidad ATS sin perder la veracidad ni la estructura individualizada de su trayectoria laboral.
+Tu misión es adaptar el Currículum de ${candidateName} para postular a la vacante objetivo, maximizando su compatibilidad ATS sin perder la veracidad ni la estructura individualizada de su trayectoria laboral.
 
-Perfil Real de la Candidata (con cada experiencia individual de LinkedIn):
+Perfil Real de la Candidata (con cada experiencia individual):
 ${cvBase}
 
 Detalles de la Vacante Objetivo:
@@ -350,20 +397,14 @@ Detalles de la Vacante Objetivo:
 - Notas / Contexto: ${vacancy.notas || ''}
 
 REGLAS CRÍTICAS Y ESTRICTAS DE ESTRUCTURA:
-1. PROHIBICIÓN ABSOLUTA DE AGRUPAR EXPERIENCIAS: Queda estrictamente PROHIBIDO resumir o consolidar las empresas en un solo bloque o mezclar fechas y tareas. Cada empresa y cargo del perfil de LinkedIn debe aparecer como un objeto INDIVIDUAL e INDEPENDIENTE dentro del array "experiences".
-2. Mantén la separación exacta de empresas, cargos, periodos y ubicaciones tal como aparecen en su perfil:
-   - Colegio Gonzaga (febrero de 2026 - octubre de 2026 | Maracaibo / Remoto) - Desarrollador de sistemas
-   - Centro de Espiritualidad y Pastoral Venezuela (marzo de 2026 - julio de 2026 | Caracas) - Diseñador de páginas web
-   - INGEDACA (marzo de 2026 - abril de 2026 | Caracas) - Asistente del presidente
-   - Fe y Alegría Venezuela (agosto de 2025 - noviembre de 2025 | Caracas) - Desarrolladora Full Stack
-   - CIDE Ecuador (enero de 2025 - julio de 2025 | Pichincha, Ecuador) - Desarrolladora WordPress y Administradora CMS
-   - Fe y Alegría Venezuela (abril de 2025 - junio de 2025 | Caracas) - Pasante Desarrolladora de Chatbots
+1. PROHIBICIÓN ABSOLUTA DE AGRUPAR EXPERIENCIAS: Queda estrictamente PROHIBIDO resumir o consolidar las empresas en un solo bloque o mezclar fechas y tareas. Cada empresa y cargo del perfil debe aparecer como un objeto INDIVIDUAL e INDEPENDIENTE dentro del array "experiences".
+2. Mantén la separación exacta de empresas, cargos, periodos y ubicaciones tal como aparecen en el perfil.
 3. Para CADA experiencia individual:
-   - Redacta entre 2 y 3 viñetas ("bullets") detallando las tareas y logros reales de Arianna en esa empresa.
+   - Redacta entre 2 y 3 viñetas ("bullets") detallando las tareas y logros reales de ${candidateName} en esa empresa.
    - Aplica el método STAR/XYZ ("Logré X medido por Y realizando Z").
    - Ajusta el vocabulario técnico para que resuene con las necesidades de ${vacancy.empresa} (${(vacancy.requisitos || []).slice(0, 3).join(', ')}), sin cambiar la verdad histórica de lo que hizo en esa empresa.
-4. "role": Título profesional adaptado (ej: "${vacancy.puesto} | Arianna Clemente").
-5. "summary": Párrafo profesional de 3 a 4 líneas de alta persuasión técnica. REGLA ESTRICTA ANTI-AUTOBOMBO: Queda estrictamente PROHIBIDO usar frases de auto-declaración como "Arianna Clemente es la persona para la vacante...", "Perfil ideal para la empresa X", o "Es la candidata indicada". El resumen debe redactarse en tono profesional y describir hechos demostrables, alcance tecnológico y valor práctico, permitiendo que el reclutador deduzca su idoneidad de forma natural.
+4. "role": Título profesional adaptado (ej: "${vacancy.puesto} | ${candidateName}").
+5. "summary": Párrafo profesional de 3 a 4 líneas de alta persuasión técnica. REGLA ESTRICTA ANTI-AUTOBOMBO: Queda estrictamente PROHIBIDO usar frases de auto-declaración como "${candidateName} es la persona para la vacante...", "Perfil ideal para la empresa X", o "Es la candidata indicada". El resumen debe redactarse en tono profesional y describir hechos demostrables, alcance tecnológico y valor práctico, permitiendo que el reclutador deduzca su idoneidad de forma natural.
 6. "skills": Objeto con "relevant", "core" y "methodologies".
 
 Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura exacta:

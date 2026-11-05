@@ -428,35 +428,76 @@
   ];
 
   // =========================================================================
-  // Algoritmo de Cálculo de Compatibilidad ATS (0 Tokens)
+  // Algoritmo Dinámico de Compatibilidad ATS (Multi-Usuario, 0 Tokens)
   // =========================================================================
+  function getActiveUserProfile() {
+    if (window.appStorage && typeof window.appStorage.getProfile === 'function') {
+      try {
+        return window.appStorage.getProfile();
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  function getDynamicProfileKeywords() {
+    const profile = getActiveUserProfile();
+    const keywords = { ...ARIANNA_PROFILE_KEYWORDS };
+
+    if (!profile) return keywords;
+
+    // Si el perfil tiene habilidades personalizadas, las incorporamos con peso prioritario
+    if (Array.isArray(profile.habilidades) && profile.habilidades.length > 0) {
+      profile.habilidades.forEach(skill => {
+        if (!skill) return;
+        const s = String(skill).trim().toLowerCase();
+        if (s.length >= 2) {
+          keywords[s] = 16;
+        }
+      });
+    }
+
+    // Si tiene titular profesional, extraer palabras clave relevantes
+    if (profile.titular) {
+      const words = profile.titular.toLowerCase().split(/[\s,/-]+/).filter(w => w.length > 3);
+      words.forEach(w => {
+        if (!keywords[w]) keywords[w] = 14;
+      });
+    }
+
+    return keywords;
+  }
+
   function calculateAtsScore(job) {
     let score = 55; // Base score
     const textBlob = `${job.puesto} ${job.descripcion} ${(job.requisitos || []).join(' ')}`.toLowerCase();
+    const keywords = getDynamicProfileKeywords();
 
-    // Sumar puntos por palabras clave
-    for (const [kw, weight] of Object.entries(ARIANNA_PROFILE_KEYWORDS)) {
+    // Sumar puntos por palabras clave del perfil activo
+    for (const [kw, weight] of Object.entries(keywords)) {
       if (textBlob.includes(kw)) {
         score += (weight * 0.45);
       }
     }
 
-    // Boost si es remoto o tiene pasarelas/moodle/laravel
+    // Boost por modalidad remota si coincide con preferencia o vacante
     if (job.modalidad && job.modalidad.toLowerCase().includes('remoto')) score += 5;
-    if (textBlob.includes('laravel') && textBlob.includes('react')) score += 8;
-    if (textBlob.includes('pasarelas de pago') || textBlob.includes('pago móvil') || textBlob.includes('stripe')) score += 8;
-    if (textBlob.includes('moodle') || textBlob.includes('wordpress')) score += 7;
 
-    // Normalizar entre 70% y 98%
-    score = Math.min(98, Math.max(70, Math.round(score)));
+    // Normalizar entre 68% y 98%
+    score = Math.min(98, Math.max(68, Math.round(score)));
     return score;
   }
 
-  // Pre-calcular scores ATS para todos los trabajos
-  CURATED_JOBS.forEach(j => {
-    j.matchScore = calculateAtsScore(j);
-    j.isTopMatch = j.matchScore >= 88;
-  });
+  function recalculateAllScores() {
+    state.jobs.forEach(j => {
+      j.matchScore = calculateAtsScore(j);
+      j.isTopMatch = j.matchScore >= 85;
+    });
+  }
+
+  // Pre-calcular scores ATS iniciales
+  recalculateAllScores();
 
   // =========================================================================
   // Estado del Módulo
@@ -476,7 +517,7 @@
     chatMessages: [
       {
         sender: 'assistant',
-        text: '¡Hola, Arianna! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar cualquier vacante, comparar opciones (por ejemplo, **Remoto Internacional vs España**) o decirte en cuál tienes mayor probabilidad de avanzar según tu CV. ¿Por dónde empezamos?'
+        text: '¡Hola! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar cualquier vacante, comparar opciones (por ejemplo, **Remoto Internacional vs España**) o decirte en cuál tienes mayor probabilidad de avanzar según tu CV. ¿Por dónde empezamos?'
       }
     ]
   };
@@ -948,14 +989,23 @@
         `3. **Pruebas de Código:** Adjunta tu enlace a GitHub y tu portafolio; para los reclutadores españoles el código limpio y verificable pesa más que la procedencia geográfica.`;
     }
 
-    // Si tenemos API Key de Gemini configurada, hacemos una llamada ultracompacta (<200 tokens)
-    if (window.aiParser && typeof window.aiParser.callGeminiText === 'function') {
-      const compactPrompt = `Eres un Asesor de Empleo experto para Arianna Clemente (Full Stack: PHP, Laravel, React, WordPress, Moodle, Pasarelas de Pago, MySQL).
-Pregunta de Arianna: "${prompt}".
+    // Obtener información del perfil activo
+    const profile = getActiveUserProfile();
+    const candidateName = profile && profile.nombre ? profile.nombre : 'Arianna Clemente';
+    const candidateRole = profile && profile.titular ? profile.titular : 'Full Stack Developer';
+    const candidateSkills = (profile && Array.isArray(profile.habilidades) && profile.habilidades.length > 0)
+      ? profile.habilidades.slice(0, 7).join(', ')
+      : 'PHP, Laravel, React, WordPress, Moodle, Pasarelas de Pago, MySQL';
+
+    // Si tenemos proveedor de IA configurado (Gemini, Claude, Kimi, OpenAI, etc.)
+    if (window.aiParser && (typeof window.aiParser.callLlmText === 'function' || typeof window.aiParser.callGeminiText === 'function')) {
+      const compactPrompt = `Eres un Asesor de Empleo experto para ${candidateName} (${candidateRole}: ${candidateSkills}).
+Pregunta de ${candidateName}: "${prompt}".
 Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 150 palabras.`;
       
       try {
-        const aiResponse = await window.aiParser.callGeminiText(compactPrompt);
+        const caller = window.aiParser.callLlmText || window.aiParser.callGeminiText;
+        const aiResponse = await caller(compactPrompt, 'Eres un asesor de reclutamiento profesional y conciso.');
         if (aiResponse) return aiResponse;
       } catch (e) {
         console.warn('Fallback a heurística local por error de API:', e);
@@ -964,8 +1014,8 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
 
     // Heurística general por defecto
     return `Analizando tu consulta sobre **"${escapeHtml(prompt)}"**:\n\n` +
-      `• Tu perfil tiene mayor ventaja competitiva en vacantes que combinan **Backend robusto (Laravel/PHP)** con interfaces interactivas en **React**.\n` +
-      `• Para empresas que requieran pasarelas de pago, destaca tu módulo transaccional Gonzaga Admin.\n` +
+      `• Tu perfil como **${escapeHtml(candidateRole)}** tiene mayor ventaja competitiva en vacantes que solicitan **${escapeHtml(candidateSkills)}**.\n` +
+      `• Para empresas con procesos técnicos rigurosos, destaca tus métricas de impacto verificables en tu portafolio y GitHub.\n` +
       `• ¿Deseas seleccionar dos vacantes con la casilla **"Comparar"** para ver un cara a cara detallado?`;
   }
 
@@ -1220,17 +1270,41 @@ Responde en 3 viñetas concisas y 1 recomendación de acción directa. Máximo 1
     }, 3200);
   }
 
+  function updateCopilotGreeting() {
+    const profile = getActiveUserProfile();
+    const firstName = profile && profile.nombre ? profile.nombre.split(' ')[0] : 'Arianna';
+    if (state.chatMessages.length === 1 && state.chatMessages[0].sender === 'assistant') {
+      state.chatMessages[0].text = `¡Hola, ${escapeHtml(firstName)}! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar cualquier vacante, comparar opciones (por ejemplo, **Remoto Internacional vs España**) o decirte en cuál tienes mayor probabilidad de avanzar según tu CV. ¿Por dónde empezamos?`;
+      renderCopilotMessages();
+    }
+  }
+
   // =========================================================================
   // Exportar API Pública
   // =========================================================================
   window.jobRadar = {
     init: function () {
+      recalculateAllScores();
+      updateCopilotGreeting();
       render();
       renderCopilotMessages();
+
+      // Suscribirse a cambios en el perfil (por ejemplo al subir un .md o cambiar de usuario)
+      if (window.appStorage && typeof window.appStorage.subscribeProfile === 'function') {
+        window.appStorage.subscribeProfile(() => {
+          recalculateAllScores();
+          updateCopilotGreeting();
+          render();
+        });
+      }
     },
     render: render,
     importJobToKanban: importJobToKanban,
-    askCopilot: handleCopilotUserPrompt
+    askCopilot: handleCopilotUserPrompt,
+    recalculateScores: function () {
+      recalculateAllScores();
+      render();
+    }
   };
 
   // Inicializar al cargar el DOM
