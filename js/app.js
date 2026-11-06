@@ -2979,23 +2979,25 @@ hello.ary.code@gmail.com`;
     }
   });
 
-  // Migrate Seed Vacancies to Cloud
-  btnMigrateSeedToCloud.addEventListener('click', async () => {
-    try {
-      btnMigrateSeedToCloud.disabled = true;
-      btnMigrateSeedToCloud.innerHTML = '<span>Subiendo vacantes a la nube...</span>';
-      const result = await window.appStorage.migrateLocalToCloud();
-      showToast(`¡${result.count} vacantes migradas a tu nube con éxito!`, 'success');
-    } catch (err) {
-      showToast(err.message || 'Error al migrar vacantes', 'error');
-    } finally {
-      btnMigrateSeedToCloud.disabled = false;
-      btnMigrateSeedToCloud.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <span>Subir vacantes locales a la nube (16 iniciales)</span>
-      `;
-    }
-  });
+  // Migrate Seed Vacancies to Cloud (opcional si existe en DOM)
+  if (btnMigrateSeedToCloud) {
+    btnMigrateSeedToCloud.addEventListener('click', async () => {
+      try {
+        btnMigrateSeedToCloud.disabled = true;
+        btnMigrateSeedToCloud.innerHTML = '<span>Subiendo vacantes a la nube...</span>';
+        const result = await window.appStorage.migrateLocalToCloud();
+        showToast(`¡${result.count} vacantes migradas a tu nube con éxito!`, 'success');
+      } catch (err) {
+        showToast(err.message || 'Error al migrar vacantes', 'error');
+      } finally {
+        btnMigrateSeedToCloud.disabled = false;
+        btnMigrateSeedToCloud.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Subir vacantes locales a la nube (16 iniciales)</span>
+        `;
+      }
+    });
+  }
 
   // Manual Sync
   btnManualSync.addEventListener('click', async () => {
