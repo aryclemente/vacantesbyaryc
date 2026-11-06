@@ -1592,6 +1592,45 @@ a:focus-visible {
     right: 14px;
     z-index: 950;
   }
+
+  /* Job Radar Hero & Search Bar Mobile */
+  .jobsearch-hero-title {
+    font-size: 1.65rem !important;
+    letter-spacing: -0.02em;
+  }
+  .jobsearch-hero-subtitle {
+    font-size: 0.875rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+  .jobsearch-hero {
+    padding: 1.5rem 0.85rem 1.75rem !important;
+  }
+  .jobsearch-bar-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    padding: 0.5rem !important;
+  }
+  .jobsearch-bar-col {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-slate) !important;
+    padding: 0.6rem 0.5rem !important;
+  }
+  .jobsearch-bar-col:last-of-type {
+    border-bottom: none !important;
+  }
+  .jobsearch-bar-divider {
+    display: none !important;
+  }
+  .btn-jobsearch-hero-submit {
+    width: 100% !important;
+    min-height: 44px !important;
+    margin-top: 0.5rem !important;
+    justify-content: center !important;
+    font-size: 0.875rem !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1632,6 +1671,12 @@ a:focus-visible {
     padding: 0.85rem 1rem;
     max-height: calc(85vh - 120px);
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Collapse multi-column modal grids on mobile devices */
+  .modal-body [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
   }
 
   .modal-footer {
@@ -2874,6 +2919,20 @@ a:focus-visible {
   display: block;
   opacity: 1;
 }
+
+/* On Desktop (min-width: 769px), make the drawer companion non-blocking so the board can be interacted with */
+@media (min-width: 769px) {
+  .copilot-drawer-overlay {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    pointer-events: none !important;
+  }
+  .copilot-drawer-panel {
+    pointer-events: auto !important;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.22);
+  }
+}
+
 .copilot-drawer-panel {
   position: fixed;
   top: 0;

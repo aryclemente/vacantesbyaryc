@@ -1,0 +1,1 @@
+1. Cada vez que inicie sesion debo agregar la clave de mi API IA? Tu clave se guarda únicamente en tu navegador (privado y seguro). Si no tienes clave configurada, la aplicación opera al 100% con el motor heurístico local sin coste.

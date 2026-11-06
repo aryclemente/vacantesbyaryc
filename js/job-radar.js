@@ -496,6 +496,7 @@
     jobs: [...CURATED_JOBS],
     filteredJobs: [...CURATED_JOBS],
     selectedJobIdsForCompare: new Set(),
+    activeFilterRole: 'all',
     activeFilterMarket: 'all',
     activeFilterPlatform: 'all',
     activeFilterType: 'all',
@@ -537,35 +538,75 @@
     const q = (state.searchKeyword || '').trim().toLowerCase();
 
     state.filteredJobs = state.jobs.filter(job => {
-      // 1. Keyword search (puesto, empresa, descripción o requisitos)
+      // 1. Keyword search (multi-word match across puesto, empresa, ubicacion, modalidad, requisitos, descripcion)
       if (q) {
-        const fullText = `${job.puesto} ${job.empresa} ${job.ubicacion} ${(job.requisitos || []).join(' ')}`.toLowerCase();
-        if (!fullText.includes(q)) return false;
+        const fullText = `${job.puesto} ${job.empresa} ${job.ubicacion} ${job.modalidad} ${(job.requisitos || []).join(' ')} ${job.descripcion}`.toLowerCase();
+        const terms = q.split(/\s+/).filter(Boolean);
+        const matchesAll = terms.every(t => fullText.includes(t));
+        if (!matchesAll) return false;
       }
 
-      // 2. Mercado / Ubicación
-      if (state.activeFilterMarket !== 'all') {
-        if (state.activeFilterMarket === 'spain' && job.mercado !== 'spain') return false;
-        if (state.activeFilterMarket === 'remote' && job.mercado !== 'remote') return false;
-        if (state.activeFilterMarket === 'latam' && job.mercado !== 'latam') return false;
+      // 2. Rol / Especialidad
+      if (state.activeFilterRole && state.activeFilterRole !== 'all') {
+        const role = state.activeFilterRole.toLowerCase();
+        const fullRoleText = `${job.puesto} ${(job.requisitos || []).join(' ')} ${job.descripcion}`.toLowerCase();
+        if (role === 'full stack') {
+          if (!fullRoleText.includes('full stack') && !fullRoleText.includes('fullstack') && !fullRoleText.includes('full-stack') && !fullRoleText.includes('php / react') && !fullRoleText.includes('desarrollador')) return false;
+        } else if (role === 'frontend') {
+          if (!fullRoleText.includes('frontend') && !fullRoleText.includes('front-end') && !fullRoleText.includes('react') && !fullRoleText.includes('next.js') && !fullRoleText.includes('vue') && !fullRoleText.includes('angular') && !fullRoleText.includes('css')) return false;
+        } else if (role === 'backend') {
+          if (!fullRoleText.includes('backend') && !fullRoleText.includes('back-end') && !fullRoleText.includes('php') && !fullRoleText.includes('laravel') && !fullRoleText.includes('python') && !fullRoleText.includes('node') && !fullRoleText.includes('api')) return false;
+        } else if (role === 'wordpress') {
+          if (!fullRoleText.includes('wordpress') && !fullRoleText.includes('woocommerce') && !fullRoleText.includes('cms') && !fullRoleText.includes('headless')) return false;
+        } else if (role === 'ai') {
+          if (!fullRoleText.includes('ia') && !fullRoleText.includes('ai') && !fullRoleText.includes('chatbot') && !fullRoleText.includes('automatización') && !fullRoleText.includes('openai') && !fullRoleText.includes('gemini') && !fullRoleText.includes('prompt')) return false;
+        } else {
+          if (!fullRoleText.includes(role)) return false;
+        }
       }
 
-      // 3. Plataforma
-      if (state.activeFilterPlatform !== 'all') {
-        if (job.plataforma !== state.activeFilterPlatform) return false;
+      // 3. Mercado / Ubicación
+      if (state.activeFilterMarket && state.activeFilterMarket !== 'all') {
+        const m = state.activeFilterMarket.toLowerCase();
+        if (m === 'spain' || m === 'españa') {
+          const matchSpain = job.mercado === 'spain' ||
+            (job.ubicacion && (job.ubicacion.toLowerCase().includes('españa') || job.ubicacion.toLowerCase().includes('madrid') || job.ubicacion.toLowerCase().includes('barcelona')));
+          if (!matchSpain) return false;
+        } else if (m === 'remote' || m === 'remoto') {
+          const matchRemote = job.mercado === 'remote' ||
+            (job.modalidad && job.modalidad.toLowerCase().includes('remot')) ||
+            (job.ubicacion && job.ubicacion.toLowerCase().includes('remot'));
+          if (!matchRemote) return false;
+        } else if (m === 'latam') {
+          const matchLatam = job.mercado === 'latam' ||
+            (job.ubicacion && (job.ubicacion.toLowerCase().includes('latam') || job.ubicacion.toLowerCase().includes('colombia') || job.ubicacion.toLowerCase().includes('méxico') || job.ubicacion.toLowerCase().includes('argentina') || job.ubicacion.toLowerCase().includes('chile')));
+          if (!matchLatam) return false;
+        } else if (m === 'venezuela') {
+          const matchVzla = job.mercado === 'venezuela' ||
+            (job.ubicacion && (job.ubicacion.toLowerCase().includes('venezuela') || job.ubicacion.toLowerCase().includes('caracas')));
+          if (!matchVzla) return false;
+        }
       }
 
-      // 4. Modalidad
-      if (state.activeFilterModality !== 'all') {
+      // 4. Plataforma
+      if (state.activeFilterPlatform && state.activeFilterPlatform !== 'all') {
+        const p = state.activeFilterPlatform.toLowerCase();
+        const jobP = (job.plataforma || '').toLowerCase();
+        const jobPName = (job.plataformaNombre || '').toLowerCase();
+        if (!jobP.includes(p) && !jobPName.includes(p)) return false;
+      }
+
+      // 5. Modalidad
+      if (state.activeFilterModality && state.activeFilterModality !== 'all') {
         if (!job.modalidad.toLowerCase().includes(state.activeFilterModality.toLowerCase())) return false;
       }
 
-      // 5. Tipo
-      if (state.activeFilterType !== 'all') {
+      // 6. Tipo
+      if (state.activeFilterType && state.activeFilterType !== 'all') {
         if (job.tipo !== state.activeFilterType) return false;
       }
 
-      // 6. Match ATS
+      // 7. Match ATS
       const score = job.matchScore || 75;
       if (!state.filterMatchHigh && score >= 85) return false;
       if (!state.filterMatchMed && score >= 70 && score < 85) return false;
@@ -1189,22 +1230,27 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   // Listeners y Enlaces de Controles de Interfaz
   // =========================================================================
   function initEventListeners() {
-    // 1. Hero Search Bar
+    // 1. Hero Search Bar Controls
     const heroInput = document.getElementById('radarHeroInput');
-    const heroMarket = document.getElementById('radarHeroMarketSelect');
-    const heroSource = document.getElementById('radarHeroSourceSelect');
-    const heroForm = document.getElementById('radarHeroForm');
+    const filterRole = document.getElementById('radarFilterRole');
+    const filterLocation = document.getElementById('radarFilterLocation');
+    const filterSource = document.getElementById('radarFilterSource');
+    const btnSearch = document.getElementById('btnRadarSearch');
 
-    if (heroForm) {
-      heroForm.addEventListener('submit', (e) => {
+    function executeHeroSearch() {
+      state.searchKeyword = (heroInput && heroInput.value) || '';
+      state.activeFilterRole = (filterRole && filterRole.value) || 'all';
+      state.activeFilterMarket = (filterLocation && filterLocation.value) || 'all';
+      state.activeFilterPlatform = (filterSource && filterSource.value) || 'all';
+      render();
+      const gridEl = document.getElementById('radarJobsGrid');
+      if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (btnSearch) {
+      btnSearch.addEventListener('click', (e) => {
         e.preventDefault();
-        state.searchKeyword = (heroInput && heroInput.value) || '';
-        state.activeFilterMarket = (heroMarket && heroMarket.value) || 'all';
-        state.activeFilterPlatform = (heroSource && heroSource.value) || 'all';
-        render();
-        // Desplazar suavemente a los resultados
-        const gridEl = document.getElementById('radarJobsGrid');
-        if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        executeHeroSearch();
       });
     }
 
@@ -1214,6 +1260,33 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
         applyFilters();
         renderCards();
         updateResultsCount();
+      });
+      heroInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          executeHeroSearch();
+        }
+      });
+    }
+
+    if (filterRole) {
+      filterRole.addEventListener('change', (e) => {
+        state.activeFilterRole = e.target.value;
+        render();
+      });
+    }
+
+    if (filterLocation) {
+      filterLocation.addEventListener('change', (e) => {
+        state.activeFilterMarket = e.target.value;
+        render();
+      });
+    }
+
+    if (filterSource) {
+      filterSource.addEventListener('change', (e) => {
+        state.activeFilterPlatform = e.target.value;
+        render();
       });
     }
 
@@ -1244,6 +1317,7 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const btnReset = document.getElementById('btnResetRadarFilters');
     if (btnReset) {
       btnReset.addEventListener('click', () => {
+        state.activeFilterRole = 'all';
         state.activeFilterMarket = 'all';
         state.activeFilterPlatform = 'all';
         state.activeFilterType = 'all';
@@ -1252,8 +1326,9 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
         state.filterMatchMed = true;
         state.searchKeyword = '';
         if (heroInput) heroInput.value = '';
-        if (heroMarket) heroMarket.value = 'all';
-        if (heroSource) heroSource.value = 'all';
+        if (filterRole) filterRole.value = 'all';
+        if (filterLocation) filterLocation.value = 'all';
+        if (filterSource) filterSource.value = 'all';
         const chkHigh = document.getElementById('chkMatchHigh');
         const chkMed = document.getElementById('chkMatchMed');
         if (chkHigh) chkHigh.checked = true;
@@ -1362,7 +1437,9 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
 
     overlay.classList.add('active');
     overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    if (window.innerWidth <= 768) {
+      document.body.style.overflow = 'hidden';
+    }
     populateAtsVacancyPicker(targetVacancyId);
     updateAtsBadges();
     renderCopilotMessages();

@@ -926,9 +926,18 @@ class StorageService {
     return this.cache;
   }
 
+  getSettingsKey() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    return user ? `aryc_settings_${user.id}` : SETTINGS_KEY;
+  }
+
   getSettings() {
     try {
-      const settings = localStorage.getItem(SETTINGS_KEY);
+      const key = this.getSettingsKey();
+      let settings = localStorage.getItem(key);
+      if (!settings && key === SETTINGS_KEY) {
+        settings = localStorage.getItem('aryc_app_settings');
+      }
       return settings ? JSON.parse(settings) : { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
     } catch (e) {
       return { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
@@ -936,7 +945,17 @@ class StorageService {
   }
 
   saveSettings(settings) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    const key = this.getSettingsKey();
+    localStorage.setItem(key, JSON.stringify(settings));
+
+    // Si el usuario está autenticado, sincronizar proveedor en su perfil
+    if (window.appSupabase && window.appSupabase.isAuthenticated()) {
+      const profile = this.getProfile();
+      if (profile) {
+        profile.ai_provider = settings.aiProvider || profile.ai_provider || 'gemini';
+        this.saveProfile(profile, true);
+      }
+    }
   }
 
   exportDataJson() {

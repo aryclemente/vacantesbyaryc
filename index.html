@@ -492,12 +492,22 @@
             <!-- Search Form Bar -->
             <div class="jobsearch-bar-card">
               <div class="jobsearch-bar-col">
-                <label for="radarFilterRole" class="jobsearch-bar-label">
+                <label for="radarHeroInput" class="jobsearch-bar-label">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  <span>Especialidad / Rol:</span>
+                  <span>Buscar:</span>
+                </label>
+                <input type="text" id="radarHeroInput" class="jobsearch-bar-select" placeholder="Ej: React, PHP, Cabify..." aria-label="Buscar vacantes por palabra clave o tecnología" style="width:100%; border:none; outline:none; background:transparent;">
+              </div>
+
+              <div class="jobsearch-bar-divider"></div>
+
+              <div class="jobsearch-bar-col">
+                <label for="radarFilterRole" class="jobsearch-bar-label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  <span>Rol:</span>
                 </label>
                 <select id="radarFilterRole" class="jobsearch-bar-select" aria-label="Filtrar por especialidad o rol tecnológico">
-                  <option value="all">Todas las profesiones tech</option>
+                  <option value="all">Todas las especialidades</option>
                   <option value="Full Stack">Full Stack Developer</option>
                   <option value="Frontend">Frontend (React / Next.js)</option>
                   <option value="Backend">Backend (PHP / Laravel / Python)</option>
@@ -511,14 +521,14 @@
               <div class="jobsearch-bar-col">
                 <label for="radarFilterLocation" class="jobsearch-bar-label">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                  <span>Ubicación / Mercado:</span>
+                  <span>Ubicación:</span>
                 </label>
                 <select id="radarFilterLocation" class="jobsearch-bar-select" aria-label="Filtrar por ubicación geográfica o modalidad de contratación">
                   <option value="all">Todos los mercados</option>
-                  <option value="Remoto">100% Remoto Internacional (Global)</option>
+                  <option value="Remoto">100% Remoto Internacional</option>
                   <option value="España">España / Europa (Remoto o Híbrido)</option>
-                  <option value="LATAM">LATAM / Remoto Regional</option>
-                  <option value="Venezuela">Venezuela / Nacional</option>
+                  <option value="LATAM">LATAM Regional</option>
+                  <option value="Venezuela">Venezuela Nacional</option>
                 </select>
               </div>
 
@@ -526,8 +536,8 @@
 
               <div class="jobsearch-bar-col">
                 <label for="radarFilterSource" class="jobsearch-bar-label">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                  <span>Bolsa / Portal:</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  <span>Bolsa:</span>
                 </label>
                 <select id="radarFilterSource" class="jobsearch-bar-select" aria-label="Filtrar por portal o bolsa de empleo">
                   <option value="all">Todas las plataformas</option>
@@ -979,6 +989,33 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               <span>Sincronizar ahora con la nube</span>
             </button>
+          </div>
+
+          <!-- Password Setup / Change for Magic Link users -->
+          <div style="background:var(--surface-container-low); border:1px solid var(--border-slate); border-radius:12px; padding:1.25rem; margin-top:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <div>
+                <h4 style="margin:0 0 0.25rem 0; font-size:0.9375rem;">Seguridad &amp; Contraseña</h4>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">
+                  Si entraste por Magic Link, puedes definir una contraseña para ingresar con clave cuando quieras.
+                </p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" id="btnToggleSetPassword" style="font-size:0.75rem; padding:0.35rem 0.65rem; white-space:nowrap;">
+                🔑 Gestionar Clave
+              </button>
+            </div>
+            <div id="boxSetPassword" style="display:none; margin-top:0.85rem; border-top:1px dashed var(--border-slate); padding-top:0.75rem;">
+              <div class="form-group" style="margin-bottom:0.5rem;">
+                <label class="form-label" for="inputSetNewPassword" style="font-size:0.75rem;">Nueva Contraseña (mínimo 6 caracteres)</label>
+                <div style="display:flex; gap:0.5rem;">
+                  <input type="password" id="inputSetNewPassword" class="form-control" placeholder="••••••••" style="font-size:0.8125rem; flex:1;" aria-label="Nueva contraseña para tu cuenta">
+                  <button type="button" class="btn btn-primary" id="btnSaveNewPassword" style="font-size:0.75rem; padding:0.4rem 0.85rem; white-space:nowrap;">
+                    Guardar Clave
+                  </button>
+                </div>
+              </div>
+              <div id="setPasswordFeedback" style="display:none; font-size:0.75rem; margin-top:0.35rem; font-weight:600;"></div>
+            </div>
           </div>
         </div>
       </div>

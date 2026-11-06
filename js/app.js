@@ -885,7 +885,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   btnSettings.addEventListener('click', () => {
     const current = window.appStorage.getSettings();
-    inputApiKey.value = current.geminiApiKey || '';
+    inputApiKey.value = current.geminiApiKey || current.aiApiKey || '';
+    const selectAiProvider = document.getElementById('selectAiProvider');
+    if (selectAiProvider && current.aiProvider) {
+      selectAiProvider.value = current.aiProvider;
+    }
     settingsModal.classList.add('open');
   });
 
@@ -899,9 +903,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnSaveSettings.addEventListener('click', () => {
     const key = inputApiKey.value.trim();
-    window.appStorage.saveSettings({ geminiApiKey: key });
+    const selectAiProvider = document.getElementById('selectAiProvider');
+    const provider = selectAiProvider ? selectAiProvider.value : 'gemini';
+    window.appStorage.saveSettings({
+      geminiApiKey: key,
+      aiApiKey: key,
+      aiProvider: provider
+    });
     settingsModal.classList.remove('open');
-    showToast('Configuración guardada en tu navegador', 'success');
+    showToast('Configuración guardada para tu perfil', 'success');
   });
 
   btnExportJson.addEventListener('click', () => {
@@ -3006,6 +3016,81 @@ hello.ary.code@gmail.com`;
     showToast('Sincronización completada', 'success');
   });
 
+  // Set Password logic for Magic Link users
+  const btnToggleSetPassword = document.getElementById('btnToggleSetPassword');
+  const boxSetPassword = document.getElementById('boxSetPassword');
+  const inputSetNewPassword = document.getElementById('inputSetNewPassword');
+  const btnSaveNewPassword = document.getElementById('btnSaveNewPassword');
+  const setPasswordFeedback = document.getElementById('setPasswordFeedback');
+
+  if (btnToggleSetPassword && boxSetPassword) {
+    btnToggleSetPassword.addEventListener('click', () => {
+      const isVisible = boxSetPassword.style.display === 'block';
+      boxSetPassword.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible && inputSetNewPassword) inputSetNewPassword.focus();
+    });
+  }
+
+  if (btnSaveNewPassword && inputSetNewPassword) {
+    btnSaveNewPassword.addEventListener('click', async () => {
+      const newPwd = inputSetNewPassword.value;
+      if (!newPwd || newPwd.length < 6) {
+        if (setPasswordFeedback) {
+          setPasswordFeedback.style.display = 'block';
+          setPasswordFeedback.style.color = 'var(--error)';
+          setPasswordFeedback.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+        }
+        return;
+      }
+
+      try {
+        btnSaveNewPassword.disabled = true;
+        btnSaveNewPassword.textContent = 'Guardando...';
+        const { error } = await window.appSupabase.client.auth.updateUser({ password: newPwd });
+        if (error) throw error;
+        if (setPasswordFeedback) {
+          setPasswordFeedback.style.display = 'block';
+          setPasswordFeedback.style.color = 'var(--mint-turquoise)';
+          setPasswordFeedback.textContent = '✓ Contraseña establecida con éxito. Ahora puedes entrar con clave o Magic Link.';
+        }
+        showToast('Contraseña guardada con éxito', 'success');
+        inputSetNewPassword.value = '';
+        setTimeout(() => {
+          if (boxSetPassword) boxSetPassword.style.display = 'none';
+        }, 2800);
+      } catch (err) {
+        if (setPasswordFeedback) {
+          setPasswordFeedback.style.display = 'block';
+          setPasswordFeedback.style.color = 'var(--error)';
+          setPasswordFeedback.textContent = err.message || 'Error al actualizar contraseña';
+        }
+        showToast(err.message || 'Error al actualizar contraseña', 'error');
+      } finally {
+        btnSaveNewPassword.disabled = false;
+        btnSaveNewPassword.textContent = 'Guardar Clave';
+      }
+    });
+  }
+
+  // Onboarding bienvenida para nuevo usuario
+  function checkNewUserWelcome() {
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
+    const user = window.appSupabase.getUser();
+    const profile = window.appStorage.getProfile();
+    const storageKey = 'aryc_welcome_shown_' + (user ? user.id : 'guest');
+    const hasSeenWelcome = localStorage.getItem(storageKey);
+    if (!profile.onboarding_completed && !hasSeenWelcome) {
+      localStorage.setItem(storageKey, 'true');
+      const profileModal = document.getElementById('profileModal');
+      if (profileModal) {
+        setTimeout(() => {
+          profileModal.classList.add('open');
+          showToast('🎉 ¡Bienvenido/a! Sube tu perfil en PDF o Markdown para adaptar tus postulaciones en segundos.', 'info');
+        }, 700);
+      }
+    }
+  }
+
   // Listeners for Supabase Auth and Sync Status
   window.appStorage.onSyncStatusChange((status) => {
     updateCloudStatusUI(status);
@@ -3014,13 +3099,15 @@ hello.ary.code@gmail.com`;
   if (window.appSupabase) {
     window.appSupabase.onAuthStateChange(() => {
       updateAuthUI();
+      checkNewUserWelcome();
     });
   }
 
   // Initial Auth & Cloud state check
   setTimeout(() => {
     updateAuthUI();
-  }, 300);
+    checkNewUserWelcome();
+  }, 400);
 
   // =========================================================================
   // Reactive Storage Subscription
