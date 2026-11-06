@@ -386,6 +386,7 @@ class StorageService {
     this.profileCache = null;
     this.syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error' | 'offline'
     this.syncListeners = [];
+    this.perfilesTableAvailable = null; // null: desconocido, true: disponible, false: tabla pendiente de crear en Supabase
     this.init();
   }
 
@@ -478,6 +479,10 @@ class StorageService {
 
     // Sincronizar con Supabase si está autenticado
     if (syncToCloud && window.appSupabase && window.appSupabase.isAuthenticated()) {
+      if (this.perfilesTableAvailable === false) {
+        // La tabla aún no existe en Supabase; los datos ya quedaron persistidos en localStorage
+        return this.profileCache;
+      }
       const user = window.appSupabase.getUser();
       const payload = {
         id: user.id,
@@ -502,7 +507,19 @@ class StorageService {
         .from('perfiles')
         .upsert(payload, { onConflict: 'id' })
         .then(({ error }) => {
-          if (error) console.error('Error sincronizando perfil con Supabase:', error);
+          if (error) {
+            if (error.code === 'PGRST205' || error.code === '42P01' || error.status === 404 || error.message?.includes('404') || error.message?.includes('not find')) {
+              this.perfilesTableAvailable = false;
+              console.info('ℹ️ [Supabase] La tabla "perfiles" aún no está creada en tu proyecto Supabase. Tus datos se guardaron localmente. Para habilitar la nube, ejecuta "documentacion/supabase_perfiles_schema.sql" en tu Dashboard de Supabase.');
+            } else {
+              console.error('Error sincronizando perfil con Supabase:', error);
+            }
+          } else {
+            this.perfilesTableAvailable = true;
+          }
+        })
+        .catch(err => {
+          console.warn('Error de red al sincronizar perfil con Supabase:', err);
         });
     }
 
@@ -529,6 +546,7 @@ class StorageService {
 
   async syncProfileWithSupabase() {
     if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
+    if (this.perfilesTableAvailable === false) return;
     const user = window.appSupabase.getUser();
     try {
       const { data, error } = await window.appSupabase.client
@@ -537,9 +555,20 @@ class StorageService {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (!error && data) {
+      if (error) {
+        if (error.code === 'PGRST205' || error.code === '42P01' || error.status === 404 || error.message?.includes('404') || error.message?.includes('not find')) {
+          this.perfilesTableAvailable = false;
+          console.info('ℹ️ [Supabase] La tabla "perfiles" aún no existe en tu base de datos Supabase. Se utilizará el perfil local.');
+          return;
+        }
+        console.warn('Error al consultar perfil en Supabase:', error);
+        return;
+      }
+
+      this.perfilesTableAvailable = true;
+      if (data) {
         this.saveProfile(data, false);
-      } else if (!data) {
+      } else {
         // Primera vez del usuario: registrar perfil inicial
         this.saveProfile(this.getProfile(), true);
       }

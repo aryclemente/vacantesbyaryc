@@ -41,8 +41,10 @@ CREATE TRIGGER trigger_perfiles_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_perfiles_updated_at();
 
--- 3. Habilitar Row Level Security (RLS) en la tabla perfiles
+-- 3. Habilitar Row Level Security (RLS) y permisos en la tabla perfiles
 ALTER TABLE public.perfiles ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.perfiles TO authenticated;
+GRANT ALL ON TABLE public.perfiles TO service_role;
 
 -- 4. Políticas RLS de Alto Rendimiento (Security & Performance Best Practices)
 -- Envolver funciones de auth en SELECT para evitar ejecución fila por fila
@@ -128,8 +130,16 @@ CREATE INDEX IF NOT EXISTS idx_perfiles_id ON public.perfiles (id);
 CREATE INDEX IF NOT EXISTS idx_vacantes_user_id ON public.vacantes (user_id);
 CREATE INDEX IF NOT EXISTS idx_vacantes_user_estado ON public.vacantes (user_id, estado);
 
--- 8. Habilitar Realtime para perfiles y vacantes
-ALTER PUBLICATION supabase_realtime ADD TABLE public.perfiles;
+-- 8. Habilitar Realtime para perfiles
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'perfiles'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.perfiles;
+    END IF;
+END $$;
 
 -- 9. Migración Segura: Crear perfil inicial para usuarios existentes que aún no tengan fila en perfiles
 INSERT INTO public.perfiles (id, email, nombre, titular, resumen, habilidades)
@@ -144,3 +154,6 @@ FROM auth.users u
 LEFT JOIN public.perfiles p ON p.id = u.id
 WHERE p.id IS NULL
 ON CONFLICT (id) DO NOTHING;
+
+-- 10. Recargar caché de esquema de PostgREST
+NOTIFY pgrst, 'reload schema';

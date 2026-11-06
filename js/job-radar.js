@@ -489,16 +489,6 @@
     return score;
   }
 
-  function recalculateAllScores() {
-    state.jobs.forEach(j => {
-      j.matchScore = calculateAtsScore(j);
-      j.isTopMatch = j.matchScore >= 85;
-    });
-  }
-
-  // Pre-calcular scores ATS iniciales
-  recalculateAllScores();
-
   // =========================================================================
   // Estado del Módulo
   // =========================================================================
@@ -521,6 +511,16 @@
       }
     ]
   };
+
+  function recalculateAllScores() {
+    state.jobs.forEach(j => {
+      j.matchScore = calculateAtsScore(j);
+      j.isTopMatch = j.matchScore >= 85;
+    });
+  }
+
+  // Pre-calcular scores ATS iniciales
+  recalculateAllScores();
 
   // =========================================================================
   // Renderizado Principal del Radar
