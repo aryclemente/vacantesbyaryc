@@ -2788,6 +2788,7 @@ hello.ary.code@gmail.com`;
 
   // Cloud Modal Open / Close
   btnOpenCloudModal.addEventListener('click', () => {
+    hideAuthAlert();
     updateAuthUI();
     cloudModal.classList.add('open');
   });
@@ -2812,6 +2813,7 @@ hello.ary.code@gmail.com`;
     btnTogglePassword.style.color = 'var(--text-muted)';
     btnTogglePassword.style.boxShadow = 'none';
 
+    hideAuthAlert();
     formMagicLink.style.display = 'block';
     formPassword.style.display = 'none';
   });
@@ -2827,9 +2829,37 @@ hello.ary.code@gmail.com`;
     btnToggleMagicLink.style.color = 'var(--text-muted)';
     btnToggleMagicLink.style.boxShadow = 'none';
 
+    hideAuthAlert();
     formMagicLink.style.display = 'none';
     formPassword.style.display = 'block';
   });
+
+  const authAlertBox = document.getElementById('authAlertBox');
+  function showAuthAlert(msg, type = 'info') {
+    if (!authAlertBox) return;
+    authAlertBox.style.display = 'block';
+    if (type === 'success') {
+      authAlertBox.style.background = 'rgba(0, 210, 180, 0.12)';
+      authAlertBox.style.border = '1px solid var(--mint-turquoise)';
+      authAlertBox.style.color = '#004d40';
+    } else if (type === 'error') {
+      authAlertBox.style.background = 'rgba(239, 68, 68, 0.12)';
+      authAlertBox.style.border = '1px solid var(--error)';
+      authAlertBox.style.color = '#7f1d1d';
+    } else {
+      authAlertBox.style.background = 'rgba(77, 23, 214, 0.08)';
+      authAlertBox.style.border = '1px solid var(--primary)';
+      authAlertBox.style.color = 'var(--text-dark-primary)';
+    }
+    authAlertBox.innerHTML = msg;
+  }
+
+  function hideAuthAlert() {
+    if (authAlertBox) {
+      authAlertBox.style.display = 'none';
+      authAlertBox.innerHTML = '';
+    }
+  }
 
   // Magic Link Submit
   formMagicLink.addEventListener('submit', async (e) => {
@@ -2840,10 +2870,13 @@ hello.ary.code@gmail.com`;
     try {
       btnSendMagicLink.disabled = true;
       btnSendMagicLink.innerHTML = '<span>Enviando enlace...</span>';
+      hideAuthAlert();
       await window.appSupabase.signInWithOtp(email);
+      showAuthAlert(`📨 <strong>¡Enlace enviado a ${escapeHtml(email)}!</strong><br>Abre tu correo y haz clic en el enlace para ingresar inmediatamente sin contraseña.`, 'success');
       showToast('¡Enlace de acceso enviado! Revisa tu bandeja de correo.', 'success');
       inputMagicEmail.value = '';
     } catch (err) {
+      showAuthAlert(`⚠️ ${err.message || 'Error al enviar Magic Link'}`, 'error');
       showToast(err.message || 'Error al enviar Magic Link', 'error');
     } finally {
       btnSendMagicLink.disabled = false;
@@ -2859,6 +2892,7 @@ hello.ary.code@gmail.com`;
     const email = inputAuthEmail.value.trim();
     const password = inputAuthPassword.value;
     if (!email || !password) {
+      showAuthAlert('Por favor completa tu correo y contraseña.', 'error');
       showToast('Por favor completa tu correo y contraseña', 'error');
       return;
     }
@@ -2866,11 +2900,20 @@ hello.ary.code@gmail.com`;
     try {
       btnSignInPassword.disabled = true;
       btnSignInPassword.textContent = 'Iniciando...';
+      hideAuthAlert();
       await window.appSupabase.signIn(email, password);
+      showAuthAlert('¡Sesión iniciada con éxito! Sincronizando datos...', 'success');
       showToast('¡Sesión iniciada con éxito! Sincronizando datos...', 'success');
       updateAuthUI();
     } catch (err) {
-      showToast(err.message || 'Error al iniciar sesión', 'error');
+      let friendlyMsg = err.message || 'Error al iniciar sesión';
+      if (friendlyMsg.includes('Invalid login credentials')) {
+        friendlyMsg = 'Correo o contraseña incorrectos. Si te registraste hace poco, confirma primero el correo enviado a tu bandeja o entra con Magic Link.';
+      } else if (friendlyMsg.includes('Email not confirmed')) {
+        friendlyMsg = '⚠️ Debes confirmar tu correo electrónico antes de ingresar con contraseña. Revisa tu bandeja de entrada o ingresa directamente con Magic Link.';
+      }
+      showAuthAlert(`⚠️ ${friendlyMsg}`, 'error');
+      showToast(friendlyMsg, 'error');
     } finally {
       btnSignInPassword.disabled = false;
       btnSignInPassword.textContent = 'Iniciar Sesión';
@@ -2882,18 +2925,44 @@ hello.ary.code@gmail.com`;
     const email = inputAuthEmail.value.trim();
     const password = inputAuthPassword.value;
     if (!email || !password) {
+      showAuthAlert('Por favor completa correo y contraseña para registrarte.', 'error');
       showToast('Por favor completa correo y contraseña para registrarte', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showAuthAlert('La contraseña debe tener un mínimo de 6 caracteres.', 'error');
+      showToast('La contraseña debe tener un mínimo de 6 caracteres', 'error');
       return;
     }
 
     try {
       btnSignUpPassword.disabled = true;
       btnSignUpPassword.textContent = 'Creando cuenta...';
-      await window.appSupabase.signUp(email, password);
-      showToast('¡Cuenta creada! Revisa tu correo de confirmación o inicia sesión.', 'success');
+      hideAuthAlert();
+      const result = await window.appSupabase.signUp(email, password);
+
+      if (result?.user && result?.user?.identities && result.user.identities.length === 0) {
+        showAuthAlert(`ℹ️ Este correo ya se encuentra registrado. Ingresa tu contraseña y haz clic en <strong>Iniciar Sesión</strong>, o solicita un Magic Link.`, 'info');
+        showToast('El correo ya está registrado. Inicia sesión.', 'info');
+      } else if (result?.session) {
+        showAuthAlert(`🎉 <strong>¡Cuenta creada y sesión iniciada!</strong> Sincronizando tus vacantes...`, 'success');
+        showToast('¡Cuenta creada y sesión activa!', 'success');
+        updateAuthUI();
+      } else {
+        showAuthAlert(`🎉 <strong>¡Cuenta creada exitosamente!</strong><br>Hemos enviado un correo de confirmación a <strong>${escapeHtml(email)}</strong>.<br><br>👉 <em>Revisa tu bandeja de entrada (o carpeta de spam) y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.</em>`, 'success');
+        showToast('¡Cuenta creada! Revisa tu correo de confirmación.', 'success');
+      }
       updateAuthUI();
     } catch (err) {
-      showToast(err.message || 'Error al crear cuenta', 'error');
+      let friendlyMsg = err.message || 'Error al crear cuenta';
+      if (friendlyMsg.includes('Password should be at least')) {
+        friendlyMsg = 'La contraseña debe tener al menos 6 caracteres.';
+      } else if (friendlyMsg.includes('already registered')) {
+        friendlyMsg = 'Este correo ya está registrado. Inicia sesión o solicita un Magic Link.';
+      }
+      showAuthAlert(`⚠️ ${friendlyMsg}`, 'error');
+      showToast(friendlyMsg, 'error');
     } finally {
       btnSignUpPassword.disabled = false;
       btnSignUpPassword.textContent = 'Crear Cuenta';
@@ -2904,6 +2973,7 @@ hello.ary.code@gmail.com`;
   btnSignOut.addEventListener('click', async () => {
     if (window.appSupabase) {
       await window.appSupabase.signOut();
+      hideAuthAlert();
       showToast('Sesión cerrada. Ahora estás en modo local.', 'info');
       updateAuthUI();
     }

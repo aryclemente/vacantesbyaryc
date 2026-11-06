@@ -1361,10 +1361,14 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     if (!overlay) return;
 
     overlay.classList.add('active');
+    overlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
     populateAtsVacancyPicker(targetVacancyId);
     updateAtsBadges();
     renderCopilotMessages();
+
+    const input = document.getElementById('atsCopilotDrawerInput');
+    if (input) setTimeout(() => input.focus(), 150);
 
     if (initialPrompt) {
       handleCopilotUserPrompt(initialPrompt);
@@ -1375,6 +1379,7 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const overlay = document.getElementById('atsCopilotDrawerOverlay');
     if (!overlay) return;
     overlay.classList.remove('active');
+    overlay.style.display = 'none';
     document.body.style.overflow = '';
   }
 
@@ -1408,16 +1413,23 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   }
 
   function initDrawerEventListeners() {
-    // 1. Botón en Header y Botón Flotante
-    const btnHeader = document.getElementById('btnOpenAtsCopilotHeader');
-    if (btnHeader) {
-      btnHeader.addEventListener('click', () => openAtsCopilotDrawer());
-    }
-
-    const btnFloat = document.getElementById('btnFloatingCopilot');
-    if (btnFloat) {
-      btnFloat.addEventListener('click', () => openAtsCopilotDrawer());
-    }
+    // 1. Botón en Header (btnOpenAtsCopilotDrawer / btnOpenAtsCopilotHeader) y Botón Flotante
+    const openTriggerIds = [
+      'btnOpenAtsCopilotDrawer',
+      'btnOpenAtsCopilotHeader',
+      'btnFloatingCopilot',
+      'btnFloatingCopilotLauncher',
+      'mobileNavCopilot'
+    ];
+    openTriggerIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          openAtsCopilotDrawer();
+        });
+      }
+    });
 
     // 2. Cerrar Drawer
     const btnClose = document.getElementById('btnCloseAtsCopilotDrawer');
