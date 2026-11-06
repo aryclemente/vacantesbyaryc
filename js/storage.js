@@ -452,10 +452,26 @@ class StorageService {
 
     const user = window.appSupabase ? window.appSupabase.getUser() : null;
     if (user) {
-      const fallback = {
+      const isArianna = user.email && (user.email.toLowerCase().includes('ary') || user.email.toLowerCase().includes('arianna'));
+      const fallback = isArianna ? {
         ...ARIANNA_MASTER_PROFILE,
-        nombre: user.user_metadata?.nombre || user.email.split('@')[0],
         email: user.email,
+        onboarding_completed: true
+      } : {
+        nombre: user.user_metadata?.nombre || user.email.split('@')[0],
+        titular: '',
+        email: user.email,
+        telefono: '',
+        ubicacion: '',
+        enlaces: { github: '', linkedin: '', portafolio: '', web: '' },
+        resumen: '',
+        habilidades: [],
+        educacion: [],
+        experiencias: [],
+        foto_url: '',
+        foto_config: {},
+        preferencias_empleo: {},
+        ai_provider: 'gemini',
         onboarding_completed: false
       };
       this.profileCache = fallback;

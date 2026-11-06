@@ -11,3 +11,15 @@
 
 6. El tema de asesor de IA, como funciona?
 7. EL tema de vacantes en la web como funciona
+
+El usuario piensa que esta en mi sesion al inicio. Hay que cambiar el inicio con elementos que ayuden al  usuario a entender que esta desde 0. 
+
+Hay que explicar mejor el magic link y el usuario con contraseña. 
+
+Mi smpt llega como si fuera spam, hay que corregir esa parte. 
+
+Subir una foto general, un avatar para todos. 
+
+Hay una error en la interfaz cuando estamos en un modal, de repente el usuario no puede 
+
+Arreglar el mobile, el menu superior

@@ -2915,6 +2915,11 @@ hello.ary.code@gmail.com`;
       showAuthAlert('¡Sesión iniciada con éxito! Sincronizando datos...', 'success');
       showToast('¡Sesión iniciada con éxito! Sincronizando datos...', 'success');
       updateAuthUI();
+      setTimeout(() => {
+        const cloudModal = document.getElementById('cloudModal');
+        if (cloudModal) cloudModal.classList.remove('open');
+        checkNewUserWelcome();
+      }, 500);
     } catch (err) {
       let friendlyMsg = err.message || 'Error al iniciar sesión';
       if (friendlyMsg.includes('Invalid login credentials')) {
@@ -2959,6 +2964,11 @@ hello.ary.code@gmail.com`;
         showAuthAlert(`🎉 <strong>¡Cuenta creada y sesión iniciada!</strong> Sincronizando tus vacantes...`, 'success');
         showToast('¡Cuenta creada y sesión activa!', 'success');
         updateAuthUI();
+        setTimeout(() => {
+          const cloudModal = document.getElementById('cloudModal');
+          if (cloudModal) cloudModal.classList.remove('open');
+          checkNewUserWelcome();
+        }, 500);
       } else {
         showAuthAlert(`🎉 <strong>¡Cuenta creada exitosamente!</strong><br>Hemos enviado un correo de confirmación a <strong>${escapeHtml(email)}</strong>.<br><br>👉 <em>Revisa tu bandeja de entrada (o carpeta de spam) y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.</em>`, 'success');
         showToast('¡Cuenta creada! Revisa tu correo de confirmación.', 'success');
@@ -3076,17 +3086,29 @@ hello.ary.code@gmail.com`;
   function checkNewUserWelcome() {
     if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
     const user = window.appSupabase.getUser();
+    if (!user) return;
+
+    // Obtener perfil específico del usuario
     const profile = window.appStorage.getProfile();
-    const storageKey = 'aryc_welcome_shown_' + (user ? user.id : 'guest');
-    const hasSeenWelcome = localStorage.getItem(storageKey);
-    if (!profile.onboarding_completed && !hasSeenWelcome) {
-      localStorage.setItem(storageKey, 'true');
+
+    // Comprobar si completó el onboarding
+    const isCompleted = profile && profile.onboarding_completed === true && Array.isArray(profile.habilidades) && profile.habilidades.length > 0;
+
+    if (!isCompleted) {
       const profileModal = document.getElementById('profileModal');
+      const cloudModal = document.getElementById('cloudModal');
+
+      // Cerrar modal de login si estaba abierto
+      if (cloudModal) cloudModal.classList.remove('open');
+
       if (profileModal) {
         setTimeout(() => {
+          if (typeof window.populateProfileForm === 'function') {
+            window.populateProfileForm(profile);
+          }
           profileModal.classList.add('open');
-          showToast('🎉 ¡Bienvenido/a! Sube tu perfil en PDF o Markdown para adaptar tus postulaciones en segundos.', 'info');
-        }, 700);
+          showToast(`🎉 ¡Bienvenido/a! Sube tu perfil en PDF o Markdown para adaptar tus postulaciones en 10 segundos.`, 'info');
+        }, 400);
       }
     }
   }
@@ -3099,7 +3121,9 @@ hello.ary.code@gmail.com`;
   if (window.appSupabase) {
     window.appSupabase.onAuthStateChange(() => {
       updateAuthUI();
-      checkNewUserWelcome();
+      setTimeout(() => {
+        checkNewUserWelcome();
+      }, 500);
     });
   }
 
@@ -3107,7 +3131,7 @@ hello.ary.code@gmail.com`;
   setTimeout(() => {
     updateAuthUI();
     checkNewUserWelcome();
-  }, 400);
+  }, 700);
 
   // =========================================================================
   // Reactive Storage Subscription
@@ -3280,6 +3304,8 @@ hello.ary.code@gmail.com`;
       renderFormExperiences();
     }
 
+    window.populateProfileForm = populateProfileForm;
+
     function renderFormSkillsChips(skills) {
       if (!profSkillsChips) return;
       profSkillsChips.innerHTML = skills.map(skill => `
@@ -3392,8 +3418,10 @@ hello.ary.code@gmail.com`;
       try {
         const extracted = await window.aiParser.parseProfileFromText(text, filename);
         if (extracted) {
+          extracted.onboarding_completed = true;
           populateProfileForm(extracted);
-          showToast(`¡Perfil de "${extracted.nombre}" extraído correctamente!`, 'success');
+          window.appStorage.saveProfile(extracted, true);
+          showToast(`¡Perfil de "${extracted.nombre}" extraído y guardado correctamente!`, 'success');
           if (pasteProfileArea) pasteProfileArea.style.display = 'none';
         }
       } catch (err) {
