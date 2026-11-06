@@ -17,14 +17,16 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
+  <a href="#mainContent" class="skip-link">Saltar al contenido principal</a>
 
   <!-- ========================================================================
        Site Header
        ======================================================================== -->
   <header class="site-header">
     <div class="header-container">
-      <a href="#" class="brand-wrapper" id="brandLink">
-        <div class="brand-icon-box">
+      <a href="#" class="brand-wrapper" id="brandLink" aria-label="Inicio - Ary Vacantes Tracker">
+        <div class="brand-icon-box" aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
@@ -35,7 +37,7 @@
             Vacantes <span class="accent-text">by AryC</span>
           </div>
           <div class="brand-subtitle">
-            <span class="live-pulse">
+            <span class="live-pulse" aria-hidden="true">
               <span class="live-pulse-ring"></span>
               <span class="live-pulse-core"></span>
             </span>
@@ -45,32 +47,32 @@
       </a>
 
       <div class="header-actions">
-        <button class="btn btn-primary" id="btnOpenIntake">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button class="btn btn-primary" id="btnOpenIntake" aria-label="Registrar nueva vacante con Smart Intake">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           <span>Nueva Vacante</span>
         </button>
-        <button class="btn btn-outline" id="btnOpenAtsCopilotHeader" title="Asesor Reclutador IA para tu Tablero ATS" style="border-color: rgba(77, 23, 214, 0.35); color: var(--primary); gap:0.4rem;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+        <button class="btn btn-outline" id="btnOpenAtsCopilotHeader" title="Asesor Reclutador IA para tu Tablero ATS" aria-label="Abrir Asesor Reclutador IA para vacantes" style="border-color: rgba(77, 23, 214, 0.35); color: var(--primary); gap:0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
           <span>Asesor IA</span>
           <span class="badge" id="badgeAtsCopilotCount" style="background:var(--primary); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800;">ATS</span>
         </button>
-        <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro">
-          <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;">AC</span>
+        <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro" aria-label="Abrir mi perfil profesional y CV maestro">
+          <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;" aria-hidden="true">AC</span>
           <span id="headerUserName">Mi Perfil</span>
         </button>
-        <button class="btn btn-outline cloud-sync-btn" id="btnOpenCloudModal" title="Sincronización en la Nube">
-          <span class="cloud-status-dot" id="headerCloudDot"></span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button class="btn btn-outline cloud-sync-btn" id="btnOpenCloudModal" title="Sincronización en la Nube" aria-label="Estado de sincronización en la nube con Supabase">
+          <span class="cloud-status-dot" id="headerCloudDot" aria-hidden="true"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
           </svg>
           <span id="headerCloudLabel">Nube</span>
         </button>
-        <button class="btn btn-outline btn-icon-only" id="btnSettings" title="Configuración">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+        <button class="btn btn-outline btn-icon-only" id="btnSettings" title="Configuración" aria-label="Abrir configuración y copia de seguridad">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
@@ -193,14 +195,14 @@
     </div>
 
     <div class="filter-search-wrapper">
-      <select id="filterPriority" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">
+      <select id="filterPriority" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;" aria-label="Filtrar por nivel de prioridad">
         <option value="all">Todas las prioridades</option>
         <option value="high">Prioridad Alta</option>
         <option value="med">Prioridad Media</option>
         <option value="low">Prioridad Baja</option>
       </select>
 
-      <select id="filterModality" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">
+      <select id="filterModality" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;" aria-label="Filtrar por modalidad de trabajo">
         <option value="all">Todas las modalidades</option>
         <option value="Remoto">Remoto</option>
         <option value="Híbrido">Híbrido</option>
@@ -208,11 +210,11 @@
       </select>
 
       <div class="search-input-box">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología...">
+        <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología..." aria-label="Buscar vacantes por puesto, empresa o tecnología">
       </div>
     </div>
   </section>
@@ -221,7 +223,7 @@
   <!-- ========================================================================
        Main Content Views
        ======================================================================== -->
-  <main class="main-content">
+  <main class="main-content" id="mainContent" tabindex="-1">
     
     <!-- View 1: Kanban Board -->
     <div class="view-panel active" id="view-kanban">
@@ -261,7 +263,7 @@
         </div>
 
         <div class="dropzone-box" id="intakeDropzone">
-          <input type="file" id="fileInput" accept="image/*" style="display:none">
+          <input type="file" id="fileInput" accept="image/*" style="display:none" aria-label="Subir captura de pantalla de la vacante">
           <div class="dropzone-icon-circle">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -274,13 +276,13 @@
 
           <div class="image-preview-area" id="imagePreviewArea">
             <img id="previewImg" src="" alt="Captura de pantalla">
-            <button class="remove-img-btn" id="btnRemoveImg" type="button">&times;</button>
+            <button class="remove-img-btn" id="btnRemoveImg" type="button" aria-label="Eliminar captura adjunta">&times;</button>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">URL de la Vacante (Opcional)</label>
-          <input type="url" id="intakeUrl" class="form-control" placeholder="https://www.linkedin.com/jobs/view/...">
+          <label for="intakeUrl" class="form-label">URL de la Vacante (Opcional)</label>
+          <input type="url" id="intakeUrl" class="form-control" placeholder="https://www.linkedin.com/jobs/view/..." aria-label="URL directa de la vacante">
         </div>
 
         <div class="form-group">
@@ -308,8 +310,8 @@
         <div class="cv-toolbar">
           <div class="cv-toolbar-row" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; width:100%;">
             <div style="display:flex; align-items:center; flex-wrap:wrap; gap: 0.6rem;">
-              <label class="form-label" style="margin:0; font-size:0.75rem;">Vacante Objetivo:</label>
-              <select id="cvVacancySelect" class="form-control" style="width: auto; padding: 0.4rem 0.8rem; font-size:0.875rem;">
+              <label for="cvVacancySelect" class="form-label" style="margin:0; font-size:0.75rem;">Vacante Objetivo:</label>
+              <select id="cvVacancySelect" class="form-control" style="width: auto; padding: 0.4rem 0.8rem; font-size:0.875rem;" aria-label="Seleccionar vacante objetivo para adaptar el CV">
                 <option value="general">CV Perfil General (Tech & Banking)</option>
                 <!-- Filled dynamically with vacancies -->
               </select>
@@ -334,8 +336,8 @@
             <div style="display:flex; align-items:center; flex-wrap:wrap; gap:1rem;">
               <!-- Template Selector -->
               <div style="display:flex; align-items:center; gap:0.4rem;">
-                <label class="form-label" style="margin:0; font-size:0.75rem;">Plantilla:</label>
-                <select id="cvTemplateSelect" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size:0.8125rem;">
+                <label for="cvTemplateSelect" class="form-label" style="margin:0; font-size:0.75rem;">Plantilla:</label>
+                <select id="cvTemplateSelect" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size:0.8125rem;" aria-label="Seleccionar diseño o plantilla del CV">
                   <option value="modern">Modern Tech (Inter / Neo-Architect)</option>
                   <option value="harvard">Clásica Harvard (Merriweather / Serif)</option>
                   <option value="banking">Banking & Corporate (Fintech / Executive)</option>
@@ -348,7 +350,7 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                   <span>Foto: <strong id="cvPhotoStatusText">Visible</strong></span>
                 </button>
-                <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+                <input type="file" id="cvPhotoInput" accept="image/*" style="display:none" aria-label="Cargar archivo de fotografía de perfil para el CV">
               </div>
 
               <!-- Experiences Manager Button -->
@@ -367,7 +369,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 <span id="editCvBtnText">Editar Texto</span>
               </button>
-              <button class="btn btn-outline" id="btnResetCvContent" title="Restablecer contenido automático" style="padding:0.4rem 0.6rem;">
+              <button class="btn btn-outline" id="btnResetCvContent" title="Restablecer contenido automático" aria-label="Restablecer contenido automático del CV" style="padding:0.4rem 0.6rem;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
               </button>
               <button class="btn btn-primary" id="btnPrintCv" style="padding:0.4rem 0.85rem; font-size:0.8125rem;">
@@ -490,11 +492,11 @@
             <!-- Search Form Bar -->
             <div class="jobsearch-bar-card">
               <div class="jobsearch-bar-col">
-                <label class="jobsearch-bar-label">
+                <label for="radarFilterRole" class="jobsearch-bar-label">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                   <span>Especialidad / Rol:</span>
                 </label>
-                <select id="radarFilterRole" class="jobsearch-bar-select">
+                <select id="radarFilterRole" class="jobsearch-bar-select" aria-label="Filtrar por especialidad o rol tecnológico">
                   <option value="all">Todas las profesiones tech</option>
                   <option value="Full Stack">Full Stack Developer</option>
                   <option value="Frontend">Frontend (React / Next.js)</option>
@@ -507,11 +509,11 @@
               <div class="jobsearch-bar-divider"></div>
 
               <div class="jobsearch-bar-col">
-                <label class="jobsearch-bar-label">
+                <label for="radarFilterLocation" class="jobsearch-bar-label">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                   <span>Ubicación / Mercado:</span>
                 </label>
-                <select id="radarFilterLocation" class="jobsearch-bar-select">
+                <select id="radarFilterLocation" class="jobsearch-bar-select" aria-label="Filtrar por ubicación geográfica o modalidad de contratación">
                   <option value="all">Todos los mercados</option>
                   <option value="Remoto">100% Remoto Internacional (Global)</option>
                   <option value="España">España / Europa (Remoto o Híbrido)</option>
@@ -523,11 +525,11 @@
               <div class="jobsearch-bar-divider"></div>
 
               <div class="jobsearch-bar-col">
-                <label class="jobsearch-bar-label">
+                <label for="radarFilterSource" class="jobsearch-bar-label">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                   <span>Bolsa / Portal:</span>
                 </label>
-                <select id="radarFilterSource" class="jobsearch-bar-select">
+                <select id="radarFilterSource" class="jobsearch-bar-select" aria-label="Filtrar por portal o bolsa de empleo">
                   <option value="all">Todas las plataformas</option>
                   <option value="LinkedIn">LinkedIn Jobs</option>
                   <option value="InfoJobs">InfoJobs (España)</option>
@@ -538,7 +540,7 @@
                 </select>
               </div>
 
-              <button class="btn-jobsearch-hero-submit" id="btnRadarSearch">
+              <button class="btn-jobsearch-hero-submit" id="btnRadarSearch" aria-label="Ejecutar búsqueda en el radar de empleo">
                 <span>BUSCAR →</span>
               </button>
             </div>
@@ -596,12 +598,12 @@
                 <h4 class="facet-title">COMPATIBILIDAD CON TU CV</h4>
                 <div class="facet-options">
                   <label class="facet-checkbox-label">
-                    <input type="checkbox" id="chkMatchHigh" value="85" checked>
+                    <input type="checkbox" id="chkMatchHigh" value="85" checked aria-label="Filtrar por alta compatibilidad ATS, 85% o más">
                     <span>⭐ Alta afinidad (≥ 85% Match)</span>
                     <span class="facet-count" id="countMatchHigh">0</span>
                   </label>
                   <label class="facet-checkbox-label">
-                    <input type="checkbox" id="chkMatchMed" value="70">
+                    <input type="checkbox" id="chkMatchMed" value="70" aria-label="Filtrar por compatibilidad ATS media, 70% a 84%">
                     <span>Buena afinidad (70% - 84%)</span>
                     <span class="facet-count" id="countMatchMed">0</span>
                   </label>
@@ -661,8 +663,8 @@
 
                 <!-- Chat input form -->
                 <form id="radarCopilotForm" class="copilot-form">
-                  <input type="text" id="radarCopilotInput" class="form-control" placeholder="Pregunta sobre cualquier vacante..." style="font-size:0.8125rem;">
-                  <button type="submit" class="btn btn-primary" id="btnSendRadarCopilot" style="padding:0.45rem 0.75rem;">
+                  <input type="text" id="radarCopilotInput" class="form-control" placeholder="Pregunta sobre cualquier vacante..." style="font-size:0.8125rem;" aria-label="Escribe tu consulta sobre vacantes para el Asesor de Reclutamiento IA">
+                  <button type="submit" class="btn btn-primary" id="btnSendRadarCopilot" aria-label="Enviar mensaje al Asesor de Reclutamiento IA" style="padding:0.45rem 0.75rem;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                   </button>
                 </form>
@@ -683,8 +685,8 @@
 
               <div class="results-actions-col">
                 <div style="display:flex; align-items:center; gap:0.4rem;">
-                  <label class="form-label" style="margin:0; font-size:0.75rem;">Ordenar por:</label>
-                  <select id="radarSortSelect" class="form-control" style="width:auto; padding:0.35rem 0.75rem; font-size:0.8125rem;">
+                  <label for="radarSortSelect" class="form-label" style="margin:0; font-size:0.75rem;">Ordenar por:</label>
+                  <select id="radarSortSelect" class="form-control" style="width:auto; padding:0.35rem 0.75rem; font-size:0.8125rem;" aria-label="Ordenar oportunidades del radar">
                     <option value="match">Mayor Compatibilidad ATS ⭐</option>
                     <option value="recent">Más recientes</option>
                     <option value="salary">Mayor Salario Estimado</option>
@@ -716,66 +718,16 @@
         </div>
       </div>
     </div>
-
   </main>
-
-  <!-- ========================================================================
-       Mobile Bottom Navigation
-       ======================================================================== -->
-  <nav class="mobile-bottom-nav">
-    <button class="mobile-nav-item active" data-view="kanban">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="9" rx="1"></rect>
-        <rect x="14" y="3" width="7" height="5" rx="1"></rect>
-        <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-        <rect x="3" y="16" width="7" height="5" rx="1"></rect>
-      </svg>
-      <span>Kanban</span>
-    </button>
-    <button class="mobile-nav-item" data-view="list">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="8" y1="6" x2="21" y2="6"></line>
-        <line x1="8" y1="12" x2="21" y2="12"></line>
-        <line x1="8" y1="18" x2="21" y2="18"></line>
-        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-      </svg>
-      <span>Lista</span>
-    </button>
-    <button class="mobile-nav-item" data-view="intake">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="16"></line>
-        <line x1="8" y1="12" x2="16" y2="12"></line>
-      </svg>
-      <span>Ingesta IA</span>
-    </button>
-    <button class="mobile-nav-item" data-view="cv">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-      </svg>
-      <span>Mi CV</span>
-    </button>
-    <button class="mobile-nav-item" data-view="jobsearch">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        <circle cx="11" cy="11" r="3"></circle>
-      </svg>
-      <span>Radar</span>
-    </button>
-  </nav>
 
   <!-- ========================================================================
        Vacancy Detail Modal
        ======================================================================== -->
-  <div class="modal-overlay" id="vacancyModal">
+  <div class="modal-overlay" id="vacancyModal" role="dialog" aria-modal="true" aria-labelledby="modalJobTitle">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modalJobTitle">Detalle de la Vacante</h3>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseModal" type="button" aria-label="Cerrar detalle de vacante">&times;</button>
       </div>
       <div class="modal-body" id="modalJobContent">
         <!-- Rendered dynamically -->
@@ -783,7 +735,7 @@
       <div class="modal-footer">
         <button class="btn btn-outline" id="btnDeleteVacancy" style="color:var(--error); margin-right:auto;">Eliminar</button>
         <button class="btn btn-outline" id="btnDetailInterviewCoach" style="color:var(--primary); font-weight:700;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>🎯 Entrenador IA</span>
         </button>
         <button class="btn btn-purple" id="btnOpenUrl" target="_blank">Visitar Oferta</button>
@@ -795,100 +747,93 @@
   <!-- ========================================================================
        AI Intake Confirmation Modal
        ======================================================================== -->
-  <div class="modal-overlay" id="intakeConfirmModal">
+  <div class="modal-overlay" id="intakeConfirmModal" role="dialog" aria-modal="true" aria-labelledby="intakeConfirmTitle">
     <div class="modal-card">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); display:flex; align-items:center; justify-content:center; color:#fff;">
+          <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); display:flex; align-items:center; justify-content:center; color:#fff;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.125rem;">Confirmar Extracción con IA</h3>
+            <h3 style="margin:0; font-size:1.125rem;" id="intakeConfirmTitle">Confirmar Extracción con IA</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);" id="aiExtractionSourceBadge">Extracción inteligente finalizada</span>
           </div>
         </div>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseConfirmModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseConfirmModal" type="button" aria-label="Cerrar confirmación de extracción">&times;</button>
       </div>
       <div class="modal-body">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
           <div class="form-group">
-            <label class="form-label">Empresa</label>
-            <input type="text" id="confirmEmpresa" class="form-control" required>
+            <label class="form-label" for="confirmEmpresa">Empresa</label>
+            <input type="text" id="confirmEmpresa" class="form-control" required aria-label="Nombre de la empresa">
           </div>
           <div class="form-group">
-            <label class="form-label">Puesto / Título</label>
-            <input type="text" id="confirmPuesto" class="form-control" required>
+            <label class="form-label" for="confirmPuesto">Puesto / Título</label>
+            <input type="text" id="confirmPuesto" class="form-control" required aria-label="Título del puesto">
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem; margin-bottom:1rem;">
           <div class="form-group">
-            <label class="form-label">Modalidad</label>
-            <select id="confirmModalidad" class="form-control">
+            <label class="form-label" for="confirmModalidad">Modalidad</label>
+            <select id="confirmModalidad" class="form-control" aria-label="Modalidad de trabajo">
               <option value="Remoto">Remoto</option>
               <option value="Híbrido">Híbrido</option>
               <option value="Presencial">Presencial</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Prioridad</label>
-            <select id="confirmPrioridad" class="form-control">
+            <label class="form-label" for="confirmPrioridad">Prioridad</label>
+            <select id="confirmPrioridad" class="form-control" aria-label="Nivel de prioridad">
               <option value="high">Alta</option>
               <option value="med">Media</option>
               <option value="low">Baja</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Salario Estimado</label>
-            <input type="text" id="confirmSalario" class="form-control" placeholder="Ej: $2,000 USD">
+            <label class="form-label" for="confirmSalario">Salario Estimado</label>
+            <input type="text" id="confirmSalario" class="form-control" placeholder="Ej: $2,000 USD" aria-label="Salario estimado">
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
           <div class="form-group">
-            <label class="form-label">Contacto / Reclutador</label>
-            <input type="text" id="confirmContacto" class="form-control" placeholder="Nombre o correo">
+            <label class="form-label" for="confirmContacto">Contacto / Reclutador</label>
+            <input type="text" id="confirmContacto" class="form-control" placeholder="Nombre o correo" aria-label="Nombre o contacto del reclutador">
           </div>
           <div class="form-group">
-            <label class="form-label">URL de la Vacante</label>
-            <input type="url" id="confirmUrl" class="form-control">
+            <label class="form-label" for="confirmUrl">URL de la Vacante</label>
+            <input type="url" id="confirmUrl" class="form-control" aria-label="Enlace URL de la vacante">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Requisitos Clave Detectados</label>
+          <label class="form-label" for="confirmRequisitosInput">Requisitos Clave Detectados</label>
           <div id="confirmRequisitosChips" style="margin-bottom:0.4rem;"></div>
-          <input type="text" id="confirmRequisitosInput" class="form-control" placeholder="Añadir tecnologías separadas por coma...">
+          <input type="text" id="confirmRequisitosInput" class="form-control" placeholder="Añadir tecnologías separadas por coma..." aria-label="Añadir requisitos técnicos detectados">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Notas y Estrategia</label>
-          <textarea id="confirmNotas" class="form-control" rows="3"></textarea>
+          <label class="form-label" for="confirmNotas">Notas y Estrategia</label>
+          <textarea id="confirmNotas" class="form-control" rows="3" aria-label="Notas y estrategia de postulación"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" id="btnCancelConfirm">Descartar</button>
         <button class="btn btn-primary" id="btnSaveConfirmedJob">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Guardar en el Tablero</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="t  <!-- ========================================================================
        Settings & Backup Modal
        ======================================================================== -->
-  <div class="modal-overlay" id="settingsModal">
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Configuración & Copias de Seguridad</h3>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseSettingsModal">&times;</button>
+        <h3 id="settingsModalTitle">Configuración & Copias de Seguridad</h3>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseSettingsModal" type="button" aria-label="Cerrar configuración">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Proveedor de Inteligencia Artificial (BYOK)</label>
-          <select id="selectAiProvider" class="form-control" style="margin-bottom:0.75rem; font-size:0.875rem;">
+          <label class="form-label" for="selectAiProvider">Proveedor de Inteligencia Artificial (BYOK)</label>
+          <select id="selectAiProvider" class="form-control" style="margin-bottom:0.75rem; font-size:0.875rem;" aria-label="Proveedor de Inteligencia Artificial">
             <option value="gemini">Google Gemini (Gemini 2.5 Flash / Pro)</option>
             <option value="claude">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
             <option value="kimi">Kimi / Moonshot AI (Moonshot v1)</option>
@@ -896,8 +841,8 @@
             <option value="openrouter">OpenRouter (DeepSeek / Multi-LLM)</option>
           </select>
 
-          <label class="form-label" id="labelAiApiKey">API Key del Proveedor Seleccionado</label>
-          <input type="password" id="inputApiKey" class="form-control" placeholder="AIzaSy... / sk-ant-... / sk-...">
+          <label class="form-label" id="labelAiApiKey" for="inputApiKey">API Key del Proveedor Seleccionado</label>
+          <input type="password" id="inputApiKey" class="form-control" placeholder="AIzaSy... / sk-ant-... / sk-..." aria-label="Clave de API del proveedor de IA">
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;" id="aiProviderHelpText">
             Tu clave se guarda <strong>únicamente en tu navegador</strong> (privado y seguro). Si no tienes clave configurada, la aplicación opera al 100% con el motor heurístico local sin coste.
           </div>
@@ -910,14 +855,14 @@
           </p>
           <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
             <button class="btn btn-outline" id="btnExportJson">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Exportar JSON</span>
             </button>
             <button class="btn btn-outline" id="btnTriggerImport">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <span>Restaurar JSON</span>
             </button>
-            <input type="file" id="importFileInput" accept=".json" style="display:none">
+            <input type="file" id="importFileInput" accept=".json" style="display:none" aria-label="Seleccionar archivo JSON para importar">
             <button class="btn btn-outline" id="btnResetSeed" style="color:var(--error); margin-left:auto;">
               Restablecer Inicio
             </button>
@@ -933,17 +878,17 @@
   <!-- ========================================================================
        Supabase Cloud & Auth Modal
        ======================================================================== -->
-  <div class="modal-overlay" id="cloudModal">
+  <div class="modal-overlay" id="cloudModal" role="dialog" aria-modal="true" aria-labelledby="cloudModalTitle">
     <div class="modal-card">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div class="cloud-indicator-dot" id="modalCloudDot"></div>
+          <div class="cloud-indicator-dot" id="modalCloudDot" aria-hidden="true"></div>
           <div>
-            <h3 style="margin:0; font-size:1.125rem;">Sincronización en la Nube</h3>
+            <h3 style="margin:0; font-size:1.125rem;" id="cloudModalTitle">Sincronización en la Nube</h3>
             <div style="font-size:0.75rem; color:var(--text-muted);" id="modalCloudSubtext">Proyecto VacantesByAry conectado // Multi-dispositivo</div>
           </div>
         </div>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseCloudModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseCloudModal" type="button" aria-label="Cerrar sincronización en la nube">&times;</button>
       </div>
 
       <div class="modal-body">
@@ -961,14 +906,14 @@
           <!-- Form: Magic Link -->
           <form id="formMagicLink" style="display:block;">
             <div class="form-group">
-              <label class="form-label">Correo Electrónico</label>
-              <input type="email" id="inputMagicEmail" class="form-control" placeholder="tu-correo@ejemplo.com" required>
+              <label class="form-label" for="inputMagicEmail">Correo Electrónico</label>
+              <input type="email" id="inputMagicEmail" class="form-control" placeholder="tu-correo@ejemplo.com" required aria-label="Correo para enlace mágico">
               <span style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem; display:block;">
                 Te enviaremos un enlace seguro a tu bandeja para ingresar inmediatamente con un solo clic.
               </span>
             </div>
             <button type="submit" class="btn btn-primary" id="btnSendMagicLink" style="width:100%; margin-top:0.5rem;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
               <span>Enviar Enlace de Acceso</span>
             </button>
           </form>
@@ -976,12 +921,12 @@
           <!-- Form: Password -->
           <form id="formPassword" style="display:none;">
             <div class="form-group">
-              <label class="form-label">Correo Electrónico</label>
-              <input type="email" id="inputAuthEmail" class="form-control" placeholder="tu-correo@ejemplo.com">
+              <label class="form-label" for="inputAuthEmail">Correo Electrónico</label>
+              <input type="email" id="inputAuthEmail" class="form-control" placeholder="tu-correo@ejemplo.com" aria-label="Correo electrónico para ingresar">
             </div>
             <div class="form-group">
-              <label class="form-label">Contraseña</label>
-              <input type="password" id="inputAuthPassword" class="form-control" placeholder="••••••••">
+              <label class="form-label" for="inputAuthPassword">Contraseña</label>
+              <input type="password" id="inputAuthPassword" class="form-control" placeholder="••••••••" aria-label="Contraseña de tu cuenta">
             </div>
             <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
               <button type="button" class="btn btn-primary" id="btnSignInPassword" style="flex:1;">
@@ -1039,40 +984,40 @@
   <!-- ========================================================================
        Cover Letter Modal (Carta de Presentación)
        ======================================================================== -->
-  <div class="modal-overlay" id="coverLetterModal">
+  <div class="modal-overlay" id="coverLetterModal" role="dialog" aria-modal="true" aria-labelledby="coverLetterModalTitle">
     <div class="modal-card" style="max-width: 780px;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); display:flex; align-items:center; justify-content:center; color:#fff;">
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); display:flex; align-items:center; justify-content:center; color:#fff;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.125rem;">Carta de Presentación Adaptada</h3>
+            <h3 style="margin:0; font-size:1.125rem;" id="coverLetterModalTitle">Carta de Presentación Adaptada</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);" id="coverLetterSubtext">Generada con IA para la vacante seleccionada</span>
           </div>
         </div>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseCoverLetterModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseCoverLetterModal" type="button" aria-label="Cerrar carta de presentación">&times;</button>
       </div>
       <div class="modal-body" style="padding:1.5rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
           <span class="tag-pill" style="margin:0; background:rgba(77, 23, 214, 0.1); color:var(--primary); font-weight:700;" id="coverLetterCompanyBadge">Empresa</span>
           <span style="font-size:0.75rem; color:var(--text-muted);">Puedes editar el texto libremente antes de copiar o descargar</span>
         </div>
-        <div class="cover-letter-paper" id="coverLetterText" contenteditable="true" style="background:#ffffff; border:1px solid var(--border-slate); border-radius:12px; padding:2rem; font-family:'Inter', sans-serif; font-size:0.9375rem; line-height:1.7; color:#1e293b; min-height:340px; max-height:55vh; overflow-y:auto; white-space:pre-wrap; outline:none;">
+        <div class="cover-letter-paper" id="coverLetterText" contenteditable="true" style="background:#ffffff; border:1px solid var(--border-slate); border-radius:12px; padding:2rem; font-family:'Inter', sans-serif; font-size:0.9375rem; line-height:1.7; color:#1e293b; min-height:340px; max-height:55vh; overflow-y:auto; white-space:pre-wrap; outline:none;" aria-label="Texto de la carta de presentación">
           <!-- Content filled dynamically -->
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" id="btnRegenerateCoverLetter">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
           <span id="regenerateLetterBtnText">Regenerar con IA</span>
         </button>
         <button class="btn btn-outline" id="btnCopyCoverLetter">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
           <span>Copiar Carta</span>
         </button>
         <button class="btn btn-primary" id="btnPrintCoverLetter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>Descargar PDF</span>
         </button>
       </div>
@@ -1082,49 +1027,49 @@
   <!-- ========================================================================
        Email Pitch Modal (Correo de Postulación)
        ======================================================================== -->
-  <div class="modal-overlay" id="emailPitchModal">
+  <div class="modal-overlay" id="emailPitchModal" role="dialog" aria-modal="true" aria-labelledby="emailPitchModalTitle">
     <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--deep-teal), var(--mint-turquoise)); display:flex; align-items:center; justify-content:center; color:#fff;">
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--deep-teal), var(--mint-turquoise)); display:flex; align-items:center; justify-content:center; color:#fff;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.125rem;">Correo de Postulación</h3>
+            <h3 style="margin:0; font-size:1.125rem;" id="emailPitchModalTitle">Correo de Postulación</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);" id="emailPitchSubtext">Preparado para enviar con tu CV y Portafolio</span>
           </div>
         </div>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseEmailPitchModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseEmailPitchModal" type="button" aria-label="Cerrar correo de postulación">&times;</button>
       </div>
       <div class="modal-body" style="padding:1.5rem;">
         <div class="form-group" style="margin-bottom:0.85rem;">
-          <label class="form-label">Destinatario (Para)</label>
-          <input type="text" id="emailToInput" class="form-control" placeholder="reclutador@empresa.com">
+          <label class="form-label" for="emailToInput">Destinatario (Para)</label>
+          <input type="text" id="emailToInput" class="form-control" placeholder="reclutador@empresa.com" aria-label="Destinatario del correo">
         </div>
 
         <div class="form-group" style="margin-bottom:0.85rem;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <label class="form-label" style="margin:0;">Asunto</label>
+            <label class="form-label" style="margin:0;" for="emailSubjectInput">Asunto</label>
             <button class="btn btn-outline" id="btnCopyEmailSubject" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Copiar Asunto</button>
           </div>
-          <input type="text" id="emailSubjectInput" class="form-control" style="margin-top:0.35rem;" readonly>
+          <input type="text" id="emailSubjectInput" class="form-control" style="margin-top:0.35rem;" readonly aria-label="Asunto del correo">
         </div>
 
         <div class="form-group" style="margin-bottom:0.5rem;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <label class="form-label" style="margin:0;">Cuerpo del Mensaje</label>
+            <label class="form-label" style="margin:0;" for="emailBodyInput">Cuerpo del Mensaje</label>
             <button class="btn btn-outline" id="btnCopyEmailBody" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Copiar Cuerpo</button>
           </div>
-          <textarea id="emailBodyInput" class="form-control" style="margin-top:0.35rem; min-height:220px; font-family:'Inter', sans-serif; font-size:0.875rem; line-height:1.6;"></textarea>
+          <textarea id="emailBodyInput" class="form-control" style="margin-top:0.35rem; min-height:220px; font-family:'Inter', sans-serif; font-size:0.875rem; line-height:1.6;" aria-label="Cuerpo del mensaje de postulación"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" id="btnRegenerateEmail">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
           <span id="regenerateEmailBtnText">Regenerar con IA</span>
         </button>
         <a class="btn btn-primary" id="btnLaunchMailClient" href="#" target="_blank" style="text-decoration:none;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           <span>Abrir en Gmail / App de Correo</span>
         </a>
       </div>
@@ -1134,11 +1079,11 @@
   <!-- ========================================================================
        Interview Coach & FAQ Modal (Entrenador de Entrevistas & FAQ con IA)
        ======================================================================== -->
-  <div class="modal-overlay" id="interviewCoachModal">
+  <div class="modal-overlay" id="interviewCoachModal" role="dialog" aria-modal="true" aria-labelledby="coachModalTitle">
     <div class="modal-card" style="max-width: 820px; height: 90vh;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); display:flex; align-items:center; justify-content:center; color:#fff;">
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); display:flex; align-items:center; justify-content:center; color:#fff;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
           <div>
@@ -1151,7 +1096,7 @@
           <span class="tag-pill" style="margin:0; background:rgba(0, 210, 180, 0.12); color:var(--deep-teal); font-weight:700; font-size:0.7rem;" title="Almacenamiento ultra-optimizado con GZIP nativo en la base de datos">
             💾 GZIP Comprimido (BD Ligera)
           </span>
-          <button class="btn btn-outline btn-icon-only" id="btnCloseInterviewCoachModal">&times;</button>
+          <button class="btn btn-outline btn-icon-only" id="btnCloseInterviewCoachModal" type="button" aria-label="Cerrar entrenador de entrevistas">&times;</button>
         </div>
       </div>
 
@@ -1173,7 +1118,7 @@
               Las 5 preguntas técnicas y conductuales más determinantes para esta vacante, con estrategias basadas en tus proyectos reales:
             </p>
             <button class="btn btn-outline" id="btnRefreshFaqs" style="padding:0.3rem 0.65rem; font-size:0.75rem;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
               <span>Regenerar FAQs</span>
             </button>
           </div>
@@ -1190,13 +1135,13 @@
           </div>
 
           <form id="coachChatForm" style="display:flex; gap:0.5rem;">
-            <input type="text" id="coachChatInput" class="form-control" placeholder="Haz una pregunta o practica una respuesta para esta vacante..." style="flex:1;">
+            <input type="text" id="coachChatInput" class="form-control" placeholder="Haz una pregunta o practica una respuesta para esta vacante..." style="flex:1;" aria-label="Pregunta o respuesta para simular la entrevista">
             <button class="btn btn-primary" type="submit" id="btnSendCoachMessage" style="padding:0.6rem 1rem;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
               <span>Enviar</span>
             </button>
-            <button class="btn btn-outline" type="button" id="btnClearCoachChat" title="Borrar historial de chat" style="padding:0.6rem;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <button class="btn btn-outline" type="button" id="btnClearCoachChat" title="Borrar historial de chat" aria-label="Limpiar historial de chat del entrenador" style="padding:0.6rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </form>
         </div>
@@ -1208,19 +1153,19 @@
   <!-- ========================================================================
        Modal 1: Sugerencias de Resumen Profesional (Persuasión Sutil & Sin Autobombo)
        ======================================================================== -->
-  <div class="modal-overlay" id="summarySuggestionsModal">
+  <div class="modal-overlay" id="summarySuggestionsModal" role="dialog" aria-modal="true" aria-labelledby="summaryModalTitle">
     <div class="modal-card" style="max-width: 820px; max-height: 90vh; display:flex; flex-direction:column;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:8px; background:linear-gradient(135deg, var(--primary) 0%, #6138e9 100%); display:flex; align-items:center; justify-content:center; color:#fff;">
+          <div style="width:34px; height:34px; border-radius:8px; background:linear-gradient(135deg, var(--primary) 0%, #6138e9 100%); display:flex; align-items:center; justify-content:center; color:#fff;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.15rem;">Sugerencias de Resumen Profesional</h3>
+            <h3 style="margin:0; font-size:1.15rem;" id="summaryModalTitle">Sugerencias de Resumen Profesional</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);">Enfoques estratégicos pulidos para que el reclutador deduzca tu idoneidad sin frases forzadas</span>
           </div>
         </div>
-        <button class="modal-close-btn" id="btnCloseSummaryModal">&times;</button>
+        <button class="modal-close-btn" id="btnCloseSummaryModal" type="button" aria-label="Cerrar sugerencias de resumen">&times;</button>
       </div>
 
       <div class="modal-body" style="padding:1.25rem; overflow-y:auto; flex:1;">
@@ -1234,8 +1179,8 @@
 
         <!-- Quick Edit Box (collapsible) -->
         <div id="summaryQuickEditContainer" style="display:none; margin-top:1.25rem; border-top:1px solid var(--border-slate); padding-top:1rem;">
-          <label class="form-label" style="font-weight:700; font-size:0.8125rem; margin-bottom:0.4rem;">Personalizar antes de aplicar al CV:</label>
-          <textarea id="summaryQuickEditTextarea" class="form-control" rows="4" style="font-size:0.875rem; line-height:1.5; resize:vertical;"></textarea>
+          <label class="form-label" style="font-weight:700; font-size:0.8125rem; margin-bottom:0.4rem;" for="summaryQuickEditTextarea">Personalizar antes de aplicar al CV:</label>
+          <textarea id="summaryQuickEditTextarea" class="form-control" rows="4" style="font-size:0.875rem; line-height:1.5; resize:vertical;" aria-label="Personalizar resumen antes de aplicar"></textarea>
           <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.6rem;">
             <button class="btn btn-outline" id="btnCancelQuickEdit" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">Cancelar</button>
             <button class="btn btn-primary" id="btnApplyQuickEdit" style="padding:0.35rem 0.85rem; font-size:0.8125rem;">Aplicar Texto al CV</button>
@@ -1245,7 +1190,7 @@
 
       <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
         <button class="btn btn-outline" id="btnRegenerateSummaries" style="padding:0.4rem 0.85rem; font-size:0.8125rem;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
           <span id="btnRegenSummariesText">Regenerar con IA</span>
         </button>
         <button class="btn btn-outline" id="btnDismissSummaryModal">Cerrar</button>
@@ -1256,19 +1201,19 @@
   <!-- ========================================================================
        Modal 2: Gestionar Experiencias Laborales (Exclusión & Visibilidad On/Off)
        ======================================================================== -->
-  <div class="modal-overlay" id="manageExperiencesModal">
+  <div class="modal-overlay" id="manageExperiencesModal" role="dialog" aria-modal="true" aria-labelledby="manageExpModalTitle">
     <div class="modal-card" style="max-width: 680px; max-height: 85vh; display:flex; flex-direction:column;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:8px; background:rgba(0, 104, 117, 0.12); color:var(--deep-teal); display:flex; align-items:center; justify-content:center;">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(0, 104, 117, 0.12); color:var(--deep-teal); display:flex; align-items:center; justify-content:center;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.15rem;">Gestionar Experiencias Laborales</h3>
+            <h3 style="margin:0; font-size:1.15rem;" id="manageExpModalTitle">Gestionar Experiencias Laborales</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);">Activa o desactiva puestos para adaptar tu trayectoria a la vacante y mantener 1 página ATS</span>
           </div>
         </div>
-        <button class="modal-close-btn" id="btnCloseManageExpModal">&times;</button>
+        <button class="modal-close-btn" id="btnCloseManageExpModal" type="button" aria-label="Cerrar gestión de experiencias">&times;</button>
       </div>
 
       <div class="modal-body" style="padding:1.25rem; overflow-y:auto; flex:1;">
@@ -1299,19 +1244,19 @@
   <!-- ========================================================================
        Modal 3: Configuración y Personalización de Fotografía
        ======================================================================== -->
-  <div class="modal-overlay" id="cvPhotoConfigModal">
+  <div class="modal-overlay" id="cvPhotoConfigModal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
     <div class="modal-card" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:8px; background:rgba(255, 46, 147, 0.12); color:var(--hot-pink-vibrant); display:flex; align-items:center; justify-content:center;">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(255, 46, 147, 0.12); color:var(--hot-pink-vibrant); display:flex; align-items:center; justify-content:center;" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.15rem;">Fotografía del Currículum</h3>
+            <h3 style="margin:0; font-size:1.15rem;" id="photoModalTitle">Fotografía del Currículum</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);">Ajusta la visibilidad, forma del marco, encuadre o archivo de imagen</span>
           </div>
         </div>
-        <button class="modal-close-btn" id="btnClosePhotoModal">&times;</button>
+        <button class="modal-close-btn" id="btnClosePhotoModal" type="button" aria-label="Cerrar configuración de fotografía">&times;</button>
       </div>
 
       <div class="modal-body" style="padding:1.25rem;">
@@ -1322,8 +1267,8 @@
             <span style="font-size:0.75rem; color:var(--text-muted);">Desactívala para mercados estrictamente sin foto (EE.UU./UK) o actívala para LATAM/Europa</span>
           </div>
           <label class="switch" style="position:relative; display:inline-block; width:44px; height:24px;">
-            <input type="checkbox" id="modalTogglePhoto" style="opacity:0; width:0; height:0;">
-            <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#cbd5e1; transition:.3s; border-radius:24px;"></span>
+            <input type="checkbox" id="modalTogglePhoto" style="opacity:0; width:0; height:0;" aria-label="Incluir fotografía en el CV">
+            <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#cbd5e1; transition:.3s; border-radius:24px;" aria-hidden="true"></span>
           </label>
         </div>
 
@@ -1331,7 +1276,7 @@
           <!-- Live Preview Box -->
           <div style="text-align:center;">
             <div class="photo-preview-box shape-circle" id="modalPhotoPreviewBox">
-              <img id="modalPhotoPreviewImg" src="assets/images/arianna_photo.jpg" alt="Vista previa de foto" class="pos-top">
+              <img id="modalPhotoPreviewImg" src="assets/images/arianna_photo.jpg" alt="Vista previa de foto de perfil" class="pos-top">
             </div>
             <span style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.4rem;">Vista previa</span>
           </div>
@@ -1341,16 +1286,16 @@
             <!-- Shape Options -->
             <label class="form-label" style="font-size:0.75rem; font-weight:700; margin-bottom:0.25rem;">Forma del Marco:</label>
             <div class="photo-shape-selector">
-              <button class="photo-shape-btn active" data-shape="circle">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+              <button class="photo-shape-btn active" data-shape="circle" aria-label="Marco circular">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
                 <span>Círculo</span>
               </button>
-              <button class="photo-shape-btn" data-shape="rounded">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/></svg>
+              <button class="photo-shape-btn" data-shape="rounded" aria-label="Marco con bordes suaves">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/></svg>
                 <span>Bordes Suaves</span>
               </button>
-              <button class="photo-shape-btn" data-shape="square">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1" ry="1"/></svg>
+              <button class="photo-shape-btn" data-shape="square" aria-label="Marco cuadrado">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1" ry="1"/></svg>
                 <span>Cuadrado</span>
               </button>
             </div>
@@ -1369,11 +1314,11 @@
             <!-- Actions -->
             <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.75rem;">
               <button class="btn btn-outline" id="btnUseOfficialPhoto" style="padding:0.35rem 0.7rem; font-size:0.75rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
                 <span>Foto Oficial Arianna</span>
               </button>
               <button class="btn btn-outline" id="btnModalUploadPhoto" style="padding:0.35rem 0.7rem; font-size:0.75rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 <span>Subir Nueva Foto</span>
               </button>
               <button class="btn btn-outline" id="btnRemovePhoto" style="padding:0.35rem 0.6rem; font-size:0.75rem; color:var(--error);">
@@ -1387,32 +1332,29 @@
       <div class="modal-footer" style="display:flex; justify-content:flex-end;">
         <button class="btn btn-primary" id="btnApplyPhotoConfig">Listo</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================
+    <  <!-- ========================================================================
        User Profile & Smart Onboarding Modal
        ======================================================================== -->
-  <div class="modal-overlay" id="profileModal">
+  <div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
     <div class="modal-card" style="max-width: 780px;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.875rem;">
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--tertiary)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.875rem;" aria-hidden="true">
             👤
           </div>
           <div>
-            <h3 style="margin:0; font-size:1.15rem;">Mi Perfil Profesional & CV Maestro</h3>
+            <h3 style="margin:0; font-size:1.15rem;" id="profileModalTitle">Mi Perfil Profesional & CV Maestro</h3>
             <div style="font-size:0.75rem; color:var(--text-muted);">Gestiona tu identidad, trayectoria y stack para personalizar tu CV y el Radar de Empleos</div>
           </div>
         </div>
-        <button class="btn btn-outline btn-icon-only" id="btnCloseProfileModal">&times;</button>
+        <button class="btn btn-outline btn-icon-only" id="btnCloseProfileModal" type="button" aria-label="Cerrar perfil profesional">&times;</button>
       </div>
 
       <div class="modal-body" style="max-height: calc(85vh - 120px); overflow-y: auto;">
         
         <!-- Smart Dropzone: Cero Formularios Gigantes -->
         <div class="profile-dropzone-card" style="border: 2px dashed var(--primary); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; background: rgba(77, 23, 214, 0.03); margin-bottom: 1.5rem;">
-          <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;" aria-hidden="true">⚡</div>
           <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem; color: var(--text-dark-primary);">
             Importación Automática de Perfil
           </h4>
@@ -1422,10 +1364,10 @@
 
           <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
             <button class="btn btn-primary" id="btnUploadProfileFile" style="padding: 0.5rem 1.1rem; font-size: 0.8125rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Subir Archivo (.md, .pdf, .txt)</span>
             </button>
-            <input type="file" id="profileFileInput" accept=".md,.pdf,.txt" style="display:none;">
+            <input type="file" id="profileFileInput" accept=".md,.pdf,.txt" style="display:none;" aria-label="Seleccionar archivo de perfil profesional">
             
             <button class="btn btn-outline" id="btnTogglePasteProfile" style="padding: 0.5rem 0.9rem; font-size: 0.8125rem;">
               <span>📝 Pegar Texto / Markdown</span>
@@ -1434,7 +1376,8 @@
 
           <!-- Collapsible text area for paste -->
           <div id="pasteProfileArea" style="display:none; margin-top: 1rem; text-align: left;">
-            <textarea id="profilePasteTextarea" class="form-control" rows="5" placeholder="Pega aquí el contenido de tu CV o perfil en Markdown o texto plano..." style="font-size: 0.8125rem; font-family: monospace;"></textarea>
+            <label class="form-label" for="profilePasteTextarea" style="font-size:0.75rem;">Contenido del perfil:</label>
+            <textarea id="profilePasteTextarea" class="form-control" rows="5" placeholder="Pega aquí el contenido de tu CV o perfil en Markdown o texto plano..." style="font-size: 0.8125rem; font-family: monospace;" aria-label="Texto de CV o perfil en Markdown"></textarea>
             <div style="display:flex; justify-content:flex-end; margin-top:0.5rem;">
               <button class="btn btn-primary" id="btnProcessPastedProfile" style="padding:0.4rem 0.9rem; font-size:0.75rem;">
                 Procesar e Importar
@@ -1444,7 +1387,7 @@
 
           <!-- Loading state -->
           <div id="profileExtractLoading" style="display:none; margin-top:1rem; align-items:center; justify-content:center; gap:0.5rem; font-size:0.8125rem; color:var(--primary); font-weight:700;">
-            <span class="live-pulse"><span class="live-pulse-core" style="background:var(--primary);"></span></span>
+            <span class="live-pulse" aria-hidden="true"><span class="live-pulse-core" style="background:var(--primary);"></span></span>
             <span>Extrayendo experiencia, stack y datos de perfil...</span>
           </div>
         </div>
@@ -1460,49 +1403,49 @@
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">Nombre Completo</label>
-              <input type="text" id="profNombre" class="form-control" placeholder="Ej. Juan Pérez">
+              <label class="form-label" for="profNombre" style="font-size:0.75rem;">Nombre Completo</label>
+              <input type="text" id="profNombre" class="form-control" placeholder="Ej. Juan Pérez" aria-label="Nombre completo del perfil">
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">Titular / Cargo Objetivo</label>
-              <input type="text" id="profTitular" class="form-control" placeholder="Ej. Senior Full Stack Engineer">
+              <label class="form-label" for="profTitular" style="font-size:0.75rem;">Titular / Cargo Objetivo</label>
+              <input type="text" id="profTitular" class="form-control" placeholder="Ej. Senior Full Stack Engineer" aria-label="Cargo objetivo del perfil">
             </div>
           </div>
 
           <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">Correo Electrónico</label>
-              <input type="email" id="profEmail" class="form-control" placeholder="correo@ejemplo.com">
+              <label class="form-label" for="profEmail" style="font-size:0.75rem;">Correo Electrónico</label>
+              <input type="email" id="profEmail" class="form-control" placeholder="correo@ejemplo.com" aria-label="Correo electrónico del perfil">
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">Teléfono</label>
-              <input type="text" id="profTelefono" class="form-control" placeholder="+34 600 000 000">
+              <label class="form-label" for="profTelefono" style="font-size:0.75rem;">Teléfono</label>
+              <input type="text" id="profTelefono" class="form-control" placeholder="+34 600 000 000" aria-label="Teléfono del perfil">
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">Ubicación</label>
-              <input type="text" id="profUbicacion" class="form-control" placeholder="Madrid, España / Remoto">
+              <label class="form-label" for="profUbicacion" style="font-size:0.75rem;">Ubicación</label>
+              <input type="text" id="profUbicacion" class="form-control" placeholder="Madrid, España / Remoto" aria-label="Ubicación geográfica del perfil">
             </div>
           </div>
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">LinkedIn (URL o usuario)</label>
-              <input type="text" id="profLinkedin" class="form-control" placeholder="linkedin.com/in/usuario">
+              <label class="form-label" for="profLinkedin" style="font-size:0.75rem;">LinkedIn (URL o usuario)</label>
+              <input type="text" id="profLinkedin" class="form-control" placeholder="linkedin.com/in/usuario" aria-label="Perfil de LinkedIn">
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.75rem;">GitHub / Portafolio</label>
-              <input type="text" id="profGithub" class="form-control" placeholder="github.com/usuario">
+              <label class="form-label" for="profGithub" style="font-size:0.75rem;">GitHub / Portafolio</label>
+              <input type="text" id="profGithub" class="form-control" placeholder="github.com/usuario" aria-label="Perfil de GitHub o enlace a portafolio">
             </div>
           </div>
 
           <div class="form-group" style="margin-bottom:0.75rem;">
-            <label class="form-label" style="font-size:0.75rem;">Resumen Profesional</label>
-            <textarea id="profResumen" class="form-control" rows="3" placeholder="Describe tu trayectoria, fortalezas y valor..." style="font-size:0.8125rem;"></textarea>
+            <label class="form-label" for="profResumen" style="font-size:0.75rem;">Resumen Profesional</label>
+            <textarea id="profResumen" class="form-control" rows="3" placeholder="Describe tu trayectoria, fortalezas y valor..." style="font-size:0.8125rem;" aria-label="Resumen profesional del perfil"></textarea>
           </div>
 
           <div class="form-group" style="margin-bottom:1rem;">
-            <label class="form-label" style="font-size:0.75rem;">Habilidades Técnicas & Stack (Separadas por coma)</label>
-            <input type="text" id="profHabilidades" class="form-control" placeholder="JavaScript, React, Python, PostgreSQL, Docker, Git">
+            <label class="form-label" for="profHabilidades" style="font-size:0.75rem;">Habilidades Técnicas & Stack (Separadas por coma)</label>
+            <input type="text" id="profHabilidades" class="form-control" placeholder="JavaScript, React, Python, PostgreSQL, Docker, Git" aria-label="Habilidades técnicas y stack tecnológico">
             <div id="profSkillsChips" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.4rem;"></div>
           </div>
 
@@ -1538,23 +1481,23 @@
   <!-- ========================================================================
        Drawer Desplegable: Asesor de Reclutamiento IA (Tablero ATS & Radar)
        ======================================================================== -->
-  <div class="copilot-drawer-overlay" id="atsCopilotDrawerOverlay">
+  <div class="copilot-drawer-overlay" id="atsCopilotDrawerOverlay" role="dialog" aria-modal="true" aria-labelledby="copilotDrawerTitle">
     <div class="copilot-drawer-panel" id="atsCopilotDrawer">
       <!-- Header -->
       <div class="copilot-drawer-header">
         <div class="copilot-drawer-brand">
           <div class="copilot-avatar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
           </div>
           <div>
-            <div class="copilot-name">Ary Copilot // Asesor de Carrera & ATS</div>
+            <div class="copilot-name" id="copilotDrawerTitle">Ary Copilot // Asesor de Carrera & ATS</div>
             <div class="copilot-status" id="copilotDrawerStatus">
-              <span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;"></span>
+              <span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;" aria-hidden="true"></span>
               Conectado a tus vacantes y perfil
             </div>
           </div>
         </div>
-        <button class="modal-close-btn" id="btnCloseAtsCopilotDrawer" title="Cerrar Asesor" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+        <button class="modal-close-btn" id="btnCloseAtsCopilotDrawer" title="Cerrar Asesor" type="button" aria-label="Cerrar Asesor de Reclutamiento" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
       </div>
 
       <!-- Segmented Switcher: ATS vs Radar -->
@@ -1571,7 +1514,7 @@
       <div class="copilot-vacancy-picker-box" id="copilotVacancyPickerBox">
         <label for="copilotSelectAtsVacancy">🎯 Analizar vacante de mi Kanban:</label>
         <div style="display:flex; gap:0.4rem;">
-          <select id="copilotSelectAtsVacancy" class="form-control" style="font-size:0.8125rem; flex:1;">
+          <select id="copilotSelectAtsVacancy" class="form-control" style="font-size:0.8125rem; flex:1;" aria-label="Seleccionar vacante guardada en el ATS">
             <option value="">-- Elige una vacante para diagnóstico táctico --</option>
           </select>
           <button type="button" class="btn btn-secondary" id="btnAuditSelectedAtsJob" style="padding:0.35rem 0.65rem; font-size:0.75rem; white-space:nowrap;">
@@ -1603,21 +1546,70 @@
 
       <!-- Input Form -->
       <form id="atsCopilotDrawerForm" class="copilot-form" style="padding:0.75rem 1rem; border-top:1px solid var(--border-slate); background:var(--surface); margin:0;">
-        <input type="text" id="atsCopilotDrawerInput" class="form-control" placeholder="Pregunta sobre tus vacantes guardadas o el radar..." style="font-size:0.8125rem;">
-        <button type="submit" class="btn btn-primary" id="btnSendAtsCopilotDrawer" style="padding:0.5rem 0.85rem;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <input type="text" id="atsCopilotDrawerInput" class="form-control" placeholder="Pregunta sobre tus vacantes guardadas o el radar..." style="font-size:0.8125rem;" aria-label="Escribir pregunta para el Asesor de Reclutamiento">
+        <button type="submit" class="btn btn-primary" id="btnSendAtsCopilotDrawer" style="padding:0.5rem 0.85rem;" aria-label="Enviar mensaje al Asesor IA">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>
       </form>
     </div>
   </div>
 
   <!-- Botón Flotante para Acceso Rápido al Asesor IA -->
-  <div class="floating-copilot-bubble" id="btnFloatingCopilot" title="Abrir Asesor de Reclutamiento IA">
+  <div class="floating-copilot-bubble" id="btnFloatingCopilot" title="Abrir Asesor de Reclutamiento IA" role="button" tabindex="0" aria-label="Abrir Asesor de Reclutamiento IA">
     <div class="floating-copilot-inner">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
       <span class="floating-copilot-label">Asesor Reclutador IA</span>
     </div>
   </div>
+
+  <!-- ========================================================================
+       Mobile Bottom Navigation (Barra de Navegación Móvil)
+       ======================================================================== -->
+  <nav class="mobile-bottom-nav" aria-label="Navegación principal en móviles">
+    <button class="mobile-nav-item active" data-view="kanban" aria-label="Vista Tablero Kanban">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+        <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+        <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+      </svg>
+      <span>Kanban</span>
+    </button>
+    <button class="mobile-nav-item" data-view="list" aria-label="Vista de Lista">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Lista</span>
+    </button>
+    <button class="mobile-nav-item" data-view="intake" aria-label="Smart Intake con Inteligencia Artificial">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Intake IA</span>
+    </button>
+    <button class="mobile-nav-item" data-view="cv" aria-label="Generador de Curriculum Vitae">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>
+      <span>Mi CV</span>
+    </button>
+    <button class="mobile-nav-item" data-view="jobsearch" aria-label="Radar de Empleos y Búsqueda Activa">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <circle cx="11" cy="11" r="3"></circle>
+      </svg>
+      <span>Radar</span>
+    </button>
+  </nav>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
