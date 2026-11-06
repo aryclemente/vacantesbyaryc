@@ -2940,8 +2940,9 @@ a:focus-visible {
   width: 100%;
   max-width: 440px;
   height: 100%;
-  background: var(--surface);
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+  background: #ffffff !important;
+  border-left: 1px solid var(--border-slate);
+  box-shadow: -10px 0 35px rgba(25, 2, 44, 0.22);
   display: flex;
   flex-direction: column;
   z-index: 1101;

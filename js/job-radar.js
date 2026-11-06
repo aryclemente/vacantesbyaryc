@@ -505,6 +505,7 @@
     filterMatchMed: true,
     searchKeyword: '',
     sortBy: 'match', // match, recent, salary
+    useLocalModeOnly: false,
     chatMessages: [
       {
         sender: 'assistant',
@@ -1110,8 +1111,8 @@
       ? profile.habilidades.slice(0, 7).join(', ')
       : 'PHP, Laravel, React, WordPress, Moodle, Pasarelas de Pago, MySQL';
 
-    // Si tenemos proveedor de IA configurado (Gemini, Claude, Kimi, OpenAI, etc.)
-    if (window.aiParser && (typeof window.aiParser.callLlmText === 'function' || typeof window.aiParser.callGeminiText === 'function')) {
+    // Si tenemos proveedor de IA configurado (Gemini, Claude, Kimi, OpenAI, etc.) y no está forzado el modo local
+    if (!state.useLocalModeOnly && window.aiParser && (typeof window.aiParser.callLlmText === 'function' || typeof window.aiParser.callGeminiText === 'function')) {
       const atsSummary = savedVacancies.slice(0, 8).map(v => `${v.empresa} (${v.puesto}, estado: ${v.estado})`).join('; ');
       const compactPrompt = `Eres un Asesor de Carrera y Reclutador Senior para ${candidateName} (${candidateRole}: ${candidateSkills}).
 Vacantes guardadas en su Tablero ATS: [${atsSummary}].
@@ -1428,6 +1429,51 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     }
   }
 
+  function updateCopilotAiModeToggleUI() {
+    const box = document.getElementById('copilotAiModeToggleBox');
+    const btnAi = document.getElementById('btnCopilotModeAi');
+    const btnLocal = document.getElementById('btnCopilotModeLocal');
+    const statusText = document.getElementById('copilotDrawerStatus');
+    if (!box) return;
+
+    const settings = (window.appStorage && typeof window.appStorage.getSettings === 'function')
+      ? window.appStorage.getSettings()
+      : {};
+    const hasKey = !!(settings.aiApiKey || settings.geminiApiKey);
+
+    if (!hasKey) {
+      box.style.display = 'none';
+      state.useLocalModeOnly = true;
+      if (statusText) {
+        statusText.innerHTML = `<span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;" aria-hidden="true"></span>Modo Local Heurístico (Sin coste)`;
+      }
+      return;
+    }
+
+    // Si tiene clave configurada, mostrar el selector de modo
+    box.style.display = 'flex';
+
+    if (btnAi && btnLocal) {
+      if (state.useLocalModeOnly) {
+        btnLocal.style.background = 'var(--primary)';
+        btnLocal.style.color = '#ffffff';
+        btnAi.style.background = 'transparent';
+        btnAi.style.color = 'var(--text-muted)';
+        if (statusText) {
+          statusText.innerHTML = `<span class="live-pulse-core" style="width:6px; height:6px; background:#f59e0b; display:inline-block; border-radius:50%; margin-right:4px;" aria-hidden="true"></span>Modo Local Heurístico (0 tokens)`;
+        }
+      } else {
+        btnAi.style.background = 'var(--primary)';
+        btnAi.style.color = '#ffffff';
+        btnLocal.style.background = 'transparent';
+        btnLocal.style.color = 'var(--text-muted)';
+        if (statusText) {
+          statusText.innerHTML = `<span class="live-pulse-core" style="width:6px; height:6px; background:#00D2B4; display:inline-block; border-radius:50%; margin-right:4px;" aria-hidden="true"></span>Conectado con tu API Key (${settings.aiProvider || 'Gemini'})`;
+        }
+      }
+    }
+  }
+
   // =========================================================================
   // Control del Drawer Desplegable del Asesor ATS & IA
   // =========================================================================
@@ -1440,6 +1486,7 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     if (window.innerWidth <= 768) {
       document.body.style.overflow = 'hidden';
     }
+    updateCopilotAiModeToggleUI();
     populateAtsVacancyPicker(targetVacancyId);
     updateAtsBadges();
     renderCopilotMessages();
@@ -1537,6 +1584,22 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
         tabRadar.classList.add('active');
         tabAts.classList.remove('active');
         if (pickerBox) pickerBox.style.display = 'none';
+      });
+    }
+
+    // Switcher de Modo IA (API) vs Modo Local (0 Coste)
+    const btnModeAi = document.getElementById('btnCopilotModeAi');
+    const btnModeLocal = document.getElementById('btnCopilotModeLocal');
+    if (btnModeAi && btnModeLocal) {
+      btnModeAi.addEventListener('click', () => {
+        state.useLocalModeOnly = false;
+        updateCopilotAiModeToggleUI();
+        showToastMessage('Modo IA Activado: usando tu API Key para análisis profundo', 'info');
+      });
+      btnModeLocal.addEventListener('click', () => {
+        state.useLocalModeOnly = true;
+        updateCopilotAiModeToggleUI();
+        showToastMessage('Modo Local Activado: 0 tokens, análisis heurístico instantáneo', 'info');
       });
     }
 

@@ -3480,4 +3480,14 @@ hello.ary.code@gmail.com`;
   initCvPhoto();
   initCvTemplate();
   initUserProfileAndSettings();
+
+  window.openProfileModal = function () {
+    const profileModal = document.getElementById('profileModal');
+    if (profileModal) {
+      const profile = (window.appStorage && typeof window.appStorage.getProfile === 'function')
+        ? window.appStorage.getProfile()
+        : null;
+      profileModal.classList.add('open');
+    }
+  };
 });
