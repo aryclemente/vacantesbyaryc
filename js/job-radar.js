@@ -1486,6 +1486,21 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     if (window.innerWidth <= 768) {
       document.body.style.overflow = 'hidden';
     }
+
+    // Ocultar botón flotante mientras el drawer está abierto para evitar solapamientos
+    const floatingBtn = document.getElementById('btnFloatingCopilot');
+    if (floatingBtn) floatingBtn.style.display = 'none';
+
+    // Activar pestaña ATS por defecto al abrir desde el tablero
+    const tabAts = document.getElementById('btnCopilotTabAts');
+    const tabRadar = document.getElementById('btnCopilotTabRadar');
+    const pickerBox = document.getElementById('copilotVacancyPickerBox');
+    if (tabAts && tabRadar) {
+      tabAts.classList.add('active');
+      tabRadar.classList.remove('active');
+      if (pickerBox) pickerBox.style.display = 'flex';
+    }
+
     updateCopilotAiModeToggleUI();
     populateAtsVacancyPicker(targetVacancyId);
     updateAtsBadges();
@@ -1505,6 +1520,14 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     overlay.classList.remove('active');
     overlay.style.display = 'none';
     document.body.style.overflow = '';
+
+    // Restaurar botón flotante si estamos en Kanban o Vista Lista
+    const floatingBtn = document.getElementById('btnFloatingCopilot');
+    const isAtsBoard = document.getElementById('view-kanban')?.classList.contains('active') ||
+                       document.getElementById('view-list')?.classList.contains('active');
+    if (floatingBtn && isAtsBoard) {
+      floatingBtn.style.display = 'flex';
+    }
   }
 
   function updateAtsBadges() {
@@ -1515,6 +1538,9 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
 
     const b1 = document.getElementById('badgeAtsCopilotCount');
     if (b1) b1.textContent = `${count} ATS`;
+
+    const bToolbar = document.getElementById('badgeAtsCopilotToolbar');
+    if (bToolbar) bToolbar.textContent = `${count} ATS`;
 
     const b2 = document.getElementById('copilotAtsCountBadge');
     if (b2) b2.textContent = count;
@@ -1537,10 +1563,10 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   }
 
   function initDrawerEventListeners() {
-    // 1. Botón en Header (btnOpenAtsCopilotDrawer / btnOpenAtsCopilotHeader) y Botón Flotante
+    // 1. Botón en Toolbar (btnAtsCopilotToolbar), Botón Flotante y Triggers
     const openTriggerIds = [
       'btnOpenAtsCopilotDrawer',
-      'btnOpenAtsCopilotHeader',
+      'btnAtsCopilotToolbar',
       'btnFloatingCopilot',
       'btnFloatingCopilotLauncher',
       'mobileNavCopilot'

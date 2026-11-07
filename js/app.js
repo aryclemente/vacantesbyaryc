@@ -265,6 +265,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.jobRadar.render();
       }
     }
+
+    // El Asesor IA del Tablero ATS opera contextualmente en Kanban y Vista Lista
+    const isAtsBoardView = (viewName === 'kanban' || viewName === 'list');
+    const toolbarCopilotBtn = document.getElementById('btnAtsCopilotToolbar');
+    const floatingCopilotBtn = document.getElementById('btnFloatingCopilot');
+
+    if (toolbarCopilotBtn) {
+      toolbarCopilotBtn.style.display = isAtsBoardView ? 'inline-flex' : 'none';
+    }
+    if (floatingCopilotBtn) {
+      floatingCopilotBtn.style.display = isAtsBoardView ? 'flex' : 'none';
+    }
   }
 
   tabBtns.forEach(btn => {
@@ -461,10 +473,13 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
           </td>
           <td><span class="priority-pill ${v.prioridad || 'med'}">${v.prioridad || 'Media'}</span></td>
-          <td style="color:var(--text-muted); font-size:0.8125rem;">${v.fecha || '-'}</td>
-          <td>
+          <td style="white-space: nowrap;">
             <button class="btn btn-outline" style="padding:0.3rem 0.65rem; font-size:0.75rem;" onclick="window.openVacancyModal('${v.id}')">
               Detalle
+            </button>
+            <button class="btn btn-outline" style="padding:0.3rem 0.65rem; font-size:0.75rem; color:var(--primary); border-color:rgba(77,23,214,0.3); margin-left:0.35rem;" onclick="event.stopPropagation(); window.openCopilotForAtsVacancy('${v.id}')" title="Analizar esta vacante con el Asesor IA">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-1px;"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></svg>
+              Asesor
             </button>
           </td>
         </tr>

@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.3.0">
-  <link rel="stylesheet" href="css/styles.css?v=2.3.0">
+  <link rel="stylesheet" href="css/tokens.css?v=2.4.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.4.0">
 </head>
 <body>
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
@@ -53,11 +53,6 @@
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           <span>Nueva Vacante</span>
-        </button>
-        <button class="btn btn-outline" id="btnOpenAtsCopilotHeader" title="Asesor Reclutador IA para tu Tablero ATS" aria-label="Abrir Asesor Reclutador IA para vacantes" style="border-color: rgba(77, 23, 214, 0.35); color: var(--primary); gap:0.4rem;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
-          <span>Asesor IA</span>
-          <span class="badge" id="badgeAtsCopilotCount" style="background:var(--primary); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800;">ATS</span>
         </button>
         <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro" aria-label="Abrir mi perfil profesional y CV maestro">
           <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;" aria-hidden="true">AC</span>
@@ -216,6 +211,12 @@
         </svg>
         <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología..." aria-label="Buscar vacantes por puesto, empresa o tecnología">
       </div>
+
+      <button class="btn btn-outline" id="btnAtsCopilotToolbar" title="Diagnóstico de embudo ATS y asesoramiento táctico con IA" aria-label="Abrir Asesor IA ATS" style="padding: 0.5rem 0.95rem; font-size: 0.8125rem; font-weight: 700; border-color: rgba(77, 23, 214, 0.35); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; flex-shrink: 0;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
+        <span>Asesor IA</span>
+        <span class="badge" id="badgeAtsCopilotToolbar" style="background:var(--primary); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800;">ATS</span>
+      </button>
     </div>
   </section>
 
@@ -1611,11 +1612,15 @@
     </div>
   </div>
 
-  <!-- Botón Flotante para Acceso Rápido al Asesor IA -->
-  <div class="floating-copilot-bubble" id="btnFloatingCopilot" title="Abrir Asesor de Reclutamiento IA" role="button" tabindex="0" aria-label="Abrir Asesor de Reclutamiento IA">
+  <!-- Botón Flotante para Acceso Rápido al Asesor IA en Tablero Kanban & Vista Lista -->
+  <div class="floating-copilot-bubble" id="btnFloatingCopilot" title="Abrir Asesor de Reclutamiento ATS" role="button" tabindex="0" aria-label="Abrir Asesor de Reclutamiento IA">
     <div class="floating-copilot-inner">
+      <span class="live-pulse" style="width:7px; height:7px; margin-right:2px;" aria-hidden="true">
+        <span class="live-pulse-core" style="background:#00D2B4;"></span>
+      </span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
-      <span class="floating-copilot-label">Asesor Reclutador IA</span>
+      <span class="floating-copilot-label">Asesor IA</span>
+      <span class="badge" style="background:rgba(255,255,255,0.25); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800; margin-left:0.15rem;">ATS</span>
     </div>
   </div>
 
@@ -1675,11 +1680,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.3.0"></script>
-  <script src="js/storage.js?v=2.3.0"></script>
-  <script src="js/ai-parser.js?v=2.3.0"></script>
-  <script src="js/job-radar.js?v=2.3.0"></script>
-  <script src="js/app.js?v=2.3.0"></script>
+  <script src="js/supabase-client.js?v=2.4.0"></script>
+  <script src="js/storage.js?v=2.4.0"></script>
+  <script src="js/ai-parser.js?v=2.4.0"></script>
+  <script src="js/job-radar.js?v=2.4.0"></script>
+  <script src="js/app.js?v=2.4.0"></script>
 </body>
 </html>
 
