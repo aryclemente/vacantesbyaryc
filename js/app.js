@@ -3520,6 +3520,7 @@ hello.ary.code@gmail.com`;
   // Initial load
   renderKanban();
   renderTable();
+  switchView('kanban');
   initCvPhoto();
   initCvTemplate();
   initUserProfileAndSettings();

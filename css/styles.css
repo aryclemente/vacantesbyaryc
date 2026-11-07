@@ -2870,7 +2870,7 @@ a:focus-visible {
    ========================================================================= */
 .floating-copilot-bubble {
   position: fixed;
-  bottom: 24px;
+  bottom: 76px;
   right: 24px;
   z-index: 1000;
   display: flex;
