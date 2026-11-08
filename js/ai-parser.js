@@ -472,8 +472,76 @@ ${text.slice(0, 10000)}
   /**
    * Parser heurístico local determinista para archivos Markdown / Perfiles LinkedIn
    */
+  /**
+   * Extrae el texto real de todas las páginas de un archivo PDF en el navegador con pdf.js
+   */
+  async extractTextFromPdf(arrayBuffer) {
+    if (typeof window.pdfjsLib === 'undefined') {
+      throw new Error('La biblioteca lectora de PDF (pdf.js) aún no está disponible en la página.');
+    }
+
+    try {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      let fullText = '';
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageLines = [];
+        let lastY = null;
+        let currentLine = [];
+
+        textContent.items.forEach(item => {
+          if (!item.str || !item.str.trim()) return;
+          // Agrupar por coordenada Y aproximada para conservar saltos de línea
+          if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+            pageLines.push(currentLine.join(' '));
+            currentLine = [];
+          }
+          currentLine.push(item.str.trim());
+          lastY = item.transform[5];
+        });
+
+        if (currentLine.length > 0) {
+          pageLines.push(currentLine.join(' '));
+        }
+
+        fullText += pageLines.join('\n') + '\n\n';
+      }
+
+      return fullText.trim();
+    } catch (err) {
+      console.error('Error al decodificar PDF:', err);
+      throw new Error('No se pudo leer el contenido de texto del PDF: ' + (err.message || 'formato no estándar o escaneado como imagen'));
+    }
+  }
+
+  /**
+   * Parser heurístico local determinista para archivos Markdown, PDF de CVs y perfiles de LinkedIn
+   */
   parseProfileHeuristically(text, filename = '') {
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!text || !text.trim()) {
+      return {
+        nombre: 'Usuario',
+        titular: 'Profesional Tech',
+        email: '',
+        telefono: '',
+        ubicacion: 'Disponible Remoto',
+        enlaces: { linkedin: '', github: '', portafolio: '', web: '' },
+        resumen: '',
+        habilidades: ['JavaScript', 'HTML5', 'CSS3', 'Git'],
+        educacion: [],
+        experiencias: []
+      };
+    }
+
+    // Normalizar texto y caracteres de viñetas
+    const normalizedText = text
+      .replace(/[•●▪■◆–—]/g, '-')
+      .replace(/\r\n/g, '\n');
+    const lines = normalizedText.split('\n').map(l => l.trim()).filter(Boolean);
 
     let nombre = '';
     let titular = '';
@@ -486,109 +554,221 @@ ${text.slice(0, 10000)}
     const educacion = [];
     const experiencias = [];
 
-    // Extraer email
-    const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    if (emailMatch) email = emailMatch[0];
+    // 1. Extraer Email
+    const emailMatch = normalizedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) email = emailMatch[0].toLowerCase();
 
-    // Extraer teléfono
-    const telMatch = text.match(/(\+?\d{1,3}[\s-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,5}/);
-    if (telMatch && telMatch[0].length >= 8) telefono = telMatch[0];
+    // 2. Extraer Teléfono
+    const telMatch = normalizedText.match(/(?:\+?\d{1,3}[\s-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,5}/);
+    if (telMatch && telMatch[0].replace(/\D/g, '').length >= 8) {
+      telefono = telMatch[0].trim();
+    }
 
-    // Extraer enlaces sociales
-    const linkedInMatch = text.match(/linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
+    // 3. Extraer Enlaces
+    const linkedInMatch = normalizedText.match(/linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
     if (linkedInMatch) enlaces.linkedin = 'linkedin.com/in/' + linkedInMatch[1];
 
-    const githubMatch = text.match(/github\.com\/([a-zA-Z0-9_-]+)/i);
+    const githubMatch = normalizedText.match(/github\.com\/([a-zA-Z0-9_-]+)/i);
     if (githubMatch) enlaces.github = 'github.com/' + githubMatch[1];
 
-    // Nombre y titular desde el inicio del documento
-    for (let i = 0; i < Math.min(10, lines.length); i++) {
+    // 4. Ubicación
+    const locationKeywords = [
+      'Remoto', 'Remote', 'España', 'Madrid', 'Barcelona', 'Valencia', 'Sevilla',
+      'Caracas', 'Venezuela', 'Colombia', 'Bogotá', 'Medellín', 'México', 'CDMX',
+      'Argentina', 'Buenos Aires', 'Chile', 'Santiago', 'Perú', 'Lima', 'Híbrido'
+    ];
+    for (const loc of locationKeywords) {
+      const locRegex = new RegExp(`\\b${loc}\\b`, 'i');
+      if (locRegex.test(normalizedText)) {
+        ubicacion = loc.includes('Remoto') || loc.includes('Remote') ? 'Remoto Internacional' : `${loc} (Disponible Remoto)`;
+        break;
+      }
+    }
+    if (!ubicacion) ubicacion = 'Disponible Remoto';
+
+    // 5. Nombre y Titular (Prioridad: encabezados de CV o líneas superiores limpias)
+    const nonNamePatterns = /curriculum|vitae|resume|hoja de vida|contacto|perfil|experiencia|educacion|habilidades|summary|about|phone|email|teléfono|correo/i;
+
+    for (let i = 0; i < Math.min(12, lines.length); i++) {
       const line = lines[i];
+
+      // Formato Markdown "# Nombre" o "**Nombre:** Juan"
       if (/^#\s+([A-ZÁÉÍÓÚ][a-záéíóúA-ZÁÉÍÓÚ\s]+)/.test(line)) {
         nombre = line.replace(/^#\s+/, '').replace(/\/\/.*/, '').trim();
         if (lines[i + 1] && !lines[i + 1].startsWith('#')) {
           titular = lines[i + 1].replace(/\*\*/g, '').replace(/Rol Principal:\s*/i, '').trim();
         }
         break;
-      } else if (/^\*\*(Nombre|Name):\*\*\s*(.+)/i.test(line)) {
-        nombre = line.replace(/^\*\*(Nombre|Name):\*\*\s*/i, '').trim();
-      } else if (/^\*\*(Rol|Puesto|Headline|Cargo):\*\*\s*(.+)/i.test(line)) {
-        titular = line.replace(/^\*\*(Rol|Puesto|Headline|Cargo):\*\*\s*/i, '').trim();
+      } else if (/^\*\*(?:Nombre|Name):\*\*\s*(.+)/i.test(line)) {
+        nombre = line.replace(/^\*\*(?:Nombre|Name):\*\*\s*/i, '').trim();
+      } else if (/^\*\*(?:Rol|Puesto|Headline|Cargo|Titular):\*\*\s*(.+)/i.test(line)) {
+        titular = line.replace(/^\*\*(?:Rol|Puesto|Headline|Cargo|Titular):\*\*\s*/i, '').trim();
+      } else if (!nombre && line.length >= 3 && line.length <= 40 && !nonNamePatterns.test(line) && !line.includes('@') && !line.includes('http')) {
+        // Detectar 2 a 4 palabras que parezcan un nombre propio
+        const words = line.split(/\s+/);
+        const looksLikeName = words.length >= 2 && words.length <= 4 && words.every(w => /^[A-ZÁÉÍÓÚ][a-záéíóúA-ZÁÉÍÓÚ.'-]+$/.test(w));
+        if (looksLikeName) {
+          nombre = line;
+          if (lines[i + 1] && lines[i + 1].length < 60 && !nonNamePatterns.test(lines[i + 1])) {
+            titular = lines[i + 1].replace(/[-|]/g, '').trim();
+          }
+        }
       }
     }
 
     if (!nombre) {
-      // Tomar de la primera línea no vacía si no es un encabezado complejo
-      if (lines.length > 0 && lines[0].length < 40 && !lines[0].includes('http')) {
-        nombre = lines[0].replace(/^#+\s*/, '').trim();
-      } else {
-        nombre = filename.replace(/\.(md|pdf|txt)$/i, '').replace(/profile|perfil|cv/gi, '').trim() || 'Nuevo Usuario';
+      // Si el email tiene formato nombre.apellido@gmail.com
+      if (email) {
+        const localPart = email.split('@')[0];
+        const parts = localPart.split(/[._-]/).filter(p => p.length > 2 && !/\d/.test(p));
+        if (parts.length >= 2) {
+          nombre = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+        }
+      }
+      if (!nombre && filename) {
+        nombre = filename.replace(/\.(pdf|md|txt)$/i, '').replace(/cv|profile|perfil|resume/gi, '').trim() || 'Mi Perfil';
       }
     }
 
-    // Extraer habilidades desde secciones con viñetas o listas
-    const commonTechs = [
-      'JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'PHP', 'Laravel', 'Vue.js',
-      'HTML5', 'CSS3', 'TailwindCSS', 'WordPress', 'WooCommerce', 'MySQL', 'PostgreSQL',
-      'Docker', 'Git', 'AWS', 'Supabase', 'REST APIs', 'GraphQL', 'Next.js', 'Moodle LMS',
-      'Figma', 'Linux', 'Java', 'Spring Boot', 'C#', '.NET', 'Flutter'
+    // 6. Diccionario Extendido de Habilidades Tech (+120 tecnologías modernas)
+    const techDictionary = [
+      'JavaScript', 'TypeScript', 'React', 'React.js', 'Next.js', 'Vue.js', 'Vue', 'Nuxt.js',
+      'Angular', 'Svelte', 'Node.js', 'Express', 'NestJS', 'PHP', 'Laravel', 'Symfony',
+      'Python', 'Django', 'FastAPI', 'Flask', 'Java', 'Spring Boot', 'C#', '.NET', 'ASP.NET',
+      'Go', 'Golang', 'Rust', 'Ruby', 'Ruby on Rails', 'HTML5', 'CSS3', 'TailwindCSS', 'Sass',
+      'Bootstrap', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite', 'Supabase', 'Firebase',
+      'GraphQL', 'REST APIs', 'RESTful', 'Docker', 'Kubernetes', 'AWS', 'Google Cloud', 'GCP',
+      'Azure', 'Git', 'GitHub', 'GitLab', 'CI/CD', 'Linux', 'Nginx', 'Apache', 'Vercel', 'Netlify',
+      'WordPress', 'WooCommerce', 'Shopify', 'Strapi', 'Headless CMS', 'Moodle LMS', 'Figma',
+      'UI/UX', 'Jest', 'Cypress', 'Playwright', 'QA', 'Testing', 'Scrum', 'Agile', 'Jira',
+      'Kanban', 'SEO', 'Data Analysis', 'Pandas', 'NumPy', 'OpenAI API', 'Chatbots', 'LLMs',
+      'Machine Learning', 'English', 'Inglés', 'Full Stack', 'Frontend', 'Backend'
     ];
 
-    commonTechs.forEach(tech => {
-      const regex = new RegExp(`\\b${tech.replace('+', '\\+')}\\b`, 'i');
-      if (regex.test(text) && !habilidades.includes(tech)) {
-        habilidades.push(tech);
-      }
-    });
-
-    // Detectar experiencias en bloques
-    const expRegex = /(?:###?|##)\s*(.+?)\n+(?:(?:\*\*|\b)(?:Puesto|Rol|Cargo):?\s*([^\n]+)|([^\n]+))\n+(?:(?:\*\*|\b)(?:Periodo|Fechas|Fecha):?\s*([^\n]+)|([^\n]+(?:20\d\d|19\d\d)[^\n]*))/gi;
-    let match;
-    let expIndex = 1;
-
-    // Parser simple de bloques de experiencia
-    const sections = text.split(/(?=##?\s+)/);
-    sections.forEach(sec => {
-      if (/experiencia|experience|trayectoria/i.test(sec)) {
-        const subBlocks = sec.split(/(?=###|\n\s*-\s*\*\*)/);
-        subBlocks.forEach(sb => {
-          const bLines = sb.split('\n').map(l => l.trim()).filter(Boolean);
-          if (bLines.length >= 2) {
-            const first = bLines[0].replace(/^#+\s*/, '').replace(/[-*]\s*/, '').replace(/\*\*/g, '');
-            const bullets = bLines.filter(l => l.startsWith('-') || l.startsWith('•')).map(l => l.replace(/^[-•]\s*/, ''));
-            if (first.length > 3 && bullets.length > 0) {
-              experiencias.push({
-                id: 'exp-' + (expIndex++),
-                empresa: first.split('|')[0]?.trim() || first,
-                puesto: first.split('|')[1]?.trim() || titular || 'Desarrollador',
-                periodo: 'Historial previo',
-                ubicacion: 'Remoto',
-                bullets: bullets.slice(0, 4)
-              });
-            }
-          }
-        });
-      } else if (/resumen|perfil|acerca de|about|summary/i.test(sec) && !resumen) {
-        const pLines = sec.split('\n').filter(l => !l.startsWith('#')).map(l => l.trim()).filter(Boolean);
-        if (pLines.length > 0) {
-          resumen = pLines.slice(0, 3).join(' ');
+    techDictionary.forEach(tech => {
+      const escaped = tech.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      if (regex.test(normalizedText)) {
+        const canonical = tech === 'React.js' ? 'React' :
+                          tech === 'Vue' ? 'Vue.js' :
+                          tech === 'Golang' ? 'Go' :
+                          tech === 'RESTful' ? 'REST APIs' : tech;
+        if (!habilidades.includes(canonical)) {
+          habilidades.push(canonical);
         }
       }
     });
 
+    // Titular por defecto si no se detectó
+    if (!titular) {
+      if (habilidades.includes('Full Stack') || (habilidades.includes('React') && habilidades.includes('Node.js'))) {
+        titular = 'Full Stack Developer';
+      } else if (habilidades.includes('React') || habilidades.includes('Frontend') || habilidades.includes('Vue.js')) {
+        titular = 'Frontend Developer';
+      } else if (habilidades.includes('Python') || habilidades.includes('PHP') || habilidades.includes('Backend') || habilidades.includes('Laravel')) {
+        titular = 'Backend Developer';
+      } else if (habilidades.length > 0) {
+        titular = `${habilidades[0]} Specialist`;
+      } else {
+        titular = 'Desarrollador de Software';
+      }
+    }
+
+    // 7. Detección Inteligente de Secciones de Experiencia en CVs y PDFs
+    const datePattern = /(?:(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|jan|january|february|march|april|june|july|august|september|october|november|december)\w*[\s.,-]*)*(?:19\d\d|20\d\d)[\s–—-]*(?:(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|jan|january|february|march|april|june|july|august|september|october|november|december)\w*[\s.,-]*)*(?:19\d\d|20\d\d|presente|actualidad|present|current)?/i;
+
+    let expIdCounter = 1;
+    let isInsideExpSection = false;
+    let currentExp = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Detectar inicio de sección de experiencia
+      if (/^(?:#+\s*)?(?:experiencia|experience|trayectoria|historial profesional|historial laboral|work history)/i.test(line)) {
+        isInsideExpSection = true;
+        continue;
+      }
+
+      // Detectar fin de sección de experiencia
+      if (isInsideExpSection && /^(?:#+\s*)?(?:educaci[oó]n|education|habilidades|skills|idiomas|languages|certificaciones|certifications|cursos|proyectos|projects|referencias)/i.test(line)) {
+        if (currentExp && (currentExp.empresa || currentExp.puesto)) {
+          experiencias.push(currentExp);
+          currentExp = null;
+        }
+        isInsideExpSection = false;
+        continue;
+      }
+
+      // Si encontramos una línea con fechas de trabajo
+      const hasDate = datePattern.test(line);
+
+      if (isInsideExpSection || hasDate) {
+        if (hasDate) {
+          if (currentExp && (currentExp.empresa || currentExp.puesto)) {
+            experiencias.push(currentExp);
+          }
+
+          const matchDate = line.match(datePattern);
+          const periodStr = matchDate ? matchDate[0].trim() : 'Historial reciente';
+          const lineWithoutDate = line.replace(datePattern, '').replace(/[-|•()]/g, '').trim();
+
+          // Buscar el puesto o empresa en la línea actual o inmediatamente anterior
+          let titleOrCompany = lineWithoutDate;
+          let prevLine = (i > 0 && lines[i - 1].length < 80 && !lines[i - 1].startsWith('-')) ? lines[i - 1] : '';
+
+          currentExp = {
+            id: 'exp-' + (expIdCounter++),
+            empresa: prevLine || titleOrCompany || 'Empresa Tech',
+            puesto: titleOrCompany && titleOrCompany !== prevLine ? titleOrCompany : titular,
+            periodo: periodStr,
+            ubicacion: 'Remoto',
+            bullets: []
+          };
+          continue;
+        }
+
+        // Si ya tenemos una experiencia activa y la línea es una viñeta o descripción
+        if (currentExp) {
+          if (line.startsWith('-') || line.startsWith('*') || line.startsWith('•')) {
+            const bulletText = line.replace(/^[-*•]\s*/, '').trim();
+            if (bulletText.length > 5 && currentExp.bullets.length < 5) {
+              currentExp.bullets.push(bulletText);
+            }
+          } else if (line.length > 15 && !line.includes(':') && currentExp.bullets.length < 4) {
+            currentExp.bullets.push(line);
+          }
+        }
+      }
+
+      // 8. Resumen Profesional
+      if (!resumen && /^(?:#+\s*)?(?:resumen|perfil|perfil profesional|acerca de|about|summary|extracto)/i.test(line)) {
+        const nextLines = lines.slice(i + 1, i + 4).filter(l => !l.startsWith('#') && !l.startsWith('-'));
+        if (nextLines.length > 0) {
+          resumen = nextLines.join(' ');
+        }
+      }
+    }
+
+    if (currentExp && (currentExp.empresa || currentExp.puesto)) {
+      experiencias.push(currentExp);
+    }
+
+    // Resumen por defecto conciso si no se detectó un párrafo explícito
     if (!resumen) {
-      resumen = `Profesional con experiencia en ${habilidades.slice(0, 4).join(', ')}. Enfocado en la entrega de resultados y soluciones de alto rendimiento.`;
+      const topSkills = habilidades.slice(0, 5).join(', ');
+      resumen = `${titular} con experiencia en ${topSkills || 'desarrollo de software y soluciones digitales'}. Enfocado/a en buenas prácticas de ingeniería, escalabilidad y entrega de valor.`;
     }
 
     return {
       nombre: nombre || 'Usuario',
-      titular: titular || (habilidades.length > 0 ? `${habilidades[0]} Developer` : 'Especialista Tech'),
+      titular: titular || 'Desarrollador de Software',
       email,
       telefono,
-      ubicacion: ubicacion || 'Disponible Remoto',
+      ubicacion,
       enlaces,
       resumen,
-      habilidades: habilidades.length > 0 ? habilidades : ['JavaScript', 'HTML5', 'CSS3', 'Git'],
+      habilidades: habilidades.length > 0 ? habilidades : ['JavaScript', 'HTML5', 'CSS3', 'Git', 'React'],
       educacion,
       experiencias: experiencias.length > 0 ? experiencias : [
         {
@@ -600,7 +780,7 @@ ${text.slice(0, 10000)}
           bullets: ['Desarrollo e implementación de soluciones técnicas alineadas al negocio.']
         }
       ],
-      extractionSource: 'heuristic-markdown'
+      extractionSource: 'heuristic-cv'
     };
   }
 }

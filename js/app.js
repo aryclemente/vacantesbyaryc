@@ -3337,6 +3337,18 @@ hello.ary.code@gmail.com`;
       });
     }
 
+    // Elementos del Editor Inline de Experiencia
+    const profExpEditorCard = document.getElementById('profExpEditorCard');
+    const profExpEditorTitle = document.getElementById('profExpEditorTitle');
+    const expEditingIndex = document.getElementById('expEditingIndex');
+    const expInputCompany = document.getElementById('expInputCompany');
+    const expInputRole = document.getElementById('expInputRole');
+    const expInputPeriod = document.getElementById('expInputPeriod');
+    const expInputLocation = document.getElementById('expInputLocation');
+    const expInputBullets = document.getElementById('expInputBullets');
+    const btnCancelExpEditor = document.getElementById('btnCancelExpEditor');
+    const btnSaveInlineExp = document.getElementById('btnSaveInlineExp');
+
     function renderFormExperiences() {
       if (!profExpList) return;
       if (profExpCount) profExpCount.textContent = currentFormExperiences.length;
@@ -3344,25 +3356,30 @@ hello.ary.code@gmail.com`;
       if (currentFormExperiences.length === 0) {
         profExpList.innerHTML = `
           <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:1rem; border:1px dashed var(--border-slate); border-radius:6px;">
-            No hay experiencias añadidas aún. Sube un archivo Profile.md o añade una manualmente.
+            No hay experiencias añadidas aún. Sube un archivo PDF/Markdown o añade una manualmente.
           </div>
         `;
         return;
       }
 
       profExpList.innerHTML = currentFormExperiences.map((exp, idx) => `
-        <div style="background:var(--surface-container-low); border:1px solid var(--border-slate); border-radius:6px; padding:0.6rem; font-size:0.8125rem;">
+        <div style="background:var(--surface-container-low); border:1px solid var(--border-slate); border-radius:6px; padding:0.65rem; font-size:0.8125rem;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
             <div>
-              <strong>${escapeHtml(exp.empresa || exp.company || 'Empresa')}</strong> &ndash; 
-              <span>${escapeHtml(exp.puesto || exp.role || 'Puesto')}</span>
+              <strong style="color:var(--text-dark-primary);">${escapeHtml(exp.empresa || exp.company || 'Empresa')}</strong> &ndash; 
+              <span style="font-weight:600; color:var(--primary);">${escapeHtml(exp.puesto || exp.role || 'Puesto')}</span>
             </div>
-            <button type="button" class="btn btn-outline btn-remove-form-exp" data-idx="${idx}" style="padding:0.15rem 0.4rem; font-size:0.7rem; color:var(--error);" title="Eliminar experiencia">
-              &times;
-            </button>
+            <div style="display:flex; gap:0.3rem;">
+              <button type="button" class="btn btn-outline btn-edit-form-exp" data-idx="${idx}" style="padding:0.15rem 0.45rem; font-size:0.7rem;" title="Editar experiencia">
+                Editar
+              </button>
+              <button type="button" class="btn btn-outline btn-remove-form-exp" data-idx="${idx}" style="padding:0.15rem 0.45rem; font-size:0.7rem; color:var(--error);" title="Eliminar experiencia">
+                &times;
+              </button>
+            </div>
           </div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.35rem;">
-            ${escapeHtml(exp.periodo || exp.period || '')} &bull; ${escapeHtml(exp.ubicacion || exp.location || '')}
+            ${escapeHtml(exp.periodo || exp.period || '')} &bull; ${escapeHtml(exp.ubicacion || exp.location || 'Remoto')}
           </div>
           <ul style="padding-left:1.1rem; margin:0; font-size:0.75rem; color:var(--text-dark-secondary);">
             ${(exp.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
@@ -3370,6 +3387,7 @@ hello.ary.code@gmail.com`;
         </div>
       `).join('');
 
+      // Listener para eliminar experiencia
       profExpList.querySelectorAll('.btn-remove-form-exp').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const idx = parseInt(e.currentTarget.dataset.idx, 10);
@@ -3377,24 +3395,88 @@ hello.ary.code@gmail.com`;
           renderFormExperiences();
         });
       });
+
+      // Listener para editar experiencia
+      profExpList.querySelectorAll('.btn-edit-form-exp').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.idx, 10);
+          const exp = currentFormExperiences[idx];
+          if (!exp) return;
+
+          if (expEditingIndex) expEditingIndex.value = idx;
+          if (profExpEditorTitle) profExpEditorTitle.textContent = `Editar Experiencia en ${exp.empresa || 'Empresa'}`;
+          if (expInputCompany) expInputCompany.value = exp.empresa || '';
+          if (expInputRole) expInputRole.value = exp.puesto || '';
+          if (expInputPeriod) expInputPeriod.value = exp.periodo || '';
+          if (expInputLocation) expInputLocation.value = exp.ubicacion || '';
+          if (expInputBullets) expInputBullets.value = Array.isArray(exp.bullets) ? exp.bullets.join('\n') : '';
+
+          if (profExpEditorCard) {
+            profExpEditorCard.style.display = 'block';
+            profExpEditorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
+      });
     }
 
+    // Botón "+ Añadir Experiencia": abre editor inline limpio
     if (btnAddEmptyExp) {
       btnAddEmptyExp.addEventListener('click', () => {
-        const empresa = prompt('Nombre de la Empresa o Proyecto:');
-        if (!empresa) return;
-        const puesto = prompt('Cargo o Rol desempeñado:', 'Desarrollador de Software');
-        const logro = prompt('Describe tu logro o responsabilidad principal:');
+        if (expEditingIndex) expEditingIndex.value = '-1';
+        if (profExpEditorTitle) profExpEditorTitle.textContent = 'Añadir Nueva Experiencia';
+        if (expInputCompany) expInputCompany.value = '';
+        if (expInputRole) expInputRole.value = '';
+        if (expInputPeriod) expInputPeriod.value = '2024 - Presente';
+        if (expInputLocation) expInputLocation.value = 'Remoto';
+        if (expInputBullets) expInputBullets.value = '';
 
-        currentFormExperiences.unshift({
-          id: 'exp-' + Date.now(),
-          empresa,
-          puesto: puesto || 'Desarrollador',
-          periodo: '2025 - Presente',
-          ubicacion: 'Remoto',
-          bullets: logro ? [logro] : ['Desarrollo e implementación técnica.']
-        });
+        if (profExpEditorCard) {
+          profExpEditorCard.style.display = 'block';
+          if (expInputCompany) expInputCompany.focus();
+        }
+      });
+    }
 
+    // Cancelar edición inline
+    if (btnCancelExpEditor && profExpEditorCard) {
+      btnCancelExpEditor.addEventListener('click', () => {
+        profExpEditorCard.style.display = 'none';
+      });
+    }
+
+    // Guardar experiencia inline
+    if (btnSaveInlineExp) {
+      btnSaveInlineExp.addEventListener('click', () => {
+        const company = expInputCompany ? expInputCompany.value.trim() : '';
+        const role = expInputRole ? expInputRole.value.trim() : '';
+        const period = expInputPeriod ? expInputPeriod.value.trim() : '2024 - Presente';
+        const location = expInputLocation ? expInputLocation.value.trim() : 'Remoto';
+        const rawBullets = expInputBullets ? expInputBullets.value.split('\n').map(b => b.replace(/^[-•*]\s*/, '').trim()).filter(Boolean) : [];
+
+        if (!company || !role) {
+          showToast('Ingresa al menos la Empresa y el Puesto', 'info');
+          return;
+        }
+
+        const editIdx = expEditingIndex ? parseInt(expEditingIndex.value, 10) : -1;
+        const newExpObj = {
+          id: editIdx >= 0 && currentFormExperiences[editIdx]?.id ? currentFormExperiences[editIdx].id : 'exp-' + Date.now(),
+          empresa: company,
+          puesto: role,
+          periodo: period,
+          ubicacion: location,
+          bullets: rawBullets.length > 0 ? rawBullets : ['Desarrollo e implementación técnica.']
+        };
+
+        if (editIdx >= 0 && editIdx < currentFormExperiences.length) {
+          currentFormExperiences[editIdx] = newExpObj;
+          showToast('Experiencia actualizada en tu perfil', 'success');
+        } else {
+          currentFormExperiences.unshift(newExpObj);
+          showToast('Nueva experiencia añadida al perfil', 'success');
+        }
+
+        if (profExpEditorCard) profExpEditorCard.style.display = 'none';
         renderFormExperiences();
       });
     }
@@ -3424,22 +3506,85 @@ hello.ary.code@gmail.com`;
 
     async function processProfileText(text, filename) {
       if (!text || !text.trim()) {
-        showToast('El texto o archivo está vacío', 'error');
+        showToast('El archivo o texto está vacío o no contiene caracteres legibles', 'error');
         return;
       }
 
-      if (profileExtractLoading) profileExtractLoading.style.display = 'flex';
+      if (profileExtractLoading) {
+        profileExtractLoading.style.display = 'flex';
+        const txtLabel = document.getElementById('profileLoadingText');
+        if (txtLabel) txtLabel.textContent = `Analizando documento (${filename})...`;
+      }
 
       try {
         const extracted = await window.aiParser.parseProfileFromText(text, filename);
         if (extracted) {
-          extracted.onboarding_completed = true;
-          populateProfileForm(extracted);
-          window.appStorage.saveProfile(extracted, true);
-          showToast(`¡Perfil de "${extracted.nombre}" extraído y guardado correctamente!`, 'success');
+          const isMergeMode = document.getElementById('radioImportMerge')?.checked ?? true;
+
+          if (isMergeMode && currentFormExperiences.length > 0) {
+            // FUSIONAR: conservar historial anterior y sumar nuevas experiencias no repetidas
+            const existingKeys = new Set(
+              currentFormExperiences.map(e => `${(e.empresa || '').toLowerCase().trim()}|${(e.puesto || '').toLowerCase().trim()}`)
+            );
+            const newExps = (extracted.experiencias || []).filter(e => {
+              const k = `${(e.empresa || '').toLowerCase().trim()}|${(e.puesto || '').toLowerCase().trim()}`;
+              return !existingKeys.has(k);
+            });
+
+            currentFormExperiences = [...newExps, ...currentFormExperiences];
+
+            // Fusionar habilidades sin duplicados
+            const existingSkills = new Set(
+              profHabilidades ? profHabilidades.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) : []
+            );
+            (extracted.habilidades || []).forEach(skill => {
+              existingSkills.add(skill.toLowerCase());
+            });
+            const mergedSkills = Array.from(existingSkills).map(s => s.charAt(0).toUpperCase() + s.slice(1));
+
+            // Actualizar campos principales solo si están vacíos o por defecto
+            if (profNombre && (!profNombre.value || profNombre.value === 'Usuario')) profNombre.value = extracted.nombre || profNombre.value;
+            if (profTitular && (!profTitular.value || profTitular.value === 'Desarrollador de Software')) profTitular.value = extracted.titular || profTitular.value;
+            if (profEmail && !profEmail.value) profEmail.value = extracted.email || '';
+            if (profTelefono && !profTelefono.value) profTelefono.value = extracted.telefono || '';
+            if (profUbicacion && !profUbicacion.value) profUbicacion.value = extracted.ubicacion || '';
+            if (profLinkedin && !profLinkedin.value) profLinkedin.value = extracted.enlaces?.linkedin || '';
+            if (profGithub && !profGithub.value) profGithub.value = extracted.enlaces?.github || '';
+            if (profResumen && (!profResumen.value || profResumen.value.length < 30)) profResumen.value = extracted.resumen || profResumen.value;
+            if (profHabilidades) profHabilidades.value = mergedSkills.join(', ');
+
+            renderFormSkillsChips(mergedSkills);
+            renderFormExperiences();
+
+            const mergedProfile = {
+              nombre: profNombre ? profNombre.value : extracted.nombre,
+              titular: profTitular ? profTitular.value : extracted.titular,
+              email: profEmail ? profEmail.value : '',
+              telefono: profTelefono ? profTelefono.value : '',
+              ubicacion: profUbicacion ? profUbicacion.value : '',
+              enlaces: {
+                linkedin: profLinkedin ? profLinkedin.value : '',
+                github: profGithub ? profGithub.value : ''
+              },
+              resumen: profResumen ? profResumen.value : '',
+              habilidades: mergedSkills,
+              experiencias: currentFormExperiences,
+              onboarding_completed: true
+            };
+            window.appStorage.saveProfile(mergedProfile, true);
+            showToast(`¡CV procesado! Se combinaron ${newExps.length} nuevas experiencias con tu historial previo.`, 'success');
+          } else {
+            // REEMPLAZAR TODO
+            extracted.onboarding_completed = true;
+            populateProfileForm(extracted);
+            window.appStorage.saveProfile(extracted, true);
+            showToast(`¡Perfil de "${extracted.nombre}" extraído y guardado correctamente!`, 'success');
+          }
+
           if (pasteProfileArea) pasteProfileArea.style.display = 'none';
         }
       } catch (err) {
+        console.error('Error procesando texto de perfil:', err);
         showToast('Error procesando perfil: ' + err.message, 'error');
       } finally {
         if (profileExtractLoading) profileExtractLoading.style.display = 'none';
@@ -3448,8 +3593,37 @@ hello.ary.code@gmail.com`;
 
     if (btnProcessPastedProfile && profilePasteTextarea) {
       btnProcessPastedProfile.addEventListener('click', () => {
-        processProfileText(profilePasteTextarea.value, 'PegadoManual.md');
+        processProfileText(profilePasteTextarea.value, 'PegadoManual.txt');
       });
+    }
+
+    async function handleIncomingProfileFile(file) {
+      if (!file) return;
+
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+      if (isPdf) {
+        if (profileExtractLoading) {
+          profileExtractLoading.style.display = 'flex';
+          const txtLabel = document.getElementById('profileLoadingText');
+          if (txtLabel) txtLabel.textContent = `Extrayendo texto del PDF (${file.name})...`;
+        }
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdfText = await window.aiParser.extractTextFromPdf(arrayBuffer);
+          await processProfileText(pdfText, file.name);
+        } catch (pdfErr) {
+          console.error('Error leyendo PDF:', pdfErr);
+          showToast('Error al leer el archivo PDF: ' + pdfErr.message, 'error');
+          if (profileExtractLoading) profileExtractLoading.style.display = 'none';
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          processProfileText(evt.target.result, file.name);
+        };
+        reader.readAsText(file);
+      }
     }
 
     if (btnUploadProfileFile && profileFileInput) {
@@ -3459,13 +3633,38 @@ hello.ary.code@gmail.com`;
 
       profileFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (file) handleIncomingProfileFile(file);
+        profileFileInput.value = '';
+      });
+    }
 
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          processProfileText(evt.target.result, file.name);
-        };
-        reader.readAsText(file);
+    // Soporte Drag & Drop sobre la tarjeta de importación
+    const profileDropzoneCard = document.getElementById('profileDropzoneCard');
+    if (profileDropzoneCard) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        profileDropzoneCard.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          profileDropzoneCard.style.borderColor = 'var(--hot-pink-vibrant)';
+          profileDropzoneCard.style.background = 'rgba(77, 23, 214, 0.08)';
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        profileDropzoneCard.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          profileDropzoneCard.style.borderColor = 'var(--primary)';
+          profileDropzoneCard.style.background = 'rgba(77, 23, 214, 0.03)';
+        });
+      });
+
+      profileDropzoneCard.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const file = dt?.files?.[0];
+        if (file) {
+          handleIncomingProfileFile(file);
+        }
       });
     }
 
