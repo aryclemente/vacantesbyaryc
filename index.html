@@ -13,10 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.5.0">
-  <link rel="stylesheet" href="css/styles.css?v=2.5.0">
+  <link rel="stylesheet" href="css/tokens.css?v=2.6.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.6.0">
 </head>
-<body>
+<body class="auth-guest">
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
   <a href="#mainContent" class="skip-link">Saltar al contenido principal</a>
 
@@ -55,7 +55,7 @@
           <span>Nueva Vacante</span>
         </button>
         <button class="btn btn-outline" id="btnOpenProfileModal" title="Mi Perfil Profesional & CV Maestro" aria-label="Abrir mi perfil profesional y CV maestro">
-          <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;" aria-hidden="true">AC</span>
+          <span class="user-avatar-small" id="headerUserAvatar" style="width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; overflow:hidden;" aria-hidden="true">--</span>
           <span id="headerUserName">Mi Perfil</span>
         </button>
         <button class="btn btn-outline cloud-sync-btn" id="btnOpenCloudModal" title="Sincronización en la Nube" aria-label="Estado de sincronización en la nube con Supabase">
@@ -63,7 +63,11 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
           </svg>
-          <span id="headerCloudLabel">Nube</span>
+          <span id="headerCloudLabel">Iniciar Sesión</span>
+        </button>
+        <button class="btn btn-outline" id="btnRestartTour" title="Ver Tutorial Interactivo de 7 Pasos" aria-label="Abrir guía interactiva de funciones" style="padding:0.45rem 0.7rem; font-size:0.8125rem; font-weight:700; gap:0.35rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Guía</span>
         </button>
         <button class="btn btn-outline btn-icon-only" id="btnSettings" title="Configuración" aria-label="Abrir configuración y copia de seguridad">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -74,6 +78,49 @@
       </div>
     </div>
   </header>
+
+  <!-- ========================================================================
+       Welcome Landing View (Visible cuando no hay sesión iniciada)
+       ======================================================================== -->
+  <section class="welcome-landing-section" id="welcomeLandingView" aria-label="Bienvenida a Vacantes by AryC">
+    <div class="welcome-hero-card">
+      <div class="welcome-badge">
+        <span class="live-pulse" aria-hidden="true">
+          <span class="live-pulse-ring"></span>
+          <span class="live-pulse-core"></span>
+        </span>
+        <span>ATS Personal + Inteligencia Artificial</span>
+      </div>
+      <h1 class="welcome-title">Gestiona tu búsqueda laboral de principio a fin en la nube</h1>
+      <p class="welcome-subtitle">
+        Centraliza tu perfil profesional, encuentra empleos con compatibilidad ATS, adapta tu currículum en PDF, redacta cartas y entrena tus entrevistas en un solo lugar.
+      </p>
+
+      <div class="welcome-cta-box">
+        <p class="welcome-cta-instruction">
+          Para comenzar, da clic en <strong>Iniciar Sesión</strong> y regístrate en la nube para guardar tu progreso de forma privada y segura.
+        </p>
+        <div class="welcome-cta-actions">
+          <button type="button" class="btn btn-primary welcome-btn-start" id="btnWelcomeStartCloud">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+            <span>Iniciar Sesión / Registrarse en la Nube</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="welcome-steps-preview" aria-label="Recorrido guiado al iniciar sesión">
+        <div class="welcome-step-chip"><span>1</span> Sube o completa tu Perfil</div>
+        <div class="welcome-step-chip"><span>2</span> Registra con Smart Intake</div>
+        <div class="welcome-step-chip"><span>3</span> Explora el Radar de Empleos</div>
+        <div class="welcome-step-chip"><span>4</span> Kanban, Lista &amp; Asesor IA</div>
+        <div class="welcome-step-chip"><span>5</span> Adapta y descarga tu CV</div>
+        <div class="welcome-step-chip"><span>6</span> Correos y Cartas IA</div>
+        <div class="welcome-step-chip"><span>7</span> Simulador de Entrevistas</div>
+      </div>
+    </div>
+  </section>
 
   <!-- ========================================================================
        KPI Banner
@@ -87,7 +134,7 @@
           </svg>
         </div>
         <div class="kpi-data">
-          <span class="kpi-value" id="kpiTotal">16</span>
+          <span class="kpi-value" id="kpiTotal">0</span>
           <span class="kpi-label">Total Vacantes</span>
         </div>
       </div>
@@ -100,7 +147,7 @@
           </svg>
         </div>
         <div class="kpi-data">
-          <span class="kpi-value" id="kpiApplied">10</span>
+          <span class="kpi-value" id="kpiApplied">0</span>
           <span class="kpi-label">Postuladas</span>
         </div>
       </div>
@@ -113,7 +160,7 @@
           </svg>
         </div>
         <div class="kpi-data">
-          <span class="kpi-value" id="kpiInterviews">4</span>
+          <span class="kpi-value" id="kpiInterviews">0</span>
           <span class="kpi-label">En Entrevistas</span>
         </div>
       </div>
@@ -126,7 +173,7 @@
           </svg>
         </div>
         <div class="kpi-data">
-          <span class="kpi-value" id="kpiResponseRate">25%</span>
+          <span class="kpi-value" id="kpiResponseRate">0%</span>
           <span class="kpi-label">Tasa Conversión</span>
         </div>
       </div>
@@ -414,16 +461,16 @@
         <div class="cv-paper template-modern no-photo" id="cvPaper">
           <div class="cv-header">
             <div class="cv-photo-container shape-circle" id="cvPhotoContainer">
-              <img id="cvPhotoImg" src="" alt="Arianna Clemente" class="cv-photo-avatar pos-top">
+              <img id="cvPhotoImg" src="" alt="Foto de perfil" class="cv-photo-avatar pos-top">
             </div>
             <div class="cv-header-info">
-              <div class="cv-name" id="cvHeaderName">Arianna Clemente</div>
-              <div class="cv-role" id="cvHeaderRole">Full Stack Developer &amp; Especialista TI / Web</div>
+              <div class="cv-name" id="cvHeaderName">Tu Nombre Completo</div>
+              <div class="cv-role" id="cvHeaderRole">Titular Profesional</div>
             </div>
             <div class="cv-contacts" id="cvHeaderContacts">
-              <div>Caracas, Venezuela &bull; Remoto Internacional</div>
-              <div>hello.ary.code@gmail.com</div>
-              <div>github.com/aryclemente &bull; linkedin.com/in/aryclement</div>
+              <div>Ciudad, País &bull; Modalidad</div>
+              <div>tu-correo@ejemplo.com</div>
+              <div>Enlaces profesionales</div>
             </div>
           </div>
 
@@ -436,7 +483,7 @@
               </button>
             </div>
             <p id="cvSummaryText" style="font-size:0.875rem;">
-              Especialista en Desarrollo de Software, Arquitecturas Web Escalables y Soluciones TI con sólida experiencia liderando proyectos Frontend y Backend, modernización de plataformas de misión crítica (LMS Moodle, OJS, ecosistemas PHP/JavaScript) y diseño de flujos operativos para sectores corporativos, educativos y bancarios. Dominio en la integración de modelos de Inteligencia Artificial (Google Gemini API), construcción de interfaces accesibles de alto rendimiento (Core Web Vitals) y automatización de despliegues continuos con Git y Netlify.
+              Completa tu perfil profesional o importa tu CV para generar automáticamente un resumen adaptado a cada vacante.
             </p>
           </div>
 
@@ -450,17 +497,14 @@
           <div class="cv-section">
             <div class="cv-section-title">Educación Formal</div>
             <div style="font-size:0.875rem; color:#334155; line-height:1.6;" id="cvEducationList">
-              <div><strong>Técnico Superior en Informática</strong> &ndash; Instituto Universitario Jesús Obrero (IUJO, 2022 &ndash; 2025)</div>
-              <div><strong>Técnico Medio en Programación Informática</strong> &ndash; Instituto Técnico Jesús Obrero (ITJO, 2016 &ndash; 2019)</div>
+              <div>Agrega tu formación académica desde Mi Perfil.</div>
             </div>
           </div>
 
           <div class="cv-section">
             <div class="cv-section-title">Competencias Clave</div>
             <div style="font-size:0.875rem; color:#334155;" id="cvSkillsList">
-              <strong>Frontend &amp; Web:</strong> JavaScript (ES6+), React, Next.js, HTML5 Semántico, CSS3 Moderno, Responsive Design, TailwindCSS, Web Performance.<br>
-              <strong>Backend &amp; Bases de Datos:</strong> PHP, Laravel, Python, Node.js, REST APIs, PostgreSQL (RLS), MySQL, SQL Server, JSON.<br>
-              <strong>Cloud, DevOps &amp; Especialidades:</strong> Git, GitHub, Netlify (Serverless Functions), Supabase Cloud, Integración IA (Gemini 2.5), Pasarelas de Pago, Moodle LMS, OJS, Optimización ATS.
+              Tus habilidades técnicas y metodologías aparecerán aquí.
             </div>
           </div>
         </div>
@@ -968,7 +1012,7 @@
                 A
               </div>
               <div>
-                <div style="font-weight:700; color:var(--text-dark-primary);" id="userLoggedInEmail">arianna@ejemplo.com</div>
+                <div style="font-weight:700; color:var(--text-dark-primary);" id="userLoggedInEmail">usuario@ejemplo.com</div>
                 <div style="font-size:0.75rem; color:var(--mint-turquoise); font-weight:600; display:flex; align-items:center; gap:0.35rem;">
                   <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--mint-turquoise);"></span>
                   Sesión activa y sincronizada
@@ -1726,6 +1770,30 @@
     </button>
   </nav>
 
+  <!-- ========================================================================
+       Interactive Onboarding Tour Floating Guide (7 Pasos)
+       ======================================================================== -->
+  <aside class="onboarding-tour-card" id="onboardingTourCard" style="display:none;" role="region" aria-label="Tutorial guiado de funcionalidades">
+    <div class="tour-progress-track">
+      <div class="tour-progress-fill" id="tourProgressBar" style="width: 14%;"></div>
+    </div>
+    <div class="tour-card-header">
+      <span class="tour-step-badge" id="tourStepBadge">Paso 1 de 7</span>
+      <button type="button" class="tour-close-btn" id="btnTourClose" title="Pausar tutorial" aria-label="Pausar tutorial">&times;</button>
+    </div>
+    <h3 class="tour-step-title" id="tourStepTitle">1. Rellena tu Perfil Profesional</h3>
+    <p class="tour-step-desc" id="tourStepDesc">Sube tu CV en PDF, Markdown o TXT para comenzar.</p>
+    <div class="tour-step-hint" id="tourStepHint"></div>
+    <div class="tour-card-actions">
+      <button type="button" class="btn btn-primary btn-sm" id="btnTourPrimaryAction">Abrir Mi Perfil</button>
+      <div class="tour-nav-group">
+        <button type="button" class="btn btn-outline btn-sm" id="btnTourSkip">Omitir</button>
+        <button type="button" class="btn btn-outline btn-sm" id="btnTourPrev" style="display:none;">← Anterior</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnTourNext">Siguiente →</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1736,11 +1804,12 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.5.0"></script>
-  <script src="js/storage.js?v=2.5.0"></script>
-  <script src="js/ai-parser.js?v=2.5.0"></script>
-  <script src="js/job-radar.js?v=2.5.0"></script>
-  <script src="js/app.js?v=2.5.0"></script>
+  <script src="js/supabase-client.js?v=2.6.0"></script>
+  <script src="js/storage.js?v=2.6.0"></script>
+  <script src="js/ai-parser.js?v=2.6.0"></script>
+  <script src="js/job-radar.js?v=2.6.0"></script>
+  <script src="js/onboarding-tour.js?v=2.6.0"></script>
+  <script src="js/app.js?v=2.6.0"></script>
 </body>
 </html>
 

@@ -391,22 +391,20 @@ class StorageService {
   }
 
   init() {
-    // 1. Cargar caché inmediato desde localStorage
-    const key = this.getStorageKey();
-    const existing = localStorage.getItem(key);
-    if (!existing) {
-      // Si no hay usuario autenticado, cargar semillas iniciales
-      if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
-        this.cache = [...SEED_VACANCIES];
-        this.saveLocalVacancies(this.cache);
-      } else {
-        this.cache = [];
-      }
+    // 1. Cargar caché inmediato desde localStorage solo si hay usuario autenticado
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
+      this.cache = [];
     } else {
-      try {
-        this.cache = JSON.parse(existing);
-      } catch (e) {
+      const key = this.getStorageKey();
+      const existing = localStorage.getItem(key);
+      if (!existing) {
         this.cache = [];
+      } else {
+        try {
+          this.cache = JSON.parse(existing);
+        } catch (e) {
+          this.cache = [];
+        }
       }
     }
 
@@ -438,29 +436,12 @@ class StorageService {
   }
 
   getProfile() {
-    if (this.profileCache) return this.profileCache;
-    const key = this.getProfileKey();
-    try {
-      const data = localStorage.getItem(key);
-      if (data) {
-        this.profileCache = JSON.parse(data);
-        return this.profileCache;
-      }
-    } catch (e) {
-      console.warn('Error leyendo perfil de localStorage:', e);
-    }
-
     const user = window.appSupabase ? window.appSupabase.getUser() : null;
-    if (user) {
-      const isArianna = user.email && (user.email.toLowerCase().includes('ary') || user.email.toLowerCase().includes('arianna'));
-      const fallback = isArianna ? {
-        ...ARIANNA_MASTER_PROFILE,
-        email: user.email,
-        onboarding_completed: true
-      } : {
-        nombre: user.user_metadata?.nombre || user.email.split('@')[0],
+    if (!user) {
+      return {
+        nombre: '',
         titular: '',
-        email: user.email,
+        email: '',
         telefono: '',
         ubicacion: '',
         enlaces: { github: '', linkedin: '', portafolio: '', web: '' },
@@ -474,12 +455,44 @@ class StorageService {
         ai_provider: 'gemini',
         onboarding_completed: false
       };
-      this.profileCache = fallback;
-      return fallback;
     }
 
-    this.profileCache = { ...ARIANNA_MASTER_PROFILE };
-    return this.profileCache;
+    if (this.profileCache) return this.profileCache;
+    const key = this.getProfileKey();
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        this.profileCache = JSON.parse(data);
+        return this.profileCache;
+      }
+    } catch (e) {
+      console.warn('Error leyendo perfil de localStorage:', e);
+    }
+
+    const isArianna = user.email && (user.email.toLowerCase().includes('ary') || user.email.toLowerCase().includes('arianna'));
+    const fallback = isArianna ? {
+      ...ARIANNA_MASTER_PROFILE,
+      email: user.email,
+      onboarding_completed: true
+    } : {
+      nombre: user.user_metadata?.nombre || user.email.split('@')[0],
+      titular: '',
+      email: user.email,
+      telefono: '',
+      ubicacion: '',
+      enlaces: { github: '', linkedin: '', portafolio: '', web: '' },
+      resumen: '',
+      habilidades: [],
+      educacion: [],
+      experiencias: [],
+      foto_url: '',
+      foto_config: {},
+      preferencias_empleo: {},
+      ai_provider: 'gemini',
+      onboarding_completed: false
+    };
+    this.profileCache = fallback;
+    return fallback;
   }
 
   saveProfile(profile, syncToCloud = true) {
@@ -792,6 +805,11 @@ class StorageService {
   }
 
   getLocalVacancies() {
+    // Si no hay usuario autenticado, retornar lista vacía para proteger privacidad en la bienvenida
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) {
+      return [];
+    }
+
     const key = this.getStorageKey();
     try {
       const data = localStorage.getItem(key);
@@ -801,12 +819,7 @@ class StorageService {
     }
 
     // Si es un usuario autenticado y su almacenamiento local está vacío, devolver []
-    if (window.appSupabase && window.appSupabase.isAuthenticated()) {
-      return [];
-    }
-
-    // Modo invitado / demo: semillas de Arianna
-    return SEED_VACANCIES;
+    return [];
   }
 
   saveLocalVacancies(vacancies) {
@@ -831,9 +844,15 @@ class StorageService {
     vacancy.prioridad = vacancy.prioridad || 'high';
 
     // 1. Actualización optimista local
+    if (!Array.isArray(this.cache)) {
+      this.cache = this.getLocalVacancies();
+    }
     this.cache.unshift(vacancy);
     this.saveLocalVacancies(this.cache);
     this.notifySubscribers();
+    try {
+      window.dispatchEvent(new CustomEvent('aryc:vacancy-added', { detail: { vacancy, total: this.cache.length } }));
+    } catch (e) {}
 
     // 2. Si hay sesión activa en Supabase, guardar en la nube en segundo plano
     if (window.appSupabase && window.appSupabase.isAuthenticated()) {

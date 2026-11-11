@@ -1055,8 +1055,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const OFFICIAL_ARIANNA_PHOTO = 'assets/images/arianna_photo.jpg';
 
   function initCvPhoto() {
-    const savedPhoto = localStorage.getItem('aryc_cv_photo') || OFFICIAL_ARIANNA_PHOTO;
-    const photoEnabled = localStorage.getItem('aryc_cv_photo_enabled') !== 'false';
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    const isArianna = user?.email && (user.email.toLowerCase().includes('ary') || user.email.toLowerCase().includes('arianna'));
+    const savedPhoto = localStorage.getItem('aryc_cv_photo') || (isArianna ? OFFICIAL_ARIANNA_PHOTO : '');
+    const photoEnabled = savedPhoto ? (localStorage.getItem('aryc_cv_photo_enabled') !== 'false') : false;
     const photoShape = localStorage.getItem('aryc_cv_photo_shape') || 'circle';
     const photoPos = localStorage.getItem('aryc_cv_photo_pos') || 'top';
 
@@ -1234,8 +1236,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateCvPreview() {
     const selectedId = cvVacancySelect.value;
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || {};
     if (selectedId === 'general') {
-      applyTailoredCvData(MASTER_CV, { empresa: 'General', puesto: 'Full Stack Developer & Especialista TI / Web' });
+      const hasCustomProfile = Boolean(currentProfile.nombre || (currentProfile.experiencias && currentProfile.experiencias.length > 0));
+      if (hasCustomProfile) {
+        const generalData = generateLocalTailoredCv({
+          empresa: 'General',
+          puesto: currentProfile.titular || 'Perfil Profesional',
+          requisitos: currentProfile.habilidades || []
+        });
+        applyTailoredCvData(generalData, { empresa: 'General', puesto: currentProfile.titular || 'Perfil Profesional' });
+      } else {
+        applyTailoredCvData({
+          role: 'Titular Profesional | Tu Nombre',
+          summary: 'Completa tu perfil profesional o sube tu CV para generar tu currículum adaptado.',
+          experiences: [],
+          skills: { relevant: '', core: '', methodologies: '' }
+        }, { empresa: 'General', puesto: 'Titular Profesional' });
+      }
     } else {
       const vacancies = window.appStorage.getVacancies();
       const vacancy = vacancies.find(v => v.id === selectedId);
@@ -1248,11 +1266,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function generateLocalTailoredCv(vacancy) {
     const empresa = vacancy.empresa || 'la empresa';
-    const puesto = vacancy.puesto || 'Full Stack Developer';
-    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+    const puesto = vacancy.puesto || 'Profesional';
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || {};
     const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
       ? vacancy.requisitos
-      : (currentProfile.habilidades && currentProfile.habilidades.length > 0 ? currentProfile.habilidades.slice(0, 6) : ['JavaScript', 'PHP', 'Laravel', 'React', 'SQL', 'Git']);
+      : (currentProfile.habilidades && currentProfile.habilidades.length > 0 ? currentProfile.habilidades.slice(0, 6) : []);
 
     const profileExperiences = (currentProfile.experiencias && currentProfile.experiencias.length > 0)
       ? currentProfile.experiencias.map(exp => ({
@@ -1262,16 +1280,16 @@ document.addEventListener('DOMContentLoaded', () => {
           location: exp.ubicacion || exp.location || 'Remoto',
           bullets: exp.bullets || []
         }))
-      : MASTER_CV.experiences;
+      : [];
 
     return {
-      role: `${puesto} | ${currentProfile.nombre || 'Arianna Clemente'}`,
-      summary: currentProfile.resumen || MASTER_CV.summary,
+      role: `${puesto}${currentProfile.nombre ? ` | ${currentProfile.nombre}` : ''}`,
+      summary: currentProfile.resumen || 'Completa tu resumen profesional en Mi Perfil para personalizar esta sección.',
       experiences: profileExperiences,
       skills: {
         relevant: `${reqs.join(', ')}`,
-        core: currentProfile.habilidades ? currentProfile.habilidades.join(', ') : MASTER_CV.skills.core,
-        methodologies: 'Scrum, Kanban, Metodologías Ágiles, Optimización ATS, SEO Técnico, Seguridad TI, Continuidad Operativa.'
+        core: currentProfile.habilidades ? currentProfile.habilidades.join(', ') : '',
+        methodologies: 'Metodologías Ágiles, Optimización ATS, Trabajo Colaborativo.'
       }
     };
   }
@@ -1292,27 +1310,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyTailoredCvData(data, vacancy) {
     cvActiveData = { ...data };
-    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || {};
 
     const cvHeaderName = document.getElementById('cvHeaderName');
     const cvHeaderContacts = document.getElementById('cvHeaderContacts');
 
     if (cvHeaderName) {
-      cvHeaderName.textContent = currentProfile.nombre || 'Arianna Clemente';
+      cvHeaderName.textContent = currentProfile.nombre || 'Tu Nombre Completo';
     }
 
     if (cvHeaderContacts) {
       const links = currentProfile.enlaces || {};
       const linksStr = [links.github, links.linkedin, links.portafolio].filter(Boolean).join(' • ');
       cvHeaderContacts.innerHTML = `
-        <div>${escapeHtml(currentProfile.ubicacion || 'Remoto Internacional')}</div>
-        <div>${escapeHtml(currentProfile.email || 'hello.ary.code@gmail.com')}${currentProfile.telefono ? ` &bull; ${escapeHtml(currentProfile.telefono)}` : ''}</div>
+        <div>${escapeHtml(currentProfile.ubicacion || 'Ciudad / Remoto')}</div>
+        <div>${escapeHtml(currentProfile.email || 'tu-correo@ejemplo.com')}${currentProfile.telefono ? ` &bull; ${escapeHtml(currentProfile.telefono)}` : ''}</div>
         <div>${escapeHtml(linksStr || '')}</div>
       `;
     }
 
-    cvHeaderRole.textContent = data.role || `${vacancy.puesto || currentProfile.titular || 'Full Stack Developer'} | ${currentProfile.nombre || 'Arianna Clemente'}`;
-    cvSummaryText.textContent = data.summary || currentProfile.resumen || MASTER_CV.summary;
+    cvHeaderRole.textContent = data.role || `${vacancy.puesto || currentProfile.titular || 'Titular Profesional'}${currentProfile.nombre ? ` | ${currentProfile.nombre}` : ''}`;
+    cvSummaryText.textContent = data.summary || currentProfile.resumen || '';
 
     renderCvExperiences();
 
@@ -1329,7 +1347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const expContainer = document.getElementById('cvExperienceContainer');
     if (!expContainer || !cvActiveData) return;
 
-    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+    const currentProfile = (window.appStorage && window.appStorage.getProfile()) || {};
     const profileExpList = (currentProfile.experiencias && currentProfile.experiencias.length > 0)
       ? currentProfile.experiencias.map(exp => ({
           company: exp.empresa || exp.company,
@@ -1338,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
           location: exp.ubicacion || exp.location || 'Remoto',
           bullets: exp.bullets || []
         }))
-      : MASTER_CV.experiences;
+      : [];
 
     const allExperiences = Array.isArray(cvActiveData.experiences) && cvActiveData.experiences.length > 0
       ? cvActiveData.experiences
@@ -1484,7 +1502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const allExperiences = Array.isArray(cvActiveData.experiences) && cvActiveData.experiences.length > 0
       ? cvActiveData.experiences
-      : MASTER_CV.experiences;
+      : [];
 
     const currentVacancyId = cvVacancySelect.value;
     const hiddenList = getHiddenExperiences(currentVacancyId);
@@ -1899,6 +1917,9 @@ document.addEventListener('DOMContentLoaded', () => {
       btnToggleEditCv.click();
     }
     window.print();
+    try {
+      window.dispatchEvent(new CustomEvent('aryc:cv-downloaded'));
+    } catch (e) {}
   });
 
   // Helper
@@ -2044,27 +2065,43 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function generateLocalCoverLetter(vacancy) {
+    const profile = (window.appStorage && window.appStorage.getProfile()) || {};
     const empresa = vacancy.empresa || 'Equipo de Selección';
-    const puesto = vacancy.puesto || 'Desarrolladora Full Stack';
-    const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0) ? vacancy.requisitos.slice(0, 3).join(', ') : 'desarrollo web, integración de APIs y buenas prácticas';
+    const puesto = vacancy.puesto || profile.titular || 'Especialista Profesional';
+    const nombre = profile.nombre || 'Tu Nombre';
+    const titular = profile.titular || 'Profesional Especializado';
+    const ubicacion = profile.ubicacion || 'Disponible Remoto';
+    const email = profile.email || 'tu-correo@ejemplo.com';
+    const links = profile.enlaces || {};
+    const linkParts = [];
+    if (links.linkedin) linkParts.push(`LinkedIn: ${links.linkedin}`);
+    if (links.github) linkParts.push(`GitHub: ${links.github}`);
+    if (links.portafolio) linkParts.push(`Portafolio: ${links.portafolio}`);
+
+    const reqs = (vacancy.requisitos && vacancy.requisitos.length > 0)
+      ? vacancy.requisitos.slice(0, 4).join(', ')
+      : (profile.habilidades && profile.habilidades.length > 0 ? profile.habilidades.slice(0, 4).join(', ') : 'resolución de problemas, trabajo en equipo y entrega continua');
+
+    const expHighlight = (profile.experiencias && profile.experiencias.length > 0)
+      ? `En mi experiencia más reciente como ${profile.experiencias[0].puesto || 'especialista'} en ${profile.experiencias[0].empresa || 'proyectos clave'}, contribuí activamente en ${(profile.experiencias[0].bullets && profile.experiencias[0].bullets[0]) || 'el desarrollo e implementación de soluciones de alto impacto'}.`
+      : (profile.resumen || 'A lo largo de mi trayectoria he desarrollado soluciones enfocadas en calidad, eficiencia operativa y cumplimiento de objetivos.');
 
     const letter = `Estimado equipo de selección de ${empresa},
 
-Me dirijo a ustedes con gran entusiasmo para presentar mi postulación al puesto de ${puesto}. Cuento con una sólida trayectoria como Desarrolladora Full Stack y Especialista en Soluciones Web, combinando experiencia práctica en arquitecturas backend robustas, interfaces reactivas de alto rendimiento e integración de Inteligencia Artificial.
+Me dirijo a ustedes con gran entusiasmo para presentar mi postulación al puesto de ${puesto}. Cuento con sólida preparación como ${titular}, combinando experiencia práctica y enfoque en resultados medibles.
 
-A lo largo de mi trayectoria he liderado proyectos de alta responsabilidad transaccional y operativa. En el Colegio Gonzaga desarrollé e integré una pasarela de pagos multicuenta (Pago Móvil, transferencias bancarias, C2P Mercantil y Zinli USD) capaz de procesar más de 900 transacciones mensuales con conciliación automatizada. Asimismo, en Fe y Alegría construí un sistema integral de donaciones en Laravel con bases de datos relacionales seguras y diseñé chatbots inteligentes integrando APIs de Google Gemini, mientras que en CIDE desarrollé plugins personalizados de WordPress para validación de datos en tiempo real y gestioné plataformas LMS Moodle y revistas OJS a escala.
+${expHighlight}
 
-Mi perfil encaja con los requerimientos de ${empresa}, especialmente en el dominio de ${reqs}. Me caracterizo por una rigurosa metodología de trabajo, mentalidad de entrega continua, optimización de Core Web Vitals y un compromiso genuino por resolver problemas complejos con código limpio y escalable en entornos remotos.
+Mi perfil encaja con los requerimientos de ${empresa}, especialmente en el dominio de ${reqs}. Me caracterizo por una rigurosa metodología de trabajo, mentalidad de entrega continua y compromiso genuino por aportar valor desde el primer día.
 
-Agradezco de antemano el tiempo dedicado a revisar mi perfil. Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede generar valor inmediato para su equipo.
+Agradezco de antemano el tiempo dedicado a revisar mi perfil. Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede impulsar los objetivos de su equipo.
 
 Atentamente,
 
-Arianna Clemente
-Full Stack Developer & Especialista TI / Web
-Caracas, Venezuela • Disponible para Trabajo Remoto Internacional
-Email: hello.ary.code@gmail.com
-LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
+${nombre}
+${titular}
+${ubicacion}
+Email: ${email}${linkParts.length ? `\n${linkParts.join(' | ')}` : ''}`;
 
     return { letter };
   }
@@ -2124,7 +2161,7 @@ LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
         <html lang="es">
         <head>
           <meta charset="utf-8">
-          <title>Carta de Presentación - Arianna Clemente</title>
+          <title>Carta de Presentación</title>
           <style>
             body {
               font-family: 'Georgia', 'Times New Roman', serif;
@@ -2193,8 +2230,9 @@ LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
 
   async function generateEmailPitch(vacancy) {
     if (!vacancy) return;
+    const currentProf = (window.appStorage && window.appStorage.getProfile) ? window.appStorage.getProfile() : {};
     emailSubjectInput.dataset.vacancyId = vacancy.id;
-    emailSubjectInput.value = `Postulación: ${vacancy.puesto || 'Full Stack Developer'} - Arianna Clemente`;
+    emailSubjectInput.value = `Postulación: ${vacancy.puesto || 'Vacante'}${currentProf?.nombre ? ` - ${currentProf.nombre}` : ''}`;
     emailBodyInput.value = 'Generando correo persuasivo con Gemini 2.5 Flash...';
     if (btnRegenerateEmail) btnRegenerateEmail.disabled = true;
     if (regenerateEmailBtnText) regenerateEmailBtnText.textContent = 'Generando...';
@@ -2253,27 +2291,39 @@ LinkedIn: linkedin.com/in/aryclement | GitHub: github.com/aryclemente`;
   }
 
   function generateLocalEmailPitch(vacancy) {
+    const profile = (window.appStorage && window.appStorage.getProfile()) || {};
     const empresa = vacancy.empresa || 'Equipo de Selección';
-    const puesto = vacancy.puesto || 'Desarrolladora Full Stack';
-    const emailSubject = `Postulación: ${puesto} - Arianna Clemente | Full Stack Developer`;
+    const puesto = vacancy.puesto || profile.titular || 'Especialista Profesional';
+    const nombre = profile.nombre || 'Tu Nombre';
+    const titular = profile.titular || 'Profesional Especializado';
+    const ubicacion = profile.ubicacion || 'Disponible Remoto';
+    const email = profile.email || 'tu-correo@ejemplo.com';
+    const skills = (profile.habilidades && profile.habilidades.length > 0)
+      ? profile.habilidades.slice(0, 6).join(', ')
+      : 'habilidades técnicas y metodologías ágiles';
+    const links = profile.enlaces || {};
+    const linkLines = [];
+    if (links.portafolio) linkLines.push(`• Portafolio: ${links.portafolio}`);
+    if (links.github) linkLines.push(`• GitHub: ${links.github}`);
+    if (links.linkedin) linkLines.push(`• LinkedIn: ${links.linkedin}`);
+
+    const emailSubject = `Postulación: ${puesto} - ${nombre}`;
     const emailBody = `Estimado equipo de ${empresa},
 
 Espero que se encuentren muy bien. Les escribo para presentar formalmente mi postulación a la vacante de ${puesto}.
 
-Cuento con sólida experiencia comprobada en desarrollo Full Stack, pasarelas de pago transaccionales (+900 tx/mes), ecosistemas PHP/Laravel/JavaScript, optimización de rendimiento web (Core Web Vitals +40%) e integraciones con Inteligencia Artificial (Google Gemini API).
+Cuento con sólida experiencia como ${titular} y dominio en ${skills}. ${profile.resumen ? profile.resumen : 'Me enfoco en aportar soluciones sólidas, calidad técnica y resultados desde el primer día.'}
 
-Adjunto a este correo mi Currículum Vitae adaptado para la posición. Asimismo, les comparto los enlaces directos a mis proyectos en producción, certificaciones y código fuente:
-• Portafolio & GitHub: https://github.com/aryclemente
-• Perfil Profesional en LinkedIn: https://linkedin.com/in/aryclement
+Adjunto a este correo mi Currículum Vitae adaptado para la posición.${linkLines.length ? ` Asimismo, les comparto mis enlaces profesionales:\n${linkLines.join('\n')}` : ''}
 
-Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi experiencia puede generar valor inmediato para ${empresa}.
+Quedo a su entera disposición para coordinar una entrevista y profundizar en cómo mi perfil puede generar valor inmediato para ${empresa}.
 
 Atentamente,
 
-Arianna Clemente
-Full Stack Developer & Especialista TI / Web
-Caracas, Venezuela (Disponible para Remoto Internacional)
-hello.ary.code@gmail.com`;
+${nombre}
+${titular}
+${ubicacion}
+${email}`;
 
     return { emailSubject, emailBody };
   }
@@ -2518,13 +2568,18 @@ hello.ary.code@gmail.com`;
 
     if (history.length === 0) {
       const emp = currentCoachVacancy?.empresa || 'la empresa';
-      const rol = currentCoachVacancy?.puesto || 'Desarrolladora Full Stack';
+      const rol = currentCoachVacancy?.puesto || 'este puesto';
+      const profile = (window.appStorage && window.appStorage.getProfile()) || {};
+      const firstName = profile.nombre ? profile.nombre.split(' ')[0] : 'candidato/a';
+      const topSkills = (profile.habilidades && profile.habilidades.length > 0)
+        ? profile.habilidades.slice(0, 4).join(', ')
+        : 'tu experiencia y competencias clave';
       coachChatMessages.innerHTML = `
         <div class="coach-msg-row model">
           <div class="coach-bubble coach-bubble-model">
-            ¡Hola Arianna! 👋 Soy tu entrevistador técnico para el puesto de <strong>${escapeHtml(rol)}</strong> en <strong>${escapeHtml(emp)}</strong>.<br><br>
-            He revisado tu perfil y me llaman mucho la atención tus logros en la pasarela multicuenta del Colegio Gonzaga y tus proyectos en Laravel y Gemini. ¿Te gustaría practicar tu presentación inicial (Elevator Pitch) o prefieres que te haga la primera pregunta técnica?
-            <div class="coach-bubble-meta">Simulador Gemini 2.5 Flash</div>
+            ¡Hola ${escapeHtml(firstName)}! 👋 Soy tu entrevistador técnico para el puesto de <strong>${escapeHtml(rol)}</strong> en <strong>${escapeHtml(emp)}</strong>.<br><br>
+            He revisado tu perfil y me interesa explorar tu experiencia en <strong>${escapeHtml(topSkills)}</strong>. ¿Te gustaría practicar tu presentación inicial (Elevator Pitch) o prefieres que te haga la primera pregunta técnica?
+            <div class="coach-bubble-meta">Simulador Entrevista IA</div>
           </div>
         </div>
       `;
@@ -2796,19 +2851,37 @@ hello.ary.code@gmail.com`;
     if (!window.appSupabase) return;
 
     const isAuth = window.appSupabase.isAuthenticated();
+    document.body.classList.toggle('auth-guest', !isAuth);
 
     if (isAuth) {
       const user = window.appSupabase.getUser();
+      const isArianna = user?.email && (user.email.toLowerCase().includes('ary') || user.email.toLowerCase().includes('arianna'));
       if (cloudAuthLoggedOut) cloudAuthLoggedOut.style.display = 'none';
       if (cloudAuthLoggedIn) cloudAuthLoggedIn.style.display = 'block';
       if (userLoggedInEmail) userLoggedInEmail.textContent = user?.email || 'Usuario Activo';
-      if (userAvatarLetter) userAvatarLetter.textContent = (user?.email || 'A')[0].toUpperCase();
+      if (userAvatarLetter) userAvatarLetter.textContent = (user?.email || 'U')[0].toUpperCase();
+      const btnResetAri = document.getElementById('btnResetToAriannaProfile');
+      if (btnResetAri) btnResetAri.style.display = isArianna ? 'inline-flex' : 'none';
     } else {
       if (cloudAuthLoggedOut) cloudAuthLoggedOut.style.display = 'block';
       if (cloudAuthLoggedIn) cloudAuthLoggedIn.style.display = 'none';
+      if (window.onboardingTour && typeof window.onboardingTour.hideTour === 'function') {
+        window.onboardingTour.hideTour();
+      }
     }
 
+    initCvPhoto();
     updateCloudStatusUI(window.appStorage.syncStatus);
+  }
+
+  // Welcome CTA -> Open Cloud Modal
+  const btnWelcomeStartCloud = document.getElementById('btnWelcomeStartCloud');
+  if (btnWelcomeStartCloud) {
+    btnWelcomeStartCloud.addEventListener('click', () => {
+      hideAuthAlert();
+      updateAuthUI();
+      if (cloudModal) cloudModal.classList.add('open');
+    });
   }
 
   // Cloud Modal Open / Close
@@ -3097,34 +3170,25 @@ hello.ary.code@gmail.com`;
     });
   }
 
-  // Onboarding bienvenida para nuevo usuario
+  // Onboarding bienvenida y tutorial interactivo para usuario autenticado
   function checkNewUserWelcome() {
     if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
     const user = window.appSupabase.getUser();
     if (!user) return;
 
-    // Obtener perfil específico del usuario
-    const profile = window.appStorage.getProfile();
+    const cloudModalEl = document.getElementById('cloudModal');
+    if (cloudModalEl && cloudModalEl.classList.contains('open')) {
+      cloudModalEl.classList.remove('open');
+    }
 
-    // Comprobar si completó el onboarding
-    const isCompleted = profile && profile.onboarding_completed === true && Array.isArray(profile.habilidades) && profile.habilidades.length > 0;
-
-    if (!isCompleted) {
-      const profileModal = document.getElementById('profileModal');
-      const cloudModal = document.getElementById('cloudModal');
-
-      // Cerrar modal de login si estaba abierto
-      if (cloudModal) cloudModal.classList.remove('open');
-
-      if (profileModal) {
-        setTimeout(() => {
-          if (typeof window.populateProfileForm === 'function') {
-            window.populateProfileForm(profile);
-          }
-          profileModal.classList.add('open');
-          showToast(`🎉 ¡Bienvenido/a! Sube tu perfil en PDF o Markdown para adaptar tus postulaciones en 10 segundos.`, 'info');
-        }, 400);
-      }
+    if (window.onboardingTour) {
+      window.onboardingTour.init({
+        switchView,
+        showToast
+      });
+      setTimeout(() => {
+        window.onboardingTour.startIfNeeded();
+      }, 350);
     }
   }
 
@@ -3162,7 +3226,7 @@ hello.ary.code@gmail.com`;
   // =========================================================================
   function initUserProfileAndSettings() {
     function updateHeaderProfileUI() {
-      const profile = (window.appStorage && window.appStorage.getProfile()) || ARIANNA_MASTER_PROFILE;
+      const profile = (window.appStorage && window.appStorage.getProfile()) || {};
       const headerUserName = document.getElementById('headerUserName');
       const headerUserAvatar = document.getElementById('headerUserAvatar');
 
@@ -3172,7 +3236,7 @@ hello.ary.code@gmail.com`;
       if (headerUserAvatar) {
         const initials = profile.nombre
           ? profile.nombre.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
-          : 'AC';
+          : '--';
         headerUserAvatar.textContent = initials;
       }
     }
@@ -3705,6 +3769,9 @@ hello.ary.code@gmail.com`;
         updateCvPreview();
         if (window.jobRadar) window.jobRadar.render();
         if (profileModal) profileModal.classList.remove('open');
+        try {
+          window.dispatchEvent(new CustomEvent('aryc:profile-saved', { detail: { profile: updatedProfile } }));
+        } catch (e) {}
       });
     }
 
@@ -3723,6 +3790,9 @@ hello.ary.code@gmail.com`;
   initCvPhoto();
   initCvTemplate();
   initUserProfileAndSettings();
+  if (window.onboardingTour) {
+    window.onboardingTour.init({ switchView, showToast });
+  }
 
   window.openProfileModal = function () {
     const profileModal = document.getElementById('profileModal');
@@ -3730,6 +3800,9 @@ hello.ary.code@gmail.com`;
       const profile = (window.appStorage && typeof window.appStorage.getProfile === 'function')
         ? window.appStorage.getProfile()
         : null;
+      if (typeof window.populateProfileForm === 'function' && profile) {
+        window.populateProfileForm(profile);
+      }
       profileModal.classList.add('open');
     }
   };
