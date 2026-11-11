@@ -178,6 +178,7 @@ class OnboardingTourController {
     const btnSkip = document.getElementById('btnTourSkip');
     const btnClose = document.getElementById('btnTourClose');
     const btnRestart = document.getElementById('btnRestartTour');
+    const btnOpenSettings = document.getElementById('btnTourOpenSettings');
 
     if (btnPrev) {
       btnPrev.addEventListener('click', () => {
@@ -213,6 +214,24 @@ class OnboardingTourController {
     if (btnRestart) {
       btnRestart.addEventListener('click', () => {
         this.startTour(1, true);
+      });
+    }
+
+    if (btnOpenSettings) {
+      btnOpenSettings.addEventListener('click', () => {
+        const gearBtn = document.getElementById('btnSettings');
+        const profileModal = document.getElementById('profileModal');
+        if (profileModal && profileModal.classList.contains('open')) {
+          profileModal.classList.remove('open');
+        }
+        this.applyHighlights(['#btnSettings']);
+        if (typeof this.callbacks?.showToast === 'function') {
+          this.callbacks.showToast('⚙️ Aquí puedes agregar tu API de IA favorita y descargar tus vacantes en JSON.', 'info');
+        }
+        if (gearBtn) {
+          gearBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => gearBtn.click(), 200);
+        }
       });
     }
 
