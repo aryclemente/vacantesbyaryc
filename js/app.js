@@ -329,10 +329,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // Render Kanban Board with Drag & Drop & Quick Status
   // =========================================================================
+  function getVacancyMatchScore(v, cachedProfile) {
+    if (!v) return 0;
+    if (window.aiJobParser && typeof window.aiJobParser.computeProfileVacancyMatch === 'function') {
+      return window.aiJobParser.computeProfileVacancyMatch(v, cachedProfile).matchScore;
+    }
+    return typeof v.matchScore === 'number' ? v.matchScore : 0;
+  }
+
+  function getMatchBadgeColors(score) {
+    if (score >= 55) {
+      return 'background:rgba(0, 210, 180, 0.16); color:#006875; border:1px solid rgba(0, 210, 180, 0.4);';
+    }
+    if (score >= 10) {
+      return 'background:rgba(245, 158, 11, 0.16); color:#92400e; border:1px solid rgba(245, 158, 11, 0.4);';
+    }
+    return 'background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;';
+  }
+
   function renderKanban() {
     if (!kanbanBoardEl) return;
     const allVacancies = window.appStorage.getVacancies();
     const filtered = getFilteredVacancies();
+    const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
 
     kanbanBoardEl.innerHTML = COLUMNS.map(col => {
       const colVacancies = filtered.filter(v => v.estado === col.id);
@@ -346,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="col-count">${colVacancies.length}</span>
           </div>
           <div class="col-cards-list" data-status="${col.id}">
-            ${colVacancies.map(v => renderJobCard(v)).join('')}
+            ${colVacancies.map(v => renderJobCard(v, activeProfile)).join('')}
           </div>
         </div>
       `;
@@ -357,15 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
     updateKpis(allVacancies);
   }
 
-  function renderJobCard(v) {
+  function renderJobCard(v, activeProfile) {
     const priorityClass = v.prioridad === 'high' ? 'high' : v.prioridad === 'med' ? 'med' : 'low';
     const priorityLabel = v.prioridad === 'high' ? 'Alta' : v.prioridad === 'med' ? 'Media' : 'Baja';
+    const matchScore = getVacancyMatchScore(v, activeProfile);
 
     return `
       <div class="job-card" draggable="true" data-id="${v.id}">
         <div class="card-top">
           <span class="company-badge">${escapeHtml(v.empresa)}</span>
-          <span class="priority-pill ${priorityClass}">${priorityLabel}</span>
+          <span class="priority-pill ${priorityClass}" style="white-space:nowrap;" title="Compatibilidad frente a tu perfil: ${matchScore}%">${priorityLabel} · ${matchScore}%</span>
         </div>
         <div class="job-title">${escapeHtml(v.puesto)}</div>
         <div class="job-meta-row">
@@ -458,9 +478,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTable() {
     if (!tableBodyEl) return;
     const filtered = getFilteredVacancies();
+    const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
 
     tableBodyEl.innerHTML = filtered.map(v => {
       const col = COLUMNS.find(c => c.id === v.estado) || COLUMNS[0];
+      const priorityClass = v.prioridad === 'high' ? 'high' : v.prioridad === 'med' ? 'med' : 'low';
+      const priorityLabel = v.prioridad === 'high' ? 'Alta' : v.prioridad === 'med' ? 'Media' : 'Baja';
+      const matchScore = getVacancyMatchScore(v, activeProfile);
       return `
         <tr data-id="${v.id}">
           <td><strong>${escapeHtml(v.empresa)}</strong></td>
@@ -472,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${col.label}
             </span>
           </td>
-          <td><span class="priority-pill ${v.prioridad || 'med'}">${v.prioridad || 'Media'}</span></td>
+          <td><span class="priority-pill ${priorityClass}" style="white-space:nowrap;" title="Compatibilidad frente a tu perfil: ${matchScore}%">${priorityLabel} · ${matchScore}%</span></td>
           <td style="white-space: nowrap;">
             <button class="btn btn-outline" style="padding:0.3rem 0.65rem; font-size:0.75rem;" onclick="window.openVacancyModal('${v.id}')">
               Detalle
@@ -553,6 +577,10 @@ document.addEventListener('DOMContentLoaded', () => {
     activeModalVacancyId = id;
     document.getElementById('modalJobTitle').textContent = `${vacancy.puesto} - ${vacancy.empresa}`;
 
+    const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
+    const detailMatchScore = getVacancyMatchScore(vacancy, activeProfile);
+    const detailBadgeStyle = getMatchBadgeColors(detailMatchScore);
+
     const contentEl = document.getElementById('modalJobContent');
     contentEl.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
@@ -576,7 +604,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Prioridad</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:0.25rem; margin-bottom:0.4rem; min-height:1.22rem;">
+            <label class="form-label" for="mPrioridad" style="margin:0;">Prioridad</label>
+            <span id="detailMatchBadge" style="display:inline-flex; align-items:center; font-size:0.625rem; line-height:1.1; font-weight:800; padding:0.1rem 0.38rem; border-radius:9999px; white-space:nowrap; ${detailBadgeStyle}" title="Compatibilidad calculada frente a tu perfil: ${detailMatchScore}%">${detailMatchScore}% afín</span>
+          </div>
           <select id="mPrioridad" class="form-control">
             <option value="high" ${vacancy.prioridad === 'high' ? 'selected' : ''}>Alta</option>
             <option value="med" ${vacancy.prioridad === 'med' ? 'selected' : ''}>Media</option>
@@ -3954,6 +3985,8 @@ ${email}`;
     // Subscribe to profile changes
     window.appStorage.subscribeProfile(() => {
       updateHeaderProfileUI();
+      renderKanban();
+      renderTable();
     });
 
     updateHeaderProfileUI();
