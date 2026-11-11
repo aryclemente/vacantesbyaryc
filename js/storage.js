@@ -708,6 +708,7 @@ class StorageService {
           await this.syncProfileWithSupabase();
           await this.syncWithSupabase();
           this.setupRealtimeSubscription();
+          this.recalculateExistingPrioritiesOnce();
         } else {
           // Usuario cerró sesión: limpiar caché en memoria
           this.cache = null;
@@ -721,6 +722,74 @@ class StorageService {
       });
     } else {
       setTimeout(() => this.setupSupabaseIntegration(), 500);
+    }
+  }
+
+  async recalculateExistingPrioritiesOnce() {
+    if (this._priorityMigrationRunning) return;
+    if (!window.appSupabase || !window.appSupabase.isAuthenticated()) return;
+    const user = window.appSupabase.getUser();
+    if (!user) return;
+
+    const migrationKey = `aryc_priority_match_v1_${user.id}`;
+    if (localStorage.getItem(migrationKey)) return;
+
+    if (!window.aiJobParser || typeof window.aiJobParser.computeProfileVacancyMatch !== 'function') {
+      setTimeout(() => this.recalculateExistingPrioritiesOnce(), 400);
+      return;
+    }
+
+    const profile = this.getProfile();
+    const hasProfileData = profile && (
+      (Array.isArray(profile.habilidades) && profile.habilidades.length > 0) ||
+      ((profile.titular || '').trim().length > 2) ||
+      (Array.isArray(profile.experiencias) && profile.experiencias.length > 0)
+    );
+    const vacancies = this.getVacancies();
+    if (!hasProfileData || !Array.isArray(vacancies) || vacancies.length === 0) {
+      return;
+    }
+
+    this._priorityMigrationRunning = true;
+    try {
+      let updatedCount = 0;
+      const updatesToSync = [];
+
+      const nextList = vacancies.map(v => {
+        const res = window.aiJobParser.computeProfileVacancyMatch(v, profile);
+        if (v.prioridad !== res.priority) {
+          updatedCount++;
+          updatesToSync.push({ id: v.id, prioridad: res.priority });
+          return { ...v, prioridad: res.priority };
+        }
+        return v;
+      });
+
+      if (updatedCount > 0) {
+        this.cache = nextList;
+        this.saveLocalVacancies(this.cache);
+        this.notifySubscribers();
+
+        // Sincronizar en segundo plano las prioridades actualizadas en Supabase
+        if (window.appSupabase.client) {
+          await Promise.all(updatesToSync.map(item =>
+            window.appSupabase.client
+              .from('vacantes')
+              .update({ prioridad: item.prioridad })
+              .eq('id', item.id)
+              .eq('user_id', user.id)
+          ));
+        }
+      }
+
+      localStorage.setItem(migrationKey, new Date().toISOString());
+      try {
+        window.dispatchEvent(new CustomEvent('aryc:priorities-recalculated', { detail: { updatedCount, total: vacancies.length } }));
+      } catch (e) {}
+    } catch (err) {
+      console.warn('Error en recálculo único de prioridades:', err);
+    } finally {
+      this._priorityMigrationRunning = false;
     }
   }
 

@@ -831,7 +831,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const badgeEl = document.getElementById('confirmMatchBadge');
     if (!badgeEl) return;
     const score = Number.isFinite(Number(matchScore)) ? Math.max(0, Math.min(100, Math.round(Number(matchScore)))) : 0;
-    badgeEl.textContent = `${score}% compatible`;
+    badgeEl.textContent = `${score}% afín`;
+    badgeEl.title = `Compatibilidad calculada frente a tu perfil: ${score}%`;
     if (score >= 55) {
       badgeEl.style.background = 'rgba(0, 210, 180, 0.16)';
       badgeEl.style.color = '#006875';
@@ -3205,6 +3206,13 @@ ${email}`;
   // Listeners for Supabase Auth and Sync Status
   window.appStorage.onSyncStatusChange((status) => {
     updateCloudStatusUI(status);
+  });
+
+  window.addEventListener('aryc:priorities-recalculated', (e) => {
+    const count = e?.detail?.updatedCount || 0;
+    if (count > 0) {
+      showToast(`Prioridad actualizada en ${count} vacante(s) según tu perfil`, 'success');
+    }
   });
 
   if (window.appSupabase) {
