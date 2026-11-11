@@ -7,6 +7,76 @@ const STORAGE_KEY = 'aryc_vacancies_data';
 const SETTINGS_KEY = 'aryc_app_settings';
 const PROFILE_KEY = 'aryc_master_profile';
 
+/**
+ * CryptoVault - Cifrado simétrico autenticado AES-256-GCM (Web Crypto API)
+ * Cifra API Keys del usuario antes de persistirlas en Supabase (public.perfiles.ai_settings) y almacenamiento local.
+ */
+const CryptoVault = {
+  _toBase64(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  },
+  _fromBase64(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  },
+  async _deriveKey(secretSeed, saltBytes) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(`aryc-vault-v1:${secretSeed}`),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  },
+  async encrypt(plaintext, userId) {
+    if (!plaintext) return null;
+    if (typeof crypto === 'undefined' || !crypto.subtle) {
+      throw new Error('Web Crypto API no disponible para cifrar la API Key.');
+    }
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const aesKey = await this._deriveKey(userId || 'local', salt);
+    const encoded = new TextEncoder().encode(plaintext);
+    const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, encoded);
+    return {
+      v: 1,
+      alg: 'AES-GCM-256',
+      salt: this._toBase64(salt),
+      iv: this._toBase64(iv),
+      ct: this._toBase64(new Uint8Array(cipherBuf))
+    };
+  },
+  async decrypt(payload, userId) {
+    if (!payload || typeof payload !== 'object' || !payload.ct || !payload.iv || !payload.salt) {
+      return '';
+    }
+    if (typeof crypto === 'undefined' || !crypto.subtle) return '';
+    try {
+      const salt = this._fromBase64(payload.salt);
+      const iv = this._fromBase64(payload.iv);
+      const ct = this._fromBase64(payload.ct);
+      const aesKey = await this._deriveKey(userId || 'local', salt);
+      const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ct);
+      return new TextDecoder().decode(plainBuf);
+    } catch (e) {
+      console.warn('No se pudo descifrar la API Key almacenada:', e.message);
+      return '';
+    }
+  }
+};
+
 // Perfil Maestro de Arianna Clemente (Garantía de Preservación de Datos 100%)
 const ARIANNA_MASTER_PROFILE = {
   nombre: 'Arianna Clemente',
@@ -384,6 +454,7 @@ class StorageService {
     this.profileListeners = [];
     this.cache = null;
     this.profileCache = null;
+    this.decryptedKeyMemory = {};
     this.syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error' | 'offline'
     this.syncListeners = [];
     this.perfilesTableAvailable = null; // null: desconocido, true: disponible, false: tabla pendiente de crear en Supabase
@@ -529,6 +600,7 @@ class StorageService {
         foto_config: this.profileCache.foto_config || {},
         preferencias_empleo: this.profileCache.preferencias_empleo || {},
         ai_provider: this.profileCache.ai_provider || 'gemini',
+        ai_settings: this.profileCache.ai_settings || {},
         onboarding_completed: Boolean(this.profileCache.onboarding_completed)
       };
 
@@ -597,6 +669,25 @@ class StorageService {
       this.perfilesTableAvailable = true;
       if (data) {
         this.saveProfile(data, false);
+        // Descifrar configuración de IA sincronizada desde Supabase
+        if (data.ai_settings && data.ai_settings.encryptedKey) {
+          const decryptedKey = await CryptoVault.decrypt(data.ai_settings.encryptedKey, user.id);
+          const provider = data.ai_settings.provider || data.ai_provider || 'gemini';
+          this.decryptedKeyMemory[user.id] = {
+            aiProvider: provider,
+            aiApiKey: decryptedKey,
+            geminiApiKey: decryptedKey
+          };
+          try {
+            localStorage.setItem(this.getSettingsKey(), JSON.stringify({
+              aiProvider: provider,
+              encryptedKey: data.ai_settings.encryptedKey
+            }));
+          } catch (e) {}
+          if (window.jobRadar && typeof window.jobRadar.refreshCopilotMode === 'function') {
+            window.jobRadar.refreshCopilotMode();
+          }
+        }
       } else {
         // Primera vez del usuario: registrar perfil inicial
         this.saveProfile(this.getProfile(), true);
@@ -613,6 +704,7 @@ class StorageService {
           // Usuario inició sesión: cambiar a su espacio de trabajo aislado
           this.cache = null;
           this.profileCache = null;
+          await this.unlockLocalEncryptedSettings();
           await this.syncProfileWithSupabase();
           await this.syncWithSupabase();
           this.setupRealtimeSubscription();
@@ -620,6 +712,7 @@ class StorageService {
           // Usuario cerró sesión: limpiar caché en memoria
           this.cache = null;
           this.profileCache = null;
+          this.decryptedKeyMemory = {};
           this.syncStatus = 'local';
           this.notifySyncStatus();
           this.notifySubscribers();
@@ -966,30 +1059,109 @@ class StorageService {
     return user ? `aryc_settings_${user.id}` : SETTINGS_KEY;
   }
 
+  async unlockLocalEncryptedSettings() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    const userId = user ? user.id : 'local';
+    try {
+      const raw = localStorage.getItem(this.getSettingsKey());
+      if (!raw) return this.getSettings();
+      const parsed = JSON.parse(raw);
+      if (parsed.encryptedKey) {
+        const plain = await CryptoVault.decrypt(parsed.encryptedKey, userId);
+        this.decryptedKeyMemory[userId] = {
+          aiProvider: parsed.aiProvider || 'gemini',
+          aiApiKey: plain,
+          geminiApiKey: plain
+        };
+      } else if (parsed.aiApiKey || parsed.geminiApiKey) {
+        // Migrar clave antigua en texto plano a formato cifrado
+        await this.saveSettings(parsed);
+      }
+    } catch (e) {
+      console.warn('Error desbloqueando configuración local:', e);
+    }
+    return this.getSettings();
+  }
+
+  async getDecryptedSettings() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    const userId = user ? user.id : 'local';
+    if (!this.decryptedKeyMemory[userId]) {
+      await this.unlockLocalEncryptedSettings();
+    }
+    return this.getSettings();
+  }
+
   getSettings() {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    const userId = user ? user.id : 'local';
+    if (this.decryptedKeyMemory[userId]) {
+      return { ...this.decryptedKeyMemory[userId] };
+    }
     try {
       const key = this.getSettingsKey();
       let settings = localStorage.getItem(key);
       if (!settings && key === SETTINGS_KEY) {
         settings = localStorage.getItem('aryc_app_settings');
       }
-      return settings ? JSON.parse(settings) : { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
+      if (!settings) return { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
+      const parsed = JSON.parse(settings);
+      return {
+        aiProvider: parsed.aiProvider || 'gemini',
+        aiApiKey: parsed.aiApiKey || parsed.geminiApiKey || '',
+        geminiApiKey: parsed.geminiApiKey || parsed.aiApiKey || '',
+        hasEncryptedKey: Boolean(parsed.encryptedKey)
+      };
     } catch (e) {
       return { geminiApiKey: '', aiProvider: 'gemini', aiApiKey: '' };
     }
   }
 
-  saveSettings(settings) {
-    const key = this.getSettingsKey();
-    localStorage.setItem(key, JSON.stringify(settings));
+  async saveSettings(settings) {
+    const user = window.appSupabase ? window.appSupabase.getUser() : null;
+    const userId = user ? user.id : 'local';
+    const provider = settings.aiProvider || 'gemini';
+    const rawKey = (settings.aiApiKey || settings.geminiApiKey || '').trim();
 
-    // Si el usuario está autenticado, sincronizar proveedor en su perfil
+    // 1. Mantener clave descifrada únicamente en memoria RAM durante la sesión activa
+    this.decryptedKeyMemory[userId] = {
+      aiProvider: provider,
+      aiApiKey: rawKey,
+      geminiApiKey: rawKey
+    };
+
+    // 2. Cifrar con AES-256-GCM antes de guardar en localStorage y en Supabase
+    let encryptedKey = null;
+    if (rawKey) {
+      encryptedKey = await CryptoVault.encrypt(rawKey, userId);
+    }
+
+    const key = this.getSettingsKey();
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        aiProvider: provider,
+        encryptedKey
+      }));
+    } catch (e) {
+      console.error('Error guardando configuración cifrada local:', e);
+    }
+
+    // 3. Si el usuario está autenticado, guardar proveedor y API Key CIFRADA en public.perfiles.ai_settings
     if (window.appSupabase && window.appSupabase.isAuthenticated()) {
       const profile = this.getProfile();
       if (profile) {
-        profile.ai_provider = settings.aiProvider || profile.ai_provider || 'gemini';
+        profile.ai_provider = provider;
+        profile.ai_settings = {
+          provider,
+          encryptedKey,
+          updatedAt: new Date().toISOString()
+        };
         this.saveProfile(profile, true);
       }
+    }
+
+    if (window.jobRadar && typeof window.jobRadar.refreshCopilotMode === 'function') {
+      window.jobRadar.refreshCopilotMode();
     }
   }
 

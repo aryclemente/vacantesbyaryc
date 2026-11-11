@@ -1716,6 +1716,7 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     openDrawer: openAtsCopilotDrawer,
     closeDrawer: closeAtsCopilotDrawer,
     updateAtsBadges: updateAtsBadges,
+    refreshCopilotMode: updateCopilotAiModeToggleUI,
     recalculateScores: function () {
       recalculateAllScores();
       render();

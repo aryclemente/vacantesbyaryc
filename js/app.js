@@ -827,27 +827,78 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // Intake Confirmation Modal Logic
   // =========================================================================
+  function updateConfirmMatchBadge(matchScore) {
+    const badgeEl = document.getElementById('confirmMatchBadge');
+    if (!badgeEl) return;
+    const score = Number.isFinite(Number(matchScore)) ? Math.max(0, Math.min(100, Math.round(Number(matchScore)))) : 0;
+    badgeEl.textContent = `${score}% compatible`;
+    if (score >= 55) {
+      badgeEl.style.background = 'rgba(0, 210, 180, 0.16)';
+      badgeEl.style.color = '#006875';
+      badgeEl.style.border = '1px solid rgba(0, 210, 180, 0.4)';
+    } else if (score >= 10) {
+      badgeEl.style.background = 'rgba(245, 158, 11, 0.16)';
+      badgeEl.style.color = '#92400e';
+      badgeEl.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+    } else {
+      badgeEl.style.background = '#f1f5f9';
+      badgeEl.style.color = '#64748b';
+      badgeEl.style.border = '1px solid #cbd5e1';
+    }
+  }
+
   function openConfirmModal(job) {
     confirmEmpresa.value = job.empresa || '';
     confirmPuesto.value = job.puesto || '';
     confirmModalidad.value = job.modalidad || 'Remoto';
-    confirmPrioridad.value = job.prioridad || 'high';
     confirmSalario.value = job.salario || '';
     confirmContacto.value = job.contacto || '';
     confirmUrl.value = job.url || '';
     confirmNotas.value = job.notas || '';
+    if (confirmRequisitosInput) confirmRequisitosInput.value = '';
+
+    // Calcular/verificar compatibilidad contra el perfil y asignar prioridad según rangos (55-100: high, 10-54: med, 0-9: low)
+    let matchScore = typeof job.matchScore === 'number' ? job.matchScore : null;
+    if (matchScore === null && window.aiJobParser && typeof window.aiJobParser.computeProfileVacancyMatch === 'function') {
+      const res = window.aiJobParser.computeProfileVacancyMatch(job);
+      matchScore = res.matchScore;
+      job.prioridad = res.priority;
+    }
+    const finalScore = matchScore !== null ? matchScore : 0;
+    const derivedPriority = finalScore >= 55 ? 'high' : (finalScore >= 10 ? 'med' : 'low');
+    confirmPrioridad.value = derivedPriority;
+    updateConfirmMatchBadge(finalScore);
+
+    const settings = (window.appStorage && typeof window.appStorage.getSettings === 'function') ? window.appStorage.getSettings() : {};
+    const activeProviderLabel = job.aiProviderLabel || (window.aiJobParser && typeof window.aiJobParser.getProviderDisplayName === 'function'
+      ? window.aiJobParser.getProviderDisplayName(settings.aiProvider || 'gemini')
+      : 'Google Gemini (2.5 Flash)');
 
     let badgeText = '⚡ Extracción inteligente local (Heurística)';
     if (job.extractionSource === 'ai-serverless') {
-      badgeText = '✨ Extracción Multimodal con IA en la Nube (Gemini 1.5 Flash)';
+      badgeText = `☁️ Extracción Multimodal con IA en la Nube (${activeProviderLabel})`;
     } else if (job.extractionSource === 'ai-direct' || job.aiGenerated) {
-      badgeText = '✨ Extracción Multimodal con Google Gemini API';
+      badgeText = `✨ Extracción Multimodal con ${activeProviderLabel}`;
     }
     aiExtractionSourceBadge.textContent = badgeText;
 
-
     renderRequisitosChips(job.requisitos || []);
     intakeConfirmModal.classList.add('open');
+  }
+
+  if (confirmRequisitosInput) {
+    confirmRequisitosInput.addEventListener('input', () => {
+      if (!pendingExtractedJob || !window.aiJobParser || typeof window.aiJobParser.computeProfileVacancyMatch !== 'function') return;
+      const extraTechs = confirmRequisitosInput.value.split(',').map(t => t.trim()).filter(Boolean);
+      const previewJob = {
+        ...pendingExtractedJob,
+        puesto: confirmPuesto ? confirmPuesto.value : pendingExtractedJob.puesto,
+        requisitos: [...(pendingExtractedJob.requisitos || []), ...extraTechs]
+      };
+      const res = window.aiJobParser.computeProfileVacancyMatch(previewJob);
+      confirmPrioridad.value = res.priority;
+      updateConfirmMatchBadge(res.matchScore);
+    });
   }
 
   function renderRequisitosChips(techs) {
@@ -895,73 +946,15 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(`¡Vacante "${finalJob.puesto}" guardada en el tablero!`, 'success');
   });
 
-  // =========================================================================
-  // Settings & Backup Modal Logic
-  // =========================================================================
-  btnSettings.addEventListener('click', () => {
-    const current = window.appStorage.getSettings();
-    inputApiKey.value = current.geminiApiKey || current.aiApiKey || '';
-    const selectAiProvider = document.getElementById('selectAiProvider');
-    if (selectAiProvider && current.aiProvider) {
-      selectAiProvider.value = current.aiProvider;
-    }
-    settingsModal.classList.add('open');
-  });
-
-  btnCloseSettingsModal.addEventListener('click', () => {
-    settingsModal.classList.remove('open');
-  });
-
-  settingsModal.addEventListener('click', (e) => {
-    if (e.target === settingsModal) settingsModal.classList.remove('open');
-  });
-
-  btnSaveSettings.addEventListener('click', () => {
-    const key = inputApiKey.value.trim();
-    const selectAiProvider = document.getElementById('selectAiProvider');
-    const provider = selectAiProvider ? selectAiProvider.value : 'gemini';
-    window.appStorage.saveSettings({
-      geminiApiKey: key,
-      aiApiKey: key,
-      aiProvider: provider
-    });
-    settingsModal.classList.remove('open');
-    showToast('Configuración guardada para tu perfil', 'success');
-  });
-
-  btnExportJson.addEventListener('click', () => {
-    window.appStorage.exportDataJson();
-    showToast('Copia de seguridad descargada', 'info');
-  });
-
-  btnTriggerImport.addEventListener('click', () => {
-    importFileInput.click();
-  });
-
-  importFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const success = window.appStorage.importDataJson(event.target.result);
-      if (success) {
-        showToast('Respaldo restaurado con éxito', 'success');
-        settingsModal.classList.remove('open');
-      } else {
-        showToast('Formato JSON no válido', 'error');
+  if (btnResetSeed) {
+    btnResetSeed.addEventListener('click', () => {
+      if (confirm('¿Restablecer el tablero a las vacantes iniciales de ejemplo? Se sobrescribirán los datos actuales.')) {
+        window.appStorage.resetToSeedData();
+        if (settingsModal) settingsModal.classList.remove('open');
+        showToast('Tablero restablecido con vacantes de ejemplo', 'info');
       }
-    };
-    reader.readAsText(file);
-  });
-
-  btnResetSeed.addEventListener('click', () => {
-    if (confirm('¿Restablecer el tablero a las 16 vacantes iniciales extraídas de Gemini? Se sobrescribirán los datos actuales.')) {
-      window.appStorage.resetToSeedData();
-      settingsModal.classList.remove('open');
-      showToast('Tablero restablecido a las 16 vacantes de Gemini', 'info');
-    }
-  });
+    });
+  }
 
   // =========================================================================
   // CV Generator (Tailored Content, Templates, Photo & AI Optimization)
@@ -3263,9 +3256,14 @@ ${email}`;
     const labelAiApiKey = document.getElementById('labelAiApiKey');
 
     if (btnSettings && settingsModal) {
-      btnSettings.addEventListener('click', () => {
-        const settings = window.appStorage.getSettings();
-        if (selectAiProvider) selectAiProvider.value = settings.aiProvider || 'gemini';
+      btnSettings.addEventListener('click', async () => {
+        const settings = typeof window.appStorage.getDecryptedSettings === 'function'
+          ? await window.appStorage.getDecryptedSettings()
+          : window.appStorage.getSettings();
+        if (selectAiProvider) {
+          selectAiProvider.value = settings.aiProvider || 'gemini';
+          selectAiProvider.dispatchEvent(new Event('change'));
+        }
         if (inputApiKey) inputApiKey.value = settings.aiApiKey || settings.geminiApiKey || '';
         settingsModal.classList.add('open');
       });
@@ -3296,18 +3294,25 @@ ${email}`;
     }
 
     if (btnSaveSettings) {
-      btnSaveSettings.addEventListener('click', () => {
+      btnSaveSettings.addEventListener('click', async () => {
         const provider = selectAiProvider ? selectAiProvider.value : 'gemini';
         const apiKey = inputApiKey ? inputApiKey.value.trim() : '';
 
-        window.appStorage.saveSettings({
-          aiProvider: provider,
-          aiApiKey: apiKey,
-          geminiApiKey: apiKey
-        });
-
-        showToast('Configuración de IA guardada exitosamente', 'success');
-        if (settingsModal) settingsModal.classList.remove('open');
+        btnSaveSettings.disabled = true;
+        try {
+          await window.appStorage.saveSettings({
+            aiProvider: provider,
+            aiApiKey: apiKey,
+            geminiApiKey: apiKey
+          });
+          showToast(apiKey ? 'Configuración guardada y API Key cifrada en la nube' : 'Configuración de IA guardada', 'success');
+          if (settingsModal) settingsModal.classList.remove('open');
+        } catch (err) {
+          console.error('Error cifrando/guardando configuración:', err);
+          showToast('Error guardando configuración: ' + (err.message || 'intenta de nuevo'), 'error');
+        } finally {
+          btnSaveSettings.disabled = false;
+        }
       });
     }
 

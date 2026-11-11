@@ -84,7 +84,7 @@ exports.handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    const { text = '', imageBase64 = null, url = '' } = payload;
+    const { text = '', imageBase64 = null, url = '', userProfile = null } = payload;
 
     // Obtener la clave de Gemini desde el entorno o encabezado
     const headers = event.headers || {};
@@ -115,20 +115,31 @@ exports.handler = async (event) => {
       }
     }
 
-    // Construcción del Prompt Estructurado para Gemini 1.5 Flash
+    const profileSummary = userProfile ? `
+Perfil del Candidato para evaluar compatibilidad:
+- Titular: ${userProfile.titular || 'No especificado'}
+- Habilidades: ${Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : 'No especificadas'}
+- Experiencias recientes: ${Array.isArray(userProfile.experiencias) ? userProfile.experiencias.slice(0, 3).map(e => `${e.puesto || e.role || ''} en ${e.empresa || e.company || ''}`).join('; ') : 'No especificadas'}
+` : '';
+
+    // Construcción del Prompt Estructurado para Gemini 2.5 Flash
     const prompt = `
 Analiza la siguiente información de una vacante laboral (puede ser texto extraído de una web, captura de pantalla, o ambos) y extrae los datos clave en formato JSON estrictamente válido.
-
+${profileSummary}
 Instrucciones de extracción:
 1. "empresa": Nombre exacto de la compañía contratante. Si no se indica, infiere el nombre más probable o escribe "Empresa por Confirmar".
 2. "puesto": Título o cargo de la vacante.
 3. "modalidad": Uno de estos tres valores exactos: "Remoto", "Híbrido" o "Presencial".
 4. "ubicacion": Ciudad, país o "Global / Remoto".
 5. "salario": Rango o monto salarial si se menciona (ej: "$1,500 - $2,500 USD", "€1,400 EUR"). Si no aparece, deja cadena vacía "".
-6. "prioridad": "high", "med" o "low" según el atractivo o nivel de relevancia técnica.
-7. "contacto": Nombre, email o canal del reclutador/empresa si aparece.
-8. "requisitos": Lista con los 4 a 6 requisitos técnicos, herramientas o competencias principales requeridas.
-9. "notas": Resumen conciso (máximo 3 líneas) de las responsabilidades principales y recomendaciones para postular.
+6. "matchScore": Número entero de 0 a 100 que representa el porcentaje real de compatibilidad entre el Perfil del Candidato y los requisitos/puesto de la vacante.
+7. "prioridad": Asígnala ESTRICTAMENTE según la compatibilidad ("matchScore") entre el perfil y la vacante:
+   - "high" si son compatibles del 55% al 100%
+   - "med" si son compatibles del 10% al 54%
+   - "low" si son compatibles del 0% al 9%
+8. "contacto": Nombre, email o canal del reclutador/empresa si aparece.
+9. "requisitos": Lista con los 4 a 6 requisitos técnicos, herramientas o competencias principales requeridas.
+10. "notas": Resumen conciso (máximo 3 líneas) de las responsabilidades principales y recomendaciones para postular.
 
 Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni explicaciones adicionales:
 {
@@ -137,6 +148,7 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
   "modalidad": "...",
   "ubicacion": "...",
   "salario": "...",
+  "matchScore": 0,
   "prioridad": "...",
   "contacto": "...",
   "requisitos": ["...", "..."],
@@ -205,6 +217,11 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
     const cleanJson = candidateText.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
 
+    const parsedScore = Number.isFinite(Number(parsed.matchScore)) ? Math.max(0, Math.min(100, Math.round(Number(parsed.matchScore)))) : null;
+    const derivedPriority = parsedScore !== null
+      ? (parsedScore >= 55 ? 'high' : (parsedScore >= 10 ? 'med' : 'low'))
+      : (parsed.prioridad || 'med');
+
     const vacancy = {
       id: 'vac-' + Date.now(),
       empresa: parsed.empresa || 'Empresa por Confirmar',
@@ -212,7 +229,8 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
       modalidad: parsed.modalidad || 'Remoto',
       ubicacion: parsed.ubicacion || 'Remoto',
       salario: parsed.salario || '',
-      prioridad: parsed.prioridad || 'high',
+      matchScore: parsedScore,
+      prioridad: derivedPriority,
       contacto: parsed.contacto || '',
       url: url || '',
       estado: 'saved',
@@ -220,7 +238,8 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
       notas: parsed.notas || (scrapedInfo || (text ? text.slice(0, 200) : 'Captura de pantalla extraída con IA')),
       requisitos: Array.isArray(parsed.requisitos) ? parsed.requisitos : [],
       screenshot: !!imageBase64,
-      aiGenerated: true
+      aiGenerated: true,
+      aiProviderLabel: 'Gemini 2.5 Flash'
     };
 
     return {

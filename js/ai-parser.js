@@ -11,53 +11,218 @@ class AiJobParser {
 
   }
 
+  getProviderDisplayName(provider) {
+    const map = {
+      gemini: 'Google Gemini (2.5 Flash)',
+      claude: 'Anthropic Claude (3.5 Haiku)',
+      kimi: 'Kimi / Moonshot AI (moonshot-v1-8k)',
+      openai: 'OpenAI (GPT-4o-mini)',
+      openrouter: 'OpenRouter (DeepSeek Chat)'
+    };
+    return map[provider] || map.gemini;
+  }
+
   /**
-   * Extrae los detalles de la vacante utilizando prioritariamente la función serverless de Netlify
-   * (con Gemini 1.5 Flash y Scraping), con fallback inteligente a cliente directo o heurístico local.
+   * Calcula el porcentaje de compatibilidad real (0-100%) entre el perfil del usuario y una vacante,
+   * y asigna la prioridad estricta:
+   * - 55% a 100% -> high (Alta)
+   * - 10% a 54%  -> med (Media)
+   * - 0% a 9%    -> low (Baja)
+   */
+  computeProfileVacancyMatch(vacancy, userProfile) {
+    const profile = userProfile || (window.appStorage && typeof window.appStorage.getProfile === 'function' ? window.appStorage.getProfile() : null);
+    if (!profile) {
+      return { matchScore: 0, priority: 'low' };
+    }
+
+    const skills = Array.isArray(profile.habilidades) ? profile.habilidades.map(s => String(s).trim()).filter(Boolean) : [];
+    const titular = (profile.titular || '').trim();
+    const resumen = (profile.resumen || '').trim();
+    const expText = Array.isArray(profile.experiencias)
+      ? profile.experiencias.map(e => `${e.puesto || e.role || ''} ${(e.bullets || []).join(' ')}`).join(' ')
+      : '';
+
+    const hasProfileInfo = skills.length > 0 || titular.length > 2 || expText.trim().length > 5;
+    if (!hasProfileInfo) {
+      return { matchScore: 0, priority: 'low' };
+    }
+
+    const profileCorpus = `${titular} ${skills.join(' ')} ${resumen} ${expText}`.toLowerCase();
+    const reqs = Array.isArray(vacancy?.requisitos) ? vacancy.requisitos.filter(Boolean) : [];
+    const vacTitle = (vacancy?.puesto || '').toLowerCase();
+    const vacNotes = (vacancy?.notas || '').toLowerCase();
+    const vacCorpus = `${vacTitle} ${reqs.join(' ')} ${vacNotes}`.toLowerCase();
+
+    const normalizeToken = (t) => t.toLowerCase().replace(/\.js$/i, '').trim();
+
+    let score = 0;
+
+    // 1. Coincidencia de requisitos / stack técnico (hasta 65 pts)
+    if (reqs.length > 0) {
+      let matchedReqs = 0;
+      reqs.forEach(req => {
+        const cleanReq = normalizeToken(String(req));
+        if (!cleanReq) return;
+        const parts = cleanReq.split(/[\/,&]+/).map(p => p.trim()).filter(p => p.length >= 2);
+        const isHit = parts.some(part => {
+          if (profileCorpus.includes(part)) return true;
+          return skills.some(s => {
+            const ns = normalizeToken(s);
+            return ns.length >= 2 && (part.includes(ns) || ns.includes(part));
+          });
+        });
+        if (isHit) matchedReqs++;
+      });
+      score += Math.round((matchedReqs / reqs.length) * 65);
+    } else if (skills.length > 0) {
+      let skillHits = 0;
+      skills.forEach(s => {
+        const ns = normalizeToken(s);
+        if (ns.length >= 2 && vacCorpus.includes(ns)) skillHits++;
+      });
+      const denom = Math.min(skills.length, 6);
+      score += Math.round((Math.min(skillHits, denom) / denom) * 60);
+    }
+
+    // 2. Afinidad de título / rol profesional (hasta 25 pts)
+    const stopWords = new Set(['para', 'como', 'with', 'senior', 'junior', 'semi', 'lead', 'specialist', 'especialista', 'remoto', 'remote', 'hibrido', 'híbrido']);
+    const titleWords = titular.toLowerCase().split(/[\s,/|()-]+/).filter(w => w.length > 3 && !stopWords.has(w));
+    if (titleWords.length > 0) {
+      let titleHits = 0;
+      titleWords.forEach(w => {
+        if (vacCorpus.includes(w)) titleHits++;
+      });
+      // Equivalencias de rol dev comunes
+      if ((/full\s*stack|desarrollador|developer|engineer|ingenier/i.test(titular)) &&
+          (/full\s*stack|frontend|backend|developer|desarrollador|programador|software/i.test(vacTitle))) {
+        titleHits += 0.8;
+      }
+      score += Math.min(25, Math.round((titleHits / titleWords.length) * 25));
+    }
+
+    // 3. Afinidad con experiencia laboral previa (hasta 10 pts)
+    if (expText.trim().length > 10) {
+      const vacWords = vacTitle.split(/[\s,/|()-]+/).filter(w => w.length > 3 && !stopWords.has(w));
+      const expLower = expText.toLowerCase();
+      const expHits = vacWords.filter(w => expLower.includes(w)).length;
+      if (expHits > 0) {
+        score += Math.min(10, expHits * 5);
+      }
+    }
+
+    const matchScore = Math.max(0, Math.min(100, Math.round(score)));
+    const priority = matchScore >= 55 ? 'high' : (matchScore >= 10 ? 'med' : 'low');
+    return { matchScore, priority };
+  }
+
+  applyMatchAndPriority(vacancy, userProfile) {
+    if (!vacancy) return vacancy;
+    const computed = this.computeProfileVacancyMatch(vacancy, userProfile);
+    // Si la IA devolvió matchScore válido y tenemos perfil, promediar suavemente o usar regla determinística consistente
+    const finalScore = typeof vacancy.matchScore === 'number' && !Number.isNaN(vacancy.matchScore)
+      ? Math.max(0, Math.min(100, Math.round((vacancy.matchScore * 0.4) + (computed.matchScore * 0.6))))
+      : computed.matchScore;
+    vacancy.matchScore = finalScore;
+    vacancy.prioridad = finalScore >= 55 ? 'high' : (finalScore >= 10 ? 'med' : 'low');
+    return vacancy;
+  }
+
+  /**
+   * Extrae los detalles de la vacante utilizando el proveedor elegido por el usuario,
+   * la función serverless de Netlify o el fallback heurístico local.
    */
   async extractJobDetails({ text, imageBase64, url }) {
-    const settings = window.appStorage.getSettings();
-    const localApiKey = settings.geminiApiKey ? settings.geminiApiKey.trim() : null;
+    const settings = (window.appStorage && typeof window.appStorage.getDecryptedSettings === 'function')
+      ? await window.appStorage.getDecryptedSettings()
+      : (window.appStorage ? window.appStorage.getSettings() : {});
+    const provider = settings.aiProvider || 'gemini';
+    const localApiKey = (settings.aiApiKey || settings.geminiApiKey || '').trim() || null;
+    const userProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function')
+      ? window.appStorage.getProfile()
+      : null;
 
-    // 1. Intento principal: Netlify Serverless Function (sin exponer API Keys en el cliente)
+    // 1. Si el usuario eligió explícitamente un proveedor distinto a Gemini (ej. Claude, OpenAI, Kimi, OpenRouter) con su API Key
+    if (localApiKey && provider !== 'gemini') {
+      try {
+        const directResult = await this.extractWithCustomProviderDirect({
+          text,
+          imageBase64,
+          url,
+          apiKey: localApiKey,
+          provider,
+          userProfile
+        });
+        if (directResult) {
+          directResult.extractionSource = 'ai-direct';
+          directResult.aiProviderLabel = this.getProviderDisplayName(provider);
+          return this.applyMatchAndPriority(directResult, userProfile);
+        }
+      } catch (err) {
+        console.warn(`Fallo en llamada directa a ${provider}:`, err);
+      }
+    }
+
+    // 2. Netlify Serverless Function (Gemini 2.5 Flash en la nube + Scraping de URL)
     try {
-      const serverlessResult = await this.extractWithServerless({ text, imageBase64, url, localApiKey });
+      const geminiKeyForServerless = provider === 'gemini' ? localApiKey : null;
+      const serverlessResult = await this.extractWithServerless({
+        text,
+        imageBase64,
+        url,
+        localApiKey: geminiKeyForServerless,
+        userProfile
+      });
       if (serverlessResult) {
-        return serverlessResult;
+        serverlessResult.aiProviderLabel = serverlessResult.aiProviderLabel || 'Gemini 2.5 Flash';
+        return this.applyMatchAndPriority(serverlessResult, userProfile);
       }
     } catch (err) {
       console.warn('La función serverless no respondió o estamos en entorno local estático:', err.message);
     }
 
-    // 2. Intento secundario: Si hay una API Key configurada localmente en el navegador
+    // 3. Llamada directa desde el navegador con la API Key configurada (Gemini u otro proveedor)
     if (localApiKey) {
       try {
-        const directResult = await this.extractWithGeminiDirect({ text, imageBase64, url, apiKey: localApiKey });
+        const directResult = await this.extractWithCustomProviderDirect({
+          text,
+          imageBase64,
+          url,
+          apiKey: localApiKey,
+          provider,
+          userProfile
+        });
         if (directResult) {
           directResult.extractionSource = 'ai-direct';
-          return directResult;
+          directResult.aiProviderLabel = this.getProviderDisplayName(provider);
+          return this.applyMatchAndPriority(directResult, userProfile);
         }
       } catch (err) {
-        console.warn('Fallo en llamada directa a Gemini API:', err);
+        console.warn('Fallo en llamada directa a proveedor IA:', err);
       }
     }
 
-    // 3. Fallback Heurístico Local (Rápido, robusto, sin dependencias externas)
+    // 4. Fallback Heurístico Local (Rápido, robusto, sin dependencias externas)
     const heuristicResult = this.extractWithHeuristics({ text, imageBase64, url });
     heuristicResult.extractionSource = 'heuristic';
-    return heuristicResult;
+    return this.applyMatchAndPriority(heuristicResult, userProfile);
   }
 
   /**
    * Llamada a la Netlify Function /api/extract-job
    */
-  async extractWithServerless({ text, imageBase64, url, localApiKey }) {
+  async extractWithServerless({ text, imageBase64, url, localApiKey, userProfile }) {
     const headers = { 'Content-Type': 'application/json' };
     if (localApiKey) {
       headers['x-gemini-api-key'] = localApiKey;
     }
 
-    const payload = JSON.stringify({ text, imageBase64, url });
+    const compactProfile = userProfile ? {
+      titular: userProfile.titular || '',
+      habilidades: Array.isArray(userProfile.habilidades) ? userProfile.habilidades : [],
+      experiencias: Array.isArray(userProfile.experiencias) ? userProfile.experiencias.slice(0, 3) : []
+    } : null;
+
+    const payload = JSON.stringify({ text, imageBase64, url, userProfile: compactProfile });
 
     let response = await fetch(this.serverlessApiUrl, {
       method: 'POST',
@@ -87,24 +252,32 @@ class AiJobParser {
     return null;
   }
 
-  /**
-   * Llamada multimodal directa a la API de Gemini (Google AI Studio) como respaldo
-   */
-  async extractWithGeminiDirect({ text, imageBase64, url, apiKey }) {
-    const prompt = `
-Analiza la siguiente información de una vacante laboral (puede ser texto, captura de pantalla o ambos) y extrae los datos clave en formato JSON estrictamente válido.
+  buildExtractionPrompt({ text, url, userProfile }) {
+    const profileBlock = userProfile ? `
+Perfil del Candidato para evaluar compatibilidad:
+- Titular: ${userProfile.titular || 'No especificado'}
+- Habilidades: ${Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : 'No especificadas'}
+- Experiencias: ${Array.isArray(userProfile.experiencias) ? userProfile.experiencias.slice(0, 3).map(e => `${e.puesto || e.role || ''} en ${e.empresa || e.company || ''}`).join('; ') : 'No especificadas'}
+` : '';
 
+    return `Analiza la siguiente información de una vacante laboral (texto, URL o captura de pantalla) y extrae los datos clave en formato JSON estrictamente válido.
+${profileBlock}
 Instrucciones de extracción:
 1. "empresa": Nombre exacto de la compañía contratante.
 2. "puesto": Título o cargo de la vacante.
 3. "modalidad": Uno de estos tres valores: "Remoto", "Híbrido" o "Presencial".
 4. "ubicacion": Ciudad, país o "Global / Remoto".
 5. "salario": Rango o monto salarial si se menciona (con moneda USD, EUR, etc.). Si no aparece, deja cadena vacía "".
-6. "prioridad": "high", "med" o "low" según el atractivo o relevancia técnica del puesto.
-7. "contacto": Nombre, email o canal del reclutador/empresa.
-8. "requisitos": Lista con los 4 a 6 requisitos o tecnologías principales.
-9. "notas": Resumen breve de responsabilidades clave y estrategia recomendada para postular.
+6. "matchScore": Entero de 0 a 100 que refleje la compatibilidad real entre el Perfil del Candidato y la vacante.
+7. "prioridad": Asígnala ESTRICTAMENTE según la compatibilidad con el perfil:
+   - "high" si son compatibles del 55% al 100%
+   - "med" si son compatibles del 10% al 54%
+   - "low" si son compatibles del 0% al 9%
+8. "contacto": Nombre, email o canal del reclutador/empresa.
+9. "requisitos": Lista con los 4 a 6 requisitos o tecnologías principales.
+10. "notas": Resumen breve de responsabilidades clave y estrategia recomendada para postular.
 
+${text ? `Texto de la vacante:\n${text}\n` : ''}${url ? `URL de la oferta:\n${url}\n` : ''}
 Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni explicaciones adicionales:
 {
   "empresa": "...",
@@ -112,12 +285,122 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
   "modalidad": "...",
   "ubicacion": "...",
   "salario": "...",
+  "matchScore": 0,
   "prioridad": "...",
   "contacto": "...",
   "requisitos": ["...", "..."],
   "notas": "..."
-}
-`;
+}`;
+  }
+
+  /**
+   * Llamada directa multi-proveedor (Gemini, Claude, Kimi, OpenAI, OpenRouter) desde el navegador
+   */
+  async extractWithCustomProviderDirect({ text, imageBase64, url, apiKey, provider = 'gemini', userProfile = null }) {
+    if (provider === 'gemini') {
+      return this.extractWithGeminiDirect({ text, imageBase64, url, apiKey, userProfile });
+    }
+
+    const prompt = this.buildExtractionPrompt({ text, url, userProfile });
+    let candidateText = null;
+
+    if (provider === 'claude') {
+      const content = [];
+      if (imageBase64) {
+        const match = imageBase64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+        if (match) {
+          content.push({
+            type: 'image',
+            source: { type: 'base64', media_type: match[1], data: match[2] }
+          });
+        }
+      }
+      content.push({ type: 'text', text: prompt });
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'dangerously-allow-browser': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-haiku-20241022',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content }]
+        })
+      });
+      if (!res.ok) throw new Error(`Error Claude API: ${res.status}`);
+      const data = await res.json();
+      candidateText = data?.content?.[0]?.text || null;
+    } else if (provider === 'kimi' || provider === 'openai' || provider === 'openrouter') {
+      const endpoint = provider === 'kimi'
+        ? 'https://api.moonshot.cn/v1/chat/completions'
+        : (provider === 'openrouter'
+          ? 'https://openrouter.ai/api/v1/chat/completions'
+          : 'https://api.openai.com/v1/chat/completions');
+      const model = provider === 'kimi'
+        ? 'moonshot-v1-8k'
+        : (provider === 'openrouter' ? 'deepseek/deepseek-chat' : 'gpt-4o-mini');
+
+      const userContent = (provider === 'openai' && imageBase64)
+        ? [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: imageBase64 } }
+          ]
+        : prompt;
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: userContent }],
+          temperature: 0.1
+        })
+      });
+      if (!res.ok) throw new Error(`Error ${provider} API: ${res.status}`);
+      const data = await res.json();
+      candidateText = data?.choices?.[0]?.message?.content || null;
+    }
+
+    if (!candidateText) {
+      throw new Error(`Respuesta vacía de ${provider}`);
+    }
+
+    const cleanJson = candidateText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson);
+    const parsedScore = Number.isFinite(Number(parsed.matchScore)) ? Math.max(0, Math.min(100, Math.round(Number(parsed.matchScore)))) : undefined;
+
+    return {
+      id: 'vac-' + Date.now(),
+      empresa: parsed.empresa || 'Empresa por Confirmar',
+      puesto: parsed.puesto || 'Oportunidad TI',
+      modalidad: parsed.modalidad || 'Remoto',
+      ubicacion: parsed.ubicacion || 'Remoto',
+      salario: parsed.salario || '',
+      matchScore: parsedScore,
+      prioridad: parsed.prioridad || 'med',
+      contacto: parsed.contacto || '',
+      url: url || '',
+      estado: 'saved',
+      fecha: new Date().toISOString().split('T')[0],
+      notas: parsed.notas || (text ? text.slice(0, 200) : 'Vacante extraída con IA'),
+      requisitos: Array.isArray(parsed.requisitos) ? parsed.requisitos : [],
+      screenshot: !!imageBase64,
+      aiGenerated: true
+    };
+  }
+
+  /**
+   * Llamada multimodal directa a la API de Gemini (Google AI Studio) como respaldo
+   */
+  async extractWithGeminiDirect({ text, imageBase64, url, apiKey, userProfile = null }) {
+    const prompt = this.buildExtractionPrompt({ text: '', url: '', userProfile });
 
     const parts = [{ text: prompt }];
 
@@ -167,6 +450,7 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
 
     const cleanJson = candidateText.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
+    const parsedScore = Number.isFinite(Number(parsed.matchScore)) ? Math.max(0, Math.min(100, Math.round(Number(parsed.matchScore)))) : undefined;
 
     return {
       id: 'vac-' + Date.now(),
@@ -175,7 +459,8 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
       modalidad: parsed.modalidad || 'Remoto',
       ubicacion: parsed.ubicacion || 'Remoto',
       salario: parsed.salario || '',
-      prioridad: parsed.prioridad || 'high',
+      matchScore: parsedScore,
+      prioridad: parsed.prioridad || 'med',
       contacto: parsed.contacto || '',
       url: url || '',
       estado: 'saved',
@@ -279,7 +564,9 @@ Responde ÚNICAMENTE con el objeto JSON sin bloques de código markdown ni expli
    * Respeta la configuración BYOK del usuario guardada en settings o perfiles.
    */
   async callLlmText(prompt, systemInstruction = '') {
-    const settings = (window.appStorage && window.appStorage.getSettings()) || {};
+    const settings = (window.appStorage && typeof window.appStorage.getDecryptedSettings === 'function')
+      ? await window.appStorage.getDecryptedSettings()
+      : ((window.appStorage && window.appStorage.getSettings()) || {});
     const provider = settings.aiProvider || 'gemini';
     const apiKey = (settings.aiApiKey || settings.geminiApiKey || '').trim();
 
