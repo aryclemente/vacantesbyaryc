@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.8.0">
-  <link rel="stylesheet" href="css/styles.css?v=2.8.0">
+  <link rel="stylesheet" href="css/tokens.css?v=2.9.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.9.0">
 </head>
 <body class="auth-guest">
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
@@ -1742,6 +1742,46 @@
             </div>
           </div>
 
+          <!-- Formación Académica / Educación -->
+          <div style="border-top:1px solid var(--border-slate); padding-top:0.75rem; margin-top:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <label class="form-label" style="margin:0; font-size:0.8125rem; font-weight:700;">Formación Académica / Educación (<span id="profEduCount">0</span>)</label>
+              <button type="button" class="btn btn-outline" id="btnAddEmptyEdu" style="padding:0.25rem 0.6rem; font-size:0.75rem; color:var(--primary); font-weight:700;">
+                + Añadir Formación
+              </button>
+            </div>
+
+            <!-- Editor Inline de Educación -->
+            <div id="profEduEditorCard" style="display:none; background:var(--surface-container-low); border:1.5px solid var(--primary); border-radius:8px; padding:0.85rem; margin-bottom:0.75rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                <strong id="profEduEditorTitle" style="font-size:0.875rem; color:var(--primary);">Añadir Formación Académica</strong>
+                <button type="button" id="btnCancelEduEditor" class="btn btn-outline" style="padding:0.15rem 0.45rem; font-size:0.7rem;">&times; Cancelar</button>
+              </div>
+              <input type="hidden" id="eduEditingIndex" value="-1">
+              <div style="margin-bottom:0.5rem;">
+                <label for="eduInputTitle" style="font-size:0.7rem; font-weight:700;">Título / Grado / Certificación *</label>
+                <input type="text" id="eduInputTitle" class="form-control" style="font-size:0.8rem; padding:0.35rem 0.5rem;" placeholder="Ej. Ingeniería en Informática / Técnico Superior">
+              </div>
+              <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:0.5rem; margin-bottom:0.6rem;">
+                <div>
+                  <label for="eduInputInstitution" style="font-size:0.7rem; font-weight:700;">Institución / Universidad *</label>
+                  <input type="text" id="eduInputInstitution" class="form-control" style="font-size:0.8rem; padding:0.35rem 0.5rem;" placeholder="Ej. Universidad Central / IUJO">
+                </div>
+                <div>
+                  <label for="eduInputPeriod" style="font-size:0.7rem; font-weight:700;">Periodo / Años</label>
+                  <input type="text" id="eduInputPeriod" class="form-control" style="font-size:0.8rem; padding:0.35rem 0.5rem;" placeholder="Ej. 2020 - 2024">
+                </div>
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:0.4rem;">
+                <button type="button" id="btnSaveInlineEdu" class="btn btn-primary" style="padding:0.35rem 0.85rem; font-size:0.75rem;">Guardar Formación</button>
+              </div>
+            </div>
+
+            <div id="profEduList" style="display:flex; flex-direction:column; gap:0.5rem; max-height:190px; overflow-y:auto; padding:0.25rem 0;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -1954,12 +1994,12 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.8.0"></script>
-  <script src="js/storage.js?v=2.8.0"></script>
-  <script src="js/ai-parser.js?v=2.8.0"></script>
-  <script src="js/job-radar.js?v=2.8.0"></script>
-  <script src="js/onboarding-tour.js?v=2.8.0"></script>
-  <script src="js/app.js?v=2.8.0"></script>
+  <script src="js/supabase-client.js?v=2.9.0"></script>
+  <script src="js/storage.js?v=2.9.0"></script>
+  <script src="js/ai-parser.js?v=2.9.0"></script>
+  <script src="js/job-radar.js?v=2.9.0"></script>
+  <script src="js/onboarding-tour.js?v=2.9.0"></script>
+  <script src="js/app.js?v=2.9.0"></script>
 </body>
 </html>
 

@@ -674,29 +674,124 @@ ${text.slice(0, 10000)}
       }
     }
 
-    // 7. Detección Inteligente de Secciones de Experiencia en CVs y PDFs
+    // 7. Detección Inteligente de Secciones de Experiencia y Educación en CVs y PDFs
     const datePattern = /(?:(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|jan|january|february|march|april|june|july|august|september|october|november|december)\w*[\s.,-]*)*(?:19\d\d|20\d\d)[\s–—-]*(?:(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|jan|january|february|march|april|june|july|august|september|october|november|december)\w*[\s.,-]*)*(?:19\d\d|20\d\d|presente|actualidad|present|current)?/i;
+    const eduSectionStartRe = /^(?:#+\s*|\*\*|[-•*]\s*)?(?:educaci[oó]n(?:\s+formal)?|formaci[oó]n(?:\s+acad[eé]mica|\s+profesional)?|estudios(?:\s+realizados)?|academic\s+background|education)\b/i;
+    const otherSectionEndRe = /^(?:#+\s*|\*\*)?(?:experiencia|experience|trayectoria|historial\s+(?:profesional|laboral)|work\s+history|habilidades|skills|competencias|idiomas|languages|certificaciones|certifications|cursos|proyectos|projects|referencias|resumen|perfil\s+profesional|about|summary)\b/i;
+    const degreeKeywordRe = /\b(?:licenciad[oa]|licenciatura|ingenier[oaí]a?|t[eé]cnico\s+(?:superior|medio)|grado\s+en|m[aá]ster|maestr[ií]a|diplomado|doctorado|bachiller|bachelor(?:'s)?|master(?:'s)?|b\.?sc\.?|m\.?sc\.?|mba|bootcamp)\b/i;
+    const instKeywordRe = /\b(?:universidad|instituto|colegio|facultad|polit[eé]cnico|tecnol[oó]gico|academia|escuela|university|institute|college|school|academy|udemy|platzi|coursera)\b/i;
+
+    const pushEducationUnique = (item) => {
+      const cleanTitle = (item.titulo || '').replace(/^[-*•#\s]+/, '').trim();
+      const cleanInst = (item.institucion || '').replace(/^[-*•#\s]+/, '').trim();
+      const cleanPeriod = (item.periodo || '').trim();
+      if (!cleanTitle && !cleanInst) return;
+      const key = `${cleanTitle.toLowerCase()}|${cleanInst.toLowerCase()}`;
+      const already = educacion.some(e => `${(e.titulo || '').toLowerCase()}|${(e.institucion || '').toLowerCase()}` === key);
+      if (!already) {
+        educacion.push({
+          titulo: cleanTitle || cleanInst,
+          institucion: cleanTitle ? cleanInst : '',
+          periodo: cleanPeriod
+        });
+      }
+    };
+
+    const parseEducationLine = (rawLine, nextLine = '') => {
+      let clean = rawLine.replace(/^[-*•]\s*/, '').replace(/\*\*/g, '').trim();
+      const dateMatch = clean.match(datePattern);
+      let periodo = dateMatch ? dateMatch[0].trim() : '';
+      if (periodo) {
+        clean = clean.replace(datePattern, '').replace(/\(\s*[,–—-]?\s*\)/g, '').trim();
+      }
+      // Limpiar separadores residuales al final
+      clean = clean.replace(/[\s–—|,-]+$/, '').trim();
+
+      let titulo = clean;
+      let institucion = '';
+
+      // Separar por "|", "–", "—" o " - " o ","
+      const parts = clean.split(/\s*[|–—]\s*|\s+-\s+|,\s+(?=[A-ZÁÉÍÓÚÑ])/).map(p => p.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        // Si la primera parte parece institución y la segunda título, invertir
+        if (instKeywordRe.test(parts[0]) && !degreeKeywordRe.test(parts[0])) {
+          institucion = parts[0];
+          titulo = parts.slice(1).join(' - ');
+        } else {
+          titulo = parts[0];
+          institucion = parts.slice(1).join(' - ');
+        }
+      } else if (nextLine && !eduSectionStartRe.test(nextLine) && !otherSectionEndRe.test(nextLine)) {
+        const nextClean = nextLine.replace(/^[-*•]\s*/, '').replace(/\*\*/g, '').trim();
+        const nextDateMatch = nextClean.match(datePattern);
+        if (instKeywordRe.test(nextClean) || nextDateMatch) {
+          if (!periodo && nextDateMatch) periodo = nextDateMatch[0].trim();
+          institucion = nextClean.replace(datePattern, '').replace(/\(\s*[,–—-]?\s*\)/g, '').replace(/[\s–—|,-]+$/, '').trim();
+          return { titulo, institucion, periodo, consumedNext: true };
+        }
+      }
+
+      return { titulo, institucion, periodo, consumedNext: false };
+    };
 
     let expIdCounter = 1;
     let isInsideExpSection = false;
+    let isInsideEduSection = false;
     let currentExp = null;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
+      // Detectar inicio de sección de educación
+      if (eduSectionStartRe.test(line) && line.length < 60) {
+        if (isInsideExpSection && currentExp && (currentExp.empresa || currentExp.puesto)) {
+          experiencias.push(currentExp);
+          currentExp = null;
+        }
+        isInsideExpSection = false;
+        isInsideEduSection = true;
+        continue;
+      }
+
       // Detectar inicio de sección de experiencia
-      if (/^(?:#+\s*)?(?:experiencia|experience|trayectoria|historial profesional|historial laboral|work history)/i.test(line)) {
+      if (/^(?:#+\s*|\*\*)?(?:experiencia|experience|trayectoria|historial profesional|historial laboral|work history)/i.test(line) && line.length < 65) {
+        isInsideEduSection = false;
         isInsideExpSection = true;
         continue;
       }
 
+      // Detectar fin de sección de educación si empieza otra sección
+      if (isInsideEduSection && otherSectionEndRe.test(line) && line.length < 60) {
+        isInsideEduSection = false;
+      }
+
+      // Procesar líneas dentro de Educación
+      if (isInsideEduSection) {
+        if (line.length < 4) continue;
+        const parsedEdu = parseEducationLine(line, lines[i + 1] || '');
+        pushEducationUnique(parsedEdu);
+        if (parsedEdu.consumedNext) i++;
+        continue;
+      }
+
       // Detectar fin de sección de experiencia
-      if (isInsideExpSection && /^(?:#+\s*)?(?:educaci[oó]n|education|habilidades|skills|idiomas|languages|certificaciones|certifications|cursos|proyectos|projects|referencias)/i.test(line)) {
+      if (isInsideExpSection && /^(?:#+\s*|\*\*)?(?:educaci[oó]n|formaci[oó]n|education|habilidades|skills|idiomas|languages|certificaciones|certifications|cursos|proyectos|projects|referencias)/i.test(line)) {
         if (currentExp && (currentExp.empresa || currentExp.puesto)) {
           experiencias.push(currentExp);
           currentExp = null;
         }
         isInsideExpSection = false;
+        if (eduSectionStartRe.test(line)) {
+          isInsideEduSection = true;
+        }
+        continue;
+      }
+
+      // Si hay una línea suelta de grado académico fuera de experiencia, extraerla a educación
+      if (!isInsideExpSection && (degreeKeywordRe.test(line) || (instKeywordRe.test(line) && datePattern.test(line)))) {
+        const parsedEdu = parseEducationLine(line, lines[i + 1] || '');
+        pushEducationUnique(parsedEdu);
+        if (parsedEdu.consumedNext) i++;
         continue;
       }
 
@@ -711,16 +806,18 @@ ${text.slice(0, 10000)}
 
           const matchDate = line.match(datePattern);
           const periodStr = matchDate ? matchDate[0].trim() : 'Historial reciente';
-          const lineWithoutDate = line.replace(datePattern, '').replace(/[-|•()]/g, '').trim();
+          const rawWithoutDate = line.replace(datePattern, '').replace(/[()]/g, '').replace(/[-|•\s]+$/g, '').trim();
+          const expParts = rawWithoutDate.split(/\s*[|–—]\s*|\s+-\s+/).map(p => p.trim()).filter(Boolean);
 
-          // Buscar el puesto o empresa en la línea actual o inmediatamente anterior
-          let titleOrCompany = lineWithoutDate;
-          let prevLine = (i > 0 && lines[i - 1].length < 80 && !lines[i - 1].startsWith('-')) ? lines[i - 1] : '';
+          // Buscar el puesto o empresa en la línea actual o inmediatamente anterior (ignorando encabezados de sección)
+          const prevCandidate = (i > 0 && lines[i - 1].length < 80 && !lines[i - 1].startsWith('-') && !otherSectionEndRe.test(lines[i - 1]) && !eduSectionStartRe.test(lines[i - 1])) ? lines[i - 1] : '';
+          let empresaParsed = expParts.length >= 2 ? expParts[0] : (prevCandidate || rawWithoutDate || 'Empresa Tech');
+          let puestoParsed = expParts.length >= 2 ? expParts.slice(1).join(' - ') : (rawWithoutDate && rawWithoutDate !== prevCandidate ? rawWithoutDate : titular);
 
           currentExp = {
             id: 'exp-' + (expIdCounter++),
-            empresa: prevLine || titleOrCompany || 'Empresa Tech',
-            puesto: titleOrCompany && titleOrCompany !== prevLine ? titleOrCompany : titular,
+            empresa: empresaParsed,
+            puesto: puestoParsed,
             periodo: periodStr,
             ubicacion: 'Remoto',
             bullets: []

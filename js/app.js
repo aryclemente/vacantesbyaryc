@@ -1334,6 +1334,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderCvExperiences();
 
+    const cvEducationList = document.getElementById('cvEducationList');
+    if (cvEducationList) {
+      const eduItems = Array.isArray(currentProfile.educacion) ? currentProfile.educacion : [];
+      if (eduItems.length > 0) {
+        cvEducationList.innerHTML = eduItems.map(edu => {
+          const title = escapeHtml(edu.titulo || edu.title || 'Formación Académica');
+          const inst = edu.institucion || edu.institution ? ` &ndash; ${escapeHtml(edu.institucion || edu.institution)}` : '';
+          const period = edu.periodo || edu.period ? ` (${escapeHtml(edu.periodo || edu.period)})` : '';
+          return `<div><strong>${title}</strong>${inst}${period}</div>`;
+        }).join('');
+      } else {
+        cvEducationList.innerHTML = `<div>Agrega tu formación académica desde Mi Perfil.</div>`;
+      }
+    }
+
     if (data.skills && typeof data.skills === 'object') {
       cvSkillsList.innerHTML = `
         <strong>Tecnologías Clave para ${escapeHtml(vacancy.empresa || 'el puesto')}:</strong> ${escapeHtml(data.skills.relevant || '')}<br>
@@ -3362,8 +3377,12 @@ ${email}`;
     const profSkillsChips = document.getElementById('profSkillsChips');
     const profExpList = document.getElementById('profExpList');
     const profExpCount = document.getElementById('profExpCount');
+    const profEduList = document.getElementById('profEduList');
+    const profEduCount = document.getElementById('profEduCount');
+    const btnAddEmptyEdu = document.getElementById('btnAddEmptyEdu');
 
     let currentFormExperiences = [];
+    let currentFormEducation = [];
 
     function populateProfileForm(profile) {
       if (!profile) return;
@@ -3383,6 +3402,11 @@ ${email}`;
         ? JSON.parse(JSON.stringify(profile.experiencias))
         : [];
       renderFormExperiences();
+
+      currentFormEducation = Array.isArray(profile.educacion)
+        ? JSON.parse(JSON.stringify(profile.educacion))
+        : [];
+      renderFormEducation();
     }
 
     window.populateProfileForm = populateProfileForm;
@@ -3547,6 +3571,124 @@ ${email}`;
       });
     }
 
+    // Elementos del Editor Inline de Educación / Formación Académica
+    const profEduEditorCard = document.getElementById('profEduEditorCard');
+    const profEduEditorTitle = document.getElementById('profEduEditorTitle');
+    const eduEditingIndex = document.getElementById('eduEditingIndex');
+    const eduInputTitle = document.getElementById('eduInputTitle');
+    const eduInputInstitution = document.getElementById('eduInputInstitution');
+    const eduInputPeriod = document.getElementById('eduInputPeriod');
+    const btnCancelEduEditor = document.getElementById('btnCancelEduEditor');
+    const btnSaveInlineEdu = document.getElementById('btnSaveInlineEdu');
+
+    function renderFormEducation() {
+      if (!profEduList) return;
+      if (profEduCount) profEduCount.textContent = currentFormEducation.length;
+
+      if (currentFormEducation.length === 0) {
+        profEduList.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:0.85rem; border:1px dashed var(--border-slate); border-radius:6px;">
+            No hay formación académica registrada aún. Sube tu CV o agrégala con "+ Añadir Formación".
+          </div>
+        `;
+        return;
+      }
+
+      profEduList.innerHTML = currentFormEducation.map((edu, idx) => `
+        <div style="background:var(--surface-container-low); border:1px solid var(--border-slate); border-radius:6px; padding:0.6rem 0.7rem; font-size:0.8125rem; display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
+          <div>
+            <strong style="color:var(--text-dark-primary);">${escapeHtml(edu.titulo || edu.title || 'Título')}</strong>
+            <div style="font-size:0.75rem; color:var(--text-dark-secondary);">
+              ${escapeHtml(edu.institucion || edu.institution || 'Institución')}${edu.periodo || edu.period ? ` &bull; <span style="color:var(--text-muted);">${escapeHtml(edu.periodo || edu.period)}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.3rem; flex-shrink:0;">
+            <button type="button" class="btn btn-outline btn-edit-form-edu" data-idx="${idx}" style="padding:0.15rem 0.45rem; font-size:0.7rem;" title="Editar formación">
+              Editar
+            </button>
+            <button type="button" class="btn btn-outline btn-remove-form-edu" data-idx="${idx}" style="padding:0.15rem 0.45rem; font-size:0.7rem; color:var(--error);" title="Eliminar formación">
+              &times;
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      profEduList.querySelectorAll('.btn-remove-form-edu').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.idx, 10);
+          currentFormEducation.splice(idx, 1);
+          renderFormEducation();
+        });
+      });
+
+      profEduList.querySelectorAll('.btn-edit-form-edu').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.idx, 10);
+          const edu = currentFormEducation[idx];
+          if (!edu) return;
+
+          if (eduEditingIndex) eduEditingIndex.value = idx;
+          if (profEduEditorTitle) profEduEditorTitle.textContent = 'Editar Formación Académica';
+          if (eduInputTitle) eduInputTitle.value = edu.titulo || edu.title || '';
+          if (eduInputInstitution) eduInputInstitution.value = edu.institucion || edu.institution || '';
+          if (eduInputPeriod) eduInputPeriod.value = edu.periodo || edu.period || '';
+
+          if (profEduEditorCard) {
+            profEduEditorCard.style.display = 'block';
+            profEduEditorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
+      });
+    }
+
+    if (btnAddEmptyEdu) {
+      btnAddEmptyEdu.addEventListener('click', () => {
+        if (eduEditingIndex) eduEditingIndex.value = '-1';
+        if (profEduEditorTitle) profEduEditorTitle.textContent = 'Añadir Formación Académica';
+        if (eduInputTitle) eduInputTitle.value = '';
+        if (eduInputInstitution) eduInputInstitution.value = '';
+        if (eduInputPeriod) eduInputPeriod.value = '';
+
+        if (profEduEditorCard) {
+          profEduEditorCard.style.display = 'block';
+          if (eduInputTitle) eduInputTitle.focus();
+        }
+      });
+    }
+
+    if (btnCancelEduEditor && profEduEditorCard) {
+      btnCancelEduEditor.addEventListener('click', () => {
+        profEduEditorCard.style.display = 'none';
+      });
+    }
+
+    if (btnSaveInlineEdu) {
+      btnSaveInlineEdu.addEventListener('click', () => {
+        const titulo = eduInputTitle ? eduInputTitle.value.trim() : '';
+        const institucion = eduInputInstitution ? eduInputInstitution.value.trim() : '';
+        const periodo = eduInputPeriod ? eduInputPeriod.value.trim() : '';
+
+        if (!titulo || !institucion) {
+          showToast('Ingresa al menos el Título y la Institución', 'info');
+          return;
+        }
+
+        const editIdx = eduEditingIndex ? parseInt(eduEditingIndex.value, 10) : -1;
+        const eduObj = { titulo, institucion, periodo };
+
+        if (editIdx >= 0 && editIdx < currentFormEducation.length) {
+          currentFormEducation[editIdx] = eduObj;
+          showToast('Formación actualizada en tu perfil', 'success');
+        } else {
+          currentFormEducation.unshift(eduObj);
+          showToast('Formación académica añadida al perfil', 'success');
+        }
+
+        if (profEduEditorCard) profEduEditorCard.style.display = 'none';
+        renderFormEducation();
+      });
+    }
+
     if (btnOpenProfileModal && profileModal) {
       btnOpenProfileModal.addEventListener('click', () => {
         const profile = window.appStorage.getProfile();
@@ -3622,28 +3764,45 @@ ${email}`;
             renderFormSkillsChips(mergedSkills);
             renderFormExperiences();
 
+            // Fusionar formación académica sin duplicados
+            const existingEduKeys = new Set(
+              currentFormEducation.map(ed => `${(ed.titulo || '').toLowerCase().trim()}|${(ed.institucion || '').toLowerCase().trim()}`)
+            );
+            const newEdus = (extracted.educacion || []).filter(ed => {
+              const k = `${(ed.titulo || '').toLowerCase().trim()}|${(ed.institucion || '').toLowerCase().trim()}`;
+              return !existingEduKeys.has(k);
+            });
+            currentFormEducation = [...currentFormEducation, ...newEdus];
+            renderFormEducation();
+
+            const prevProfile = window.appStorage.getProfile() || {};
             const mergedProfile = {
+              ...prevProfile,
               nombre: profNombre ? profNombre.value : extracted.nombre,
               titular: profTitular ? profTitular.value : extracted.titular,
               email: profEmail ? profEmail.value : '',
               telefono: profTelefono ? profTelefono.value : '',
               ubicacion: profUbicacion ? profUbicacion.value : '',
               enlaces: {
+                ...(prevProfile.enlaces || {}),
                 linkedin: profLinkedin ? profLinkedin.value : '',
                 github: profGithub ? profGithub.value : ''
               },
               resumen: profResumen ? profResumen.value : '',
               habilidades: mergedSkills,
+              educacion: currentFormEducation,
               experiencias: currentFormExperiences,
               onboarding_completed: true
             };
             window.appStorage.saveProfile(mergedProfile, true);
+            updateCvPreview();
             showToast(`¡CV procesado! Se combinaron ${newExps.length} nuevas experiencias con tu historial previo.`, 'success');
           } else {
             // REEMPLAZAR TODO
             extracted.onboarding_completed = true;
             populateProfileForm(extracted);
             window.appStorage.saveProfile(extracted, true);
+            updateCvPreview();
             showToast(`¡Perfil de "${extracted.nombre}" extraído y guardado correctamente!`, 'success');
           }
 
@@ -3746,21 +3905,23 @@ ${email}`;
     if (btnSaveProfile) {
       btnSaveProfile.addEventListener('click', () => {
         const rawSkills = profHabilidades ? profHabilidades.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const prevProfile = window.appStorage.getProfile() || {};
 
         const updatedProfile = {
+          ...prevProfile,
           nombre: profNombre ? profNombre.value.trim() : 'Usuario',
           titular: profTitular ? profTitular.value.trim() : 'Desarrollador Tech',
           email: profEmail ? profEmail.value.trim() : '',
           telefono: profTelefono ? profTelefono.value.trim() : '',
           ubicacion: profUbicacion ? profUbicacion.value.trim() : '',
           enlaces: {
+            ...(prevProfile.enlaces || {}),
             linkedin: profLinkedin ? profLinkedin.value.trim() : '',
-            github: profGithub ? profGithub.value.trim() : '',
-            portafolio: '',
-            web: ''
+            github: profGithub ? profGithub.value.trim() : ''
           },
           resumen: profResumen ? profResumen.value.trim() : '',
           habilidades: rawSkills,
+          educacion: currentFormEducation,
           experiencias: currentFormExperiences,
           onboarding_completed: true
         };

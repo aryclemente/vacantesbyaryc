@@ -72,11 +72,16 @@ function formatProfileToCvBase(userProfile) {
   const skills = Array.isArray(userProfile.habilidades) ? userProfile.habilidades.join(', ') : '';
   const summary = userProfile.resumen || '';
 
+  let eduText = '';
+  if (Array.isArray(userProfile.educacion) && userProfile.educacion.length > 0) {
+    eduText = userProfile.educacion.map(ed => `- ${ed.titulo || ed.title || ''}${ed.institucion || ed.institution ? ` - ${ed.institucion || ed.institution}` : ''}${ed.periodo || ed.period ? ` (${ed.periodo || ed.period})` : ''}`).join('\n');
+  }
+
   let expText = '';
   if (Array.isArray(userProfile.experiencias) && userProfile.experiencias.length > 0) {
     expText = userProfile.experiencias.map((e, idx) => {
       const bullets = Array.isArray(e.bullets) ? e.bullets.map(b => `   - ${b}`).join('\n') : '';
-      return `${idx + 1}. ${e.company || ''} | ${e.role || ''} (${e.period || ''}, ${e.location || ''}):\n${bullets}`;
+      return `${idx + 1}. ${e.company || e.empresa || ''} | ${e.role || e.puesto || ''} (${e.period || e.periodo || ''}, ${e.location || e.ubicacion || ''}):\n${bullets}`;
     }).join('\n\n');
   }
 
@@ -85,7 +90,7 @@ Rol Principal: ${role}
 Ubicación: ${location}
 Contacto: ${email} ${phone ? '| ' + phone : ''}
 
-Perfil Profesional:
+${eduText ? `Educación Formal:\n${eduText}\n\n` : ''}Perfil Profesional:
 ${summary}
 
 Competencias Técnicas Clave:
