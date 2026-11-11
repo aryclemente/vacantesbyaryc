@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.10.2">
-  <link rel="stylesheet" href="css/styles.css?v=2.10.2">
+  <link rel="stylesheet" href="css/tokens.css?v=2.11.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.11.0">
 </head>
 <body class="auth-guest">
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
@@ -401,10 +401,14 @@
         <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología..." aria-label="Buscar vacantes por puesto, empresa o tecnología">
       </div>
 
-      <button class="btn btn-outline" id="btnAtsCopilotToolbar" title="Diagnóstico de embudo ATS y asesoramiento táctico con IA" aria-label="Abrir Asesor IA ATS" style="padding: 0.5rem 0.95rem; font-size: 0.8125rem; font-weight: 700; border-color: rgba(77, 23, 214, 0.35); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; flex-shrink: 0;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg>
-        <span>Asesor IA</span>
-        <span class="badge" id="badgeAtsCopilotToolbar" style="background:var(--primary); color:#ffffff; font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:10px; font-weight:800;">ATS</span>
+      <button type="button" class="btn btn-outline btn-archived-toggle" id="btnToggleArchivedCol" title="Mostrar u ocultar carpeta de vacantes archivadas/descartadas" aria-label="Mostrar u ocultar vacantes archivadas" aria-pressed="false" style="padding: 0.5rem 0.85rem; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; flex-shrink: 0;">
+        <svg id="iconToggleArchived" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+          <line x1="2" y1="2" x2="22" y2="22"/>
+        </svg>
+        <span id="labelToggleArchived">Archivadas</span>
       </button>
     </div>
   </section>
@@ -1997,12 +2001,12 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.10.2"></script>
-  <script src="js/storage.js?v=2.10.2"></script>
-  <script src="js/ai-parser.js?v=2.10.2"></script>
-  <script src="js/job-radar.js?v=2.10.2"></script>
-  <script src="js/onboarding-tour.js?v=2.10.2"></script>
-  <script src="js/app.js?v=2.10.2"></script>
+  <script src="js/supabase-client.js?v=2.11.0"></script>
+  <script src="js/storage.js?v=2.11.0"></script>
+  <script src="js/ai-parser.js?v=2.11.0"></script>
+  <script src="js/job-radar.js?v=2.11.0"></script>
+  <script src="js/onboarding-tour.js?v=2.11.0"></script>
+  <script src="js/app.js?v=2.11.0"></script>
 </body>
 </html>
 

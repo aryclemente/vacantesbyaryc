@@ -77,12 +77,12 @@ class OnboardingTourController {
         description: 'Organiza tus postulaciones arrastrando tarjetas en el Tablero Kanban o revisándolas en Vista Lista. Además, el botón "Asesor IA ATS" analiza tu embudo y redacta mensajes para reclutadores.',
         hint: 'Alterna entre Kanban y Vista Lista o abre el Asesor IA en la esquina inferior derecha.',
         primaryBtnText: 'Abrir Asesor IA',
-        highlights: ['[data-view="kanban"]', '[data-view="list"]', '#btnAtsCopilotToolbar', '#btnFloatingCopilot'],
+        highlights: ['[data-view="kanban"]', '[data-view="list"]', '#btnFloatingCopilot'],
         onEnter: (ctx) => {
           if (typeof ctx.switchView === 'function') ctx.switchView('kanban');
         },
         onPrimaryAction: () => {
-          const copilotBtn = document.getElementById('btnAtsCopilotToolbar') || document.getElementById('btnFloatingCopilot');
+          const copilotBtn = document.getElementById('btnFloatingCopilot');
           if (copilotBtn) copilotBtn.click();
         }
       },

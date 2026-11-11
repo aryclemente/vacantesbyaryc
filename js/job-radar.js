@@ -1539,9 +1539,6 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const b1 = document.getElementById('badgeAtsCopilotCount');
     if (b1) b1.textContent = `${count} ATS`;
 
-    const bToolbar = document.getElementById('badgeAtsCopilotToolbar');
-    if (bToolbar) bToolbar.textContent = `${count} ATS`;
-
     const b2 = document.getElementById('copilotAtsCountBadge');
     if (b2) b2.textContent = count;
   }
@@ -1563,10 +1560,9 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   }
 
   function initDrawerEventListeners() {
-    // 1. Botón en Toolbar (btnAtsCopilotToolbar), Botón Flotante y Triggers
+    // 1. Botón Flotante y Triggers
     const openTriggerIds = [
       'btnOpenAtsCopilotDrawer',
-      'btnAtsCopilotToolbar',
       'btnFloatingCopilot',
       'btnFloatingCopilotLauncher',
       'mobileNavCopilot'

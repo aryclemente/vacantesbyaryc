@@ -9,13 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'applied', label: 'Postuladas', dotClass: 'applied' },
     { id: 'interview', label: 'En Proceso / Entrevistas', dotClass: 'interview' },
     { id: 'offer', label: 'Ofertas / Red Activa', dotClass: 'offer' },
-    { id: 'rejected', label: 'Descartadas / Cerradas', dotClass: 'rejected' }
+    { id: 'rejected', label: 'Archivadas / Descartadas', dotClass: 'rejected' }
   ];
 
   let currentView = 'kanban';
   let searchQuery = '';
   let selectedPriorityFilter = 'all';
   let selectedModalityFilter = 'all';
+  let showArchivedVacancies = localStorage.getItem('aryc_kanban_show_archived') === 'true';
   let activeModalVacancyId = null;
   let intakePastedImageBase64 = null;
   let pendingExtractedJob = null;
@@ -266,17 +267,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // El Asesor IA del Tablero ATS opera contextualmente en Kanban y Vista Lista
+    // El Asesor IA flotante opera contextualmente en Kanban y Vista Lista
     const isAtsBoardView = (viewName === 'kanban' || viewName === 'list');
-    const toolbarCopilotBtn = document.getElementById('btnAtsCopilotToolbar');
     const floatingCopilotBtn = document.getElementById('btnFloatingCopilot');
+    const archivedToggleBtn = document.getElementById('btnToggleArchivedCol');
 
-    if (toolbarCopilotBtn) {
-      toolbarCopilotBtn.style.display = isAtsBoardView ? 'inline-flex' : 'none';
-    }
     if (floatingCopilotBtn) {
       floatingCopilotBtn.style.display = isAtsBoardView ? 'flex' : 'none';
     }
+    if (archivedToggleBtn) {
+      archivedToggleBtn.style.display = isAtsBoardView ? 'inline-flex' : 'none';
+    }
+  }
+
+  function updateArchivedToggleUI() {
+    const btn = document.getElementById('btnToggleArchivedCol');
+    const icon = document.getElementById('iconToggleArchived');
+    const label = document.getElementById('labelToggleArchived');
+    if (!btn) return;
+    btn.classList.toggle('active', showArchivedVacancies);
+    btn.setAttribute('aria-pressed', showArchivedVacancies ? 'true' : 'false');
+    if (label) {
+      label.textContent = showArchivedVacancies ? 'Ocultar archivadas' : 'Archivadas';
+    }
+    if (icon) {
+      icon.innerHTML = showArchivedVacancies
+        ? '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/>';
+    }
+  }
+
+  function toggleArchivedVacanciesVisibility() {
+    showArchivedVacancies = !showArchivedVacancies;
+    try {
+      localStorage.setItem('aryc_kanban_show_archived', showArchivedVacancies ? 'true' : 'false');
+    } catch (e) {}
+    updateArchivedToggleUI();
+    renderKanban();
+    renderTable();
+  }
+
+  const btnToggleArchivedCol = document.getElementById('btnToggleArchivedCol');
+  if (btnToggleArchivedCol) {
+    updateArchivedToggleUI();
+    btnToggleArchivedCol.addEventListener('click', toggleArchivedVacanciesVisibility);
   }
 
   tabBtns.forEach(btn => {
@@ -352,9 +386,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const allVacancies = window.appStorage.getVacancies();
     const filtered = getFilteredVacancies();
     const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
+    const visibleColumns = showArchivedVacancies ? COLUMNS : COLUMNS.filter(c => c.id !== 'rejected');
 
-    kanbanBoardEl.innerHTML = COLUMNS.map(col => {
+    kanbanBoardEl.classList.toggle('has-archived-col', showArchivedVacancies);
+    kanbanBoardEl.innerHTML = visibleColumns.map(col => {
       const colVacancies = filtered.filter(v => v.estado === col.id);
+      const isRejectedCol = col.id === 'rejected';
       return `
         <div class="kanban-col" data-col-id="${col.id}">
           <div class="col-header">
@@ -362,7 +399,19 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="col-dot ${col.dotClass}"></span>
               <span class="col-name">${col.label}</span>
             </div>
-            <span class="col-count">${colVacancies.length}</span>
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+              ${isRejectedCol ? `
+                <button type="button" class="col-hide-archived-btn" id="btnHideArchivedColInline" title="Ocultar columna de archivadas/descartadas" aria-label="Ocultar columna de archivadas">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                </button>
+              ` : ''}
+              <span class="col-count">${colVacancies.length}</span>
+            </div>
           </div>
           <div class="col-cards-list" data-status="${col.id}">
             ${colVacancies.map(v => renderJobCard(v, activeProfile)).join('')}
@@ -370,6 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
     }).join('');
+
+    const inlineHideBtn = document.getElementById('btnHideArchivedColInline');
+    if (inlineHideBtn) {
+      inlineHideBtn.addEventListener('click', toggleArchivedVacanciesVisibility);
+    }
 
     attachCardClickEvents();
     attachDragAndDropEvents();
@@ -477,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   function renderTable() {
     if (!tableBodyEl) return;
-    const filtered = getFilteredVacancies();
+    const filtered = getFilteredVacancies().filter(v => showArchivedVacancies || v.estado !== 'rejected');
     const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
 
     tableBodyEl.innerHTML = filtered.map(v => {
