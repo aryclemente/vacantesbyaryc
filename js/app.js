@@ -2874,13 +2874,15 @@ ${email}`;
     updateCloudStatusUI(window.appStorage.syncStatus);
   }
 
-  // Welcome CTA -> Open Cloud Modal
+  // Welcome CTA ("Registrarse") -> Open Cloud Modal on Email & Password registration view
   const btnWelcomeStartCloud = document.getElementById('btnWelcomeStartCloud');
   if (btnWelcomeStartCloud) {
     btnWelcomeStartCloud.addEventListener('click', () => {
       hideAuthAlert();
       updateAuthUI();
+      if (btnTogglePassword) btnTogglePassword.click();
       if (cloudModal) cloudModal.classList.add('open');
+      if (inputAuthEmail) setTimeout(() => inputAuthEmail.focus(), 120);
     });
   }
 

@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.6.0">
-  <link rel="stylesheet" href="css/styles.css?v=2.6.0">
+  <link rel="stylesheet" href="css/tokens.css?v=2.7.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.7.0">
 </head>
 <body class="auth-guest">
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
@@ -83,41 +83,173 @@
        Welcome Landing View (Visible cuando no hay sesión iniciada)
        ======================================================================== -->
   <section class="welcome-landing-section" id="welcomeLandingView" aria-label="Bienvenida a Vacantes by AryC">
-    <div class="welcome-hero-card">
-      <div class="welcome-badge">
-        <span class="live-pulse" aria-hidden="true">
-          <span class="live-pulse-ring"></span>
-          <span class="live-pulse-core"></span>
-        </span>
-        <span>ATS Personal + Inteligencia Artificial</span>
-      </div>
-      <h1 class="welcome-title">Gestiona tu búsqueda laboral de principio a fin en la nube</h1>
+    <!-- Hero Block -->
+    <div class="welcome-hero-block">
+      <div class="welcome-ambient-dots" aria-hidden="true"></div>
+      <h1 class="welcome-title">Gestiona tu búsqueda laboral<br>de principio a fin en la nube</h1>
       <p class="welcome-subtitle">
         Centraliza tu perfil profesional, encuentra empleos con compatibilidad ATS, adapta tu currículum en PDF, redacta cartas y entrena tus entrevistas en un solo lugar.
       </p>
+      <div class="welcome-cta-actions">
+        <button type="button" class="btn btn-primary welcome-btn-start" id="btnWelcomeStartCloud">
+          <span>Registrarse</span>
+        </button>
+        <a href="#howItWorksSection" class="btn btn-outline welcome-btn-how" id="btnWelcomeHowItWorks">
+          <span>Cómo funciona</span>
+        </a>
+      </div>
+    </div>
 
-      <div class="welcome-cta-box">
-        <p class="welcome-cta-instruction">
-          Para comenzar, da clic en <strong>Iniciar Sesión</strong> y regístrate en la nube para guardar tu progreso de forma privada y segura.
-        </p>
-        <div class="welcome-cta-actions">
-          <button type="button" class="btn btn-primary welcome-btn-start" id="btnWelcomeStartCloud">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-            </svg>
-            <span>Iniciar Sesión / Registrarse en la Nube</span>
-          </button>
-        </div>
+    <!-- Cómo funciona Timeline Section -->
+    <div class="how-it-works-section" id="howItWorksSection">
+      <div class="how-it-works-header">
+        <span class="how-eyebrow">CÓMO FUNCIONA</span>
+        <h2 class="how-title">Consigue tu Empleo Ideal</h2>
       </div>
 
-      <div class="welcome-steps-preview" aria-label="Recorrido guiado al iniciar sesión">
-        <div class="welcome-step-chip"><span>1</span> Sube o completa tu Perfil</div>
-        <div class="welcome-step-chip"><span>2</span> Registra con Smart Intake</div>
-        <div class="welcome-step-chip"><span>3</span> Explora el Radar de Empleos</div>
-        <div class="welcome-step-chip"><span>4</span> Kanban, Lista &amp; Asesor IA</div>
-        <div class="welcome-step-chip"><span>5</span> Adapta y descarga tu CV</div>
-        <div class="welcome-step-chip"><span>6</span> Correos y Cartas IA</div>
-        <div class="welcome-step-chip"><span>7</span> Simulador de Entrevistas</div>
+      <div class="how-timeline">
+        <!-- Paso 1 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">01</span>
+            <h3 class="how-step-heading">Paso 1. Crea tu cuenta</h3>
+            <p class="how-step-text">Regístrate gratis con tu correo o Magic Link para sincronizar tu búsqueda en la nube de forma privada.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-pill">
+              <span class="how-mock-avatar">TU</span>
+              <div class="how-mock-lines">
+                <span class="how-line-lg"></span>
+                <span class="how-line-sm"></span>
+              </div>
+              <span class="how-check-circle">&#10003;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">02</span>
+            <h3 class="how-step-heading">Paso 2. Sube y completa tu Perfil Profesional</h3>
+            <p class="how-step-text">Importa tu CV en PDF, Markdown o TXT, fusiona experiencias nuevas y organiza tu stack técnico.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-upload">
+              <span class="how-file-badge">PDF</span>
+              <span class="how-arrow">&#8594;</span>
+              <div class="how-tags-row">
+                <span class="how-tag">React</span>
+                <span class="how-tag">SQL</span>
+                <span class="how-tag accent">+ Perfil</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">03</span>
+            <h3 class="how-step-heading">Paso 3. Guarda tus vacantes</h3>
+            <p class="how-step-text">Pega enlaces, texto o capturas de pantalla en Smart Intake para extraer requisitos y guardarlas al instante.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-intake">
+              <span class="how-spark">✨ Smart Intake</span>
+              <div class="how-intake-box">URL / Texto / Imagen &#8594; <strong>Guardada</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">04</span>
+            <h3 class="how-step-heading">Paso 4. Explora el Radar de Empleos</h3>
+            <p class="how-step-text">Descubre vacantes reales en Remoto, España y LATAM con porcentaje de compatibilidad ATS frente a tu perfil.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-radar">
+              <span class="how-radar-dot"></span>
+              <span class="how-radar-label">Remoto • Tech</span>
+              <span class="how-ats-score">94% ATS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 5 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">05</span>
+            <h3 class="how-step-heading">Paso 5. Gestiona tus vacantes con Asesor IA</h3>
+            <p class="how-step-text">Controla cada etapa en tu Tablero Kanban o Vista Lista y analiza cuellos de botella con tu Asesor IA ATS.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-kanban">
+              <div class="how-col"><span>Guardadas</span><i class="how-card-bar"></i></div>
+              <div class="how-col"><span>Postuladas</span><i class="how-card-bar active"></i></div>
+              <div class="how-col"><span>Entrevista</span><i class="how-card-bar mint"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 6 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">06</span>
+            <h3 class="how-step-heading">Paso 6. Postúlate con tu CV personalizado</h3>
+            <p class="how-step-text">Adapta automáticamente tu resumen y logros al puesto seleccionado, elige plantilla y descarga el PDF.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-cv">
+              <div class="how-cv-mini">
+                <span class="how-line-lg"></span>
+                <span class="how-line-sm"></span>
+                <span class="how-line-md"></span>
+              </div>
+              <span class="how-pdf-btn">PDF ATS &#8595;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 7 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">07</span>
+            <h3 class="how-step-heading">Paso 7. Envía correos y cartas de presentación</h3>
+            <p class="how-step-text">Genera en segundos un correo directo para reclutadores y una carta formal alineada con la empresa.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-comm">
+              <span class="how-comm-pill">&#9993; Email Pitch</span>
+              <span class="how-comm-pill">&#128196; Carta Formal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 8 -->
+        <div class="how-step-row">
+          <div class="how-step-content">
+            <span class="how-step-num">08</span>
+            <h3 class="how-step-heading">Paso 8. Prepárate con el Simulador de Entrevistas</h3>
+            <p class="how-step-text">Repasa preguntas frecuentes técnicas y de RRHH y practica tus respuestas en el simulador con IA.</p>
+          </div>
+          <div class="how-step-node" aria-hidden="true"></div>
+          <div class="how-step-visual-card" aria-hidden="true">
+            <div class="how-mock-chat">
+              <span class="how-bubble-bot">¿Cómo resolviste este reto?</span>
+              <span class="how-bubble-user">Te cuento mi enfoque...</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1804,12 +1936,12 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.6.0"></script>
-  <script src="js/storage.js?v=2.6.0"></script>
-  <script src="js/ai-parser.js?v=2.6.0"></script>
-  <script src="js/job-radar.js?v=2.6.0"></script>
-  <script src="js/onboarding-tour.js?v=2.6.0"></script>
-  <script src="js/app.js?v=2.6.0"></script>
+  <script src="js/supabase-client.js?v=2.7.0"></script>
+  <script src="js/storage.js?v=2.7.0"></script>
+  <script src="js/ai-parser.js?v=2.7.0"></script>
+  <script src="js/job-radar.js?v=2.7.0"></script>
+  <script src="js/onboarding-tour.js?v=2.7.0"></script>
+  <script src="js/app.js?v=2.7.0"></script>
 </body>
 </html>
 
