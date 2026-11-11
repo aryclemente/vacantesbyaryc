@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchQuery = '';
   let selectedPriorityFilter = 'all';
   let selectedModalityFilter = 'all';
+  let includedStatuses = new Set();
+  let excludedStatuses = new Set();
+  let tableSort = { field: null, dir: 'asc' };
+  let openFilterColumn = null;
   let showArchivedVacancies = localStorage.getItem('aryc_kanban_show_archived') === 'true';
   let activeModalVacancyId = null;
   let intakePastedImageBase64 = null;
@@ -26,8 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const kanbanBoardEl = document.getElementById('kanbanBoard');
   const tableBodyEl = document.getElementById('vacanciesTableBody');
   const searchInputEl = document.getElementById('searchInput');
-  const filterPriorityEl = document.getElementById('filterPriority');
-  const filterModalityEl = document.getElementById('filterModality');
+  const tableColumnFilterPopover = document.getElementById('tableColumnFilterPopover');
   const tabBtns = document.querySelectorAll('.tab-btn');
   const mobileNavBtns = document.querySelectorAll('.mobile-nav-item');
   const viewPanels = document.querySelectorAll('.view-panel');
@@ -356,6 +359,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Status multi-include & exclude filters
+      if (excludedStatuses.has(v.estado)) {
+        return false;
+      }
+      if (includedStatuses.size > 0 && !includedStatuses.has(v.estado)) {
+        return false;
+      }
+
       return true;
     });
   }
@@ -527,11 +538,319 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // =========================================================================
-  // Render Table List
+  // Render Table List + Column Header Popover Filters & Sorting
   // =========================================================================
+  function getStatusLabel(statusId) {
+    const col = COLUMNS.find(c => c.id === statusId);
+    return col ? col.label : statusId;
+  }
+
+  function updateColumnFilterIndicators() {
+    const activeCount =
+      (selectedPriorityFilter !== 'all' ? 1 : 0) +
+      (selectedModalityFilter !== 'all' ? 1 : 0) +
+      (includedStatuses.size > 0 || excludedStatuses.size > 0 ? 1 : 0) +
+      (tableSort.field ? 1 : 0);
+
+    const pill = document.getElementById('activeColumnFiltersPill');
+    const pillText = document.getElementById('activeColumnFiltersText');
+    if (pill && pillText) {
+      if (activeCount > 0) {
+        pill.style.display = 'inline-flex';
+        pillText.textContent = `${activeCount} filtro${activeCount > 1 ? 's' : ''}/orden`;
+      } else {
+        pill.style.display = 'none';
+      }
+    }
+
+    document.querySelectorAll('.th-filter-btn').forEach(btn => {
+      const col = btn.dataset.colFilter;
+      const ind = btn.querySelector('.th-filter-ind');
+      let isActive = false;
+      let symbol = '▾';
+
+      if (col === 'empresa' || col === 'puesto' || col === 'fecha') {
+        if (tableSort.field === col) {
+          isActive = true;
+          symbol = tableSort.dir === 'asc' ? '↑' : '↓';
+        }
+      } else if (col === 'modalidad' && selectedModalityFilter !== 'all') {
+        isActive = true;
+        symbol = '●';
+      } else if (col === 'prioridad' && selectedPriorityFilter !== 'all') {
+        isActive = true;
+        symbol = '●';
+      } else if (col === 'estado' && (includedStatuses.size > 0 || excludedStatuses.size > 0)) {
+        isActive = true;
+        symbol = `(${includedStatuses.size + excludedStatuses.size})`;
+      }
+
+      btn.classList.toggle('is-filtered', isActive);
+      if (ind) ind.textContent = symbol;
+    });
+  }
+
+  function closeColumnFilterPopover() {
+    if (tableColumnFilterPopover) {
+      tableColumnFilterPopover.style.display = 'none';
+    }
+    openFilterColumn = null;
+  }
+
+  function renderColumnFilterPopover(colName, anchorEl) {
+    if (!tableColumnFilterPopover) return;
+
+    const allVacancies = window.appStorage.getVacancies();
+    let html = '';
+
+    if (colName === 'empresa' || colName === 'puesto') {
+      const label = colName === 'empresa' ? 'Empresa' : 'Puesto';
+      const isAsc = tableSort.field === colName && tableSort.dir === 'asc';
+      const isDesc = tableSort.field === colName && tableSort.dir === 'desc';
+      html = `
+        <div class="col-filter-title"><span>Ordenar ${label}</span></div>
+        <div class="col-filter-list">
+          <button type="button" class="col-filter-option ${isAsc ? 'active' : ''}" data-sort-col="${colName}" data-sort-dir="asc">
+            <span>A → Z (Ascendente)</span>
+            <span>${isAsc ? '✓' : ''}</span>
+          </button>
+          <button type="button" class="col-filter-option ${isDesc ? 'active' : ''}" data-sort-col="${colName}" data-sort-dir="desc">
+            <span>Z → A (Descendente)</span>
+            <span>${isDesc ? '✓' : ''}</span>
+          </button>
+          <button type="button" class="col-filter-option" data-sort-clear="1">
+            <span>Sin orden alfabético</span>
+          </button>
+        </div>
+      `;
+    } else if (colName === 'fecha') {
+      const isDesc = tableSort.field === 'fecha' && tableSort.dir === 'desc';
+      const isAsc = tableSort.field === 'fecha' && tableSort.dir === 'asc';
+      html = `
+        <div class="col-filter-title"><span>Ordenar por Fecha</span></div>
+        <div class="col-filter-list">
+          <button type="button" class="col-filter-option ${isDesc ? 'active' : ''}" data-sort-col="fecha" data-sort-dir="desc">
+            <span>Más recientes primero</span>
+            <span>${isDesc ? '✓' : ''}</span>
+          </button>
+          <button type="button" class="col-filter-option ${isAsc ? 'active' : ''}" data-sort-col="fecha" data-sort-dir="asc">
+            <span>Más antiguas primero</span>
+            <span>${isAsc ? '✓' : ''}</span>
+          </button>
+          <button type="button" class="col-filter-option" data-sort-clear="1">
+            <span>Orden predeterminado</span>
+          </button>
+        </div>
+      `;
+    } else if (colName === 'modalidad') {
+      const modalities = ['all', 'Remoto', 'Híbrido', 'Presencial'];
+      html = `
+        <div class="col-filter-title"><span>Filtrar Modalidad</span></div>
+        <div class="col-filter-list">
+          ${modalities.map(m => {
+            const label = m === 'all' ? 'Todas las modalidades' : m;
+            const active = selectedModalityFilter === m;
+            return `
+              <button type="button" class="col-filter-option ${active ? 'active' : ''}" data-filter-mod="${m}">
+                <span>${label}</span>
+                <span>${active ? '✓' : ''}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } else if (colName === 'prioridad') {
+      const priorities = [
+        { val: 'all', label: 'Todas las prioridades' },
+        { val: 'high', label: 'Prioridad Alta (55%-100%)' },
+        { val: 'med', label: 'Prioridad Media (10%-54%)' },
+        { val: 'low', label: 'Prioridad Baja (0%-9%)' }
+      ];
+      html = `
+        <div class="col-filter-title"><span>Filtrar Prioridad</span></div>
+        <div class="col-filter-list">
+          ${priorities.map(p => {
+            const active = selectedPriorityFilter === p.val;
+            return `
+              <button type="button" class="col-filter-option ${active ? 'active' : ''}" data-filter-prio="${p.val}">
+                <span>${p.label}</span>
+                <span>${active ? '✓' : ''}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } else if (colName === 'estado') {
+      const countsByStatus = {};
+      allVacancies.forEach(v => {
+        countsByStatus[v.estado] = (countsByStatus[v.estado] || 0) + 1;
+      });
+      const availableCols = COLUMNS.filter(c => (countsByStatus[c.id] || 0) > 0 || includedStatuses.has(c.id) || excludedStatuses.has(c.id));
+      html = `
+        <div class="col-filter-title">
+          <span>Estados disponibles</span>
+          <button type="button" class="btn btn-outline" data-status-clear="1" style="padding:0.1rem 0.4rem; font-size:0.65rem;">Limpiar</button>
+        </div>
+        <div class="col-filter-list">
+          ${availableCols.length === 0 ? `<div style="font-size:0.78rem; color:var(--text-muted); padding:0.35rem;">Sin estados disponibles aún.</div>` : availableCols.map(c => {
+            const isInc = includedStatuses.has(c.id);
+            const isExc = excludedStatuses.has(c.id);
+            const cnt = countsByStatus[c.id] || 0;
+            return `
+              <div class="status-filter-row">
+                <span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:600; min-width:0;">
+                  <span class="col-dot ${c.dotClass}"></span>
+                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.label.split('/')[0].trim()} (${cnt})</span>
+                </span>
+                <div class="status-filter-actions">
+                  <button type="button" class="status-mode-pill include ${isInc ? 'active' : ''}" data-status-inc="${c.id}" title="Incluir en la vista">+ Incluir</button>
+                  <button type="button" class="status-mode-pill exclude ${isExc ? 'active' : ''}" data-status-exc="${c.id}" title="Excluir de la vista">− Excluir</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    tableColumnFilterPopover.innerHTML = html;
+    tableColumnFilterPopover.style.display = 'block';
+
+    // Posicionar debajo del encabezado pulsado sin salir de la pantalla
+    const rect = anchorEl.getBoundingClientRect();
+    const popWidth = 285;
+    const left = Math.min(window.innerWidth - popWidth - 12, Math.max(12, rect.left));
+    const top = Math.min(window.innerHeight - 280, rect.bottom + 6);
+    tableColumnFilterPopover.style.left = `${left}px`;
+    tableColumnFilterPopover.style.top = `${top}px`;
+
+    // Bind events inside popover
+    tableColumnFilterPopover.querySelectorAll('[data-sort-col]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tableSort = { field: btn.dataset.sortCol, dir: btn.dataset.sortDir };
+        closeColumnFilterPopover();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-sort-clear]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tableSort = { field: null, dir: 'asc' };
+        closeColumnFilterPopover();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-filter-mod]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedModalityFilter = btn.dataset.filterMod;
+        closeColumnFilterPopover();
+        renderKanban();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-filter-prio]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPriorityFilter = btn.dataset.filterPrio;
+        closeColumnFilterPopover();
+        renderKanban();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-status-inc]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const st = btn.dataset.statusInc;
+        if (includedStatuses.has(st)) {
+          includedStatuses.delete(st);
+        } else {
+          includedStatuses.add(st);
+          excludedStatuses.delete(st);
+        }
+        renderColumnFilterPopover('estado', anchorEl);
+        renderKanban();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-status-exc]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const st = btn.dataset.statusExc;
+        if (excludedStatuses.has(st)) {
+          excludedStatuses.delete(st);
+        } else {
+          excludedStatuses.add(st);
+          includedStatuses.delete(st);
+        }
+        renderColumnFilterPopover('estado', anchorEl);
+        renderKanban();
+        renderTable();
+      });
+    });
+    tableColumnFilterPopover.querySelectorAll('[data-status-clear]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        includedStatuses.clear();
+        excludedStatuses.clear();
+        renderColumnFilterPopover('estado', anchorEl);
+        renderKanban();
+        renderTable();
+      });
+    });
+  }
+
+  document.querySelectorAll('.th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const col = btn.dataset.colFilter;
+      if (openFilterColumn === col && tableColumnFilterPopover?.style.display === 'block') {
+        closeColumnFilterPopover();
+        return;
+      }
+      openFilterColumn = col;
+      renderColumnFilterPopover(col, btn);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!tableColumnFilterPopover || tableColumnFilterPopover.style.display === 'none') return;
+    if (!tableColumnFilterPopover.contains(e.target) && !e.target.closest('.th-filter-btn')) {
+      closeColumnFilterPopover();
+    }
+  });
+
+  const btnClearAllColumnFilters = document.getElementById('btnClearAllColumnFilters');
+  if (btnClearAllColumnFilters) {
+    btnClearAllColumnFilters.addEventListener('click', () => {
+      selectedPriorityFilter = 'all';
+      selectedModalityFilter = 'all';
+      includedStatuses.clear();
+      excludedStatuses.clear();
+      tableSort = { field: null, dir: 'asc' };
+      closeColumnFilterPopover();
+      renderKanban();
+      renderTable();
+    });
+  }
+
   function renderTable() {
     if (!tableBodyEl) return;
-    const filtered = getFilteredVacancies().filter(v => showArchivedVacancies || v.estado !== 'rejected');
+    updateColumnFilterIndicators();
+
+    let filtered = getFilteredVacancies().filter(v => {
+      if (includedStatuses.size > 0) return true;
+      return showArchivedVacancies || v.estado !== 'rejected';
+    });
+
+    if (tableSort.field) {
+      const dirMult = tableSort.dir === 'desc' ? -1 : 1;
+      filtered = [...filtered].sort((a, b) => {
+        if (tableSort.field === 'fecha') {
+          const da = a.fecha_postulacion || a.fecha || '';
+          const db = b.fecha_postulacion || b.fecha || '';
+          return da.localeCompare(db) * dirMult;
+        }
+        const va = (a[tableSort.field] || '').toString();
+        const vb = (b[tableSort.field] || '').toString();
+        return va.localeCompare(vb, 'es', { sensitivity: 'base' }) * dirMult;
+      });
+    }
+
     const activeProfile = (window.appStorage && typeof window.appStorage.getProfile === 'function') ? window.appStorage.getProfile() : null;
 
     tableBodyEl.innerHTML = filtered.map(v => {
@@ -539,6 +858,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const priorityClass = v.prioridad === 'high' ? 'high' : v.prioridad === 'med' ? 'med' : 'low';
       const priorityLabel = v.prioridad === 'high' ? 'Alta' : v.prioridad === 'med' ? 'Media' : 'Baja';
       const matchScore = getVacancyMatchScore(v, activeProfile);
+      const displayDate = v.fecha_postulacion || v.fecha || '--';
+      const dateBadgeLabel = v.fecha_postulacion ? `Postulada: ${v.fecha_postulacion}` : `Registrada: ${v.fecha || '--'}`;
       return `
         <tr data-id="${v.id}">
           <td><strong>${escapeHtml(v.empresa)}</strong></td>
@@ -551,6 +872,9 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
           </td>
           <td><span class="priority-pill ${priorityClass}" style="white-space:nowrap;" title="Compatibilidad frente a tu perfil: ${matchScore}%">${priorityLabel} · ${matchScore}%</span></td>
+          <td style="white-space: nowrap; font-size:0.78rem; color:var(--text-dark-secondary);" title="${escapeHtml(dateBadgeLabel)}">
+            ${v.fecha_postulacion ? `<span style="color:var(--deep-teal); font-weight:700;">📨 ${escapeHtml(displayDate)}</span>` : escapeHtml(displayDate)}
+          </td>
           <td style="white-space: nowrap;">
             <button class="btn btn-outline" style="padding:0.3rem 0.65rem; font-size:0.75rem;" onclick="window.openVacancyModal('${v.id}')">
               Detalle
@@ -588,22 +912,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchInputEl) {
     searchInputEl.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim();
-      renderKanban();
-      renderTable();
-    });
-  }
-
-  if (filterPriorityEl) {
-    filterPriorityEl.addEventListener('change', (e) => {
-      selectedPriorityFilter = e.target.value;
-      renderKanban();
-      renderTable();
-    });
-  }
-
-  if (filterModalityEl) {
-    filterModalityEl.addEventListener('change', (e) => {
-      selectedModalityFilter = e.target.value;
       renderKanban();
       renderTable();
     });
@@ -685,9 +993,15 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">URL de la Oferta</label>
-        <input type="url" id="mUrl" class="form-control" value="${escapeHtml(vacancy.url || '')}">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">URL de la Oferta</label>
+          <input type="url" id="mUrl" class="form-control" value="${escapeHtml(vacancy.url || '')}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="mFechaPostulacion">Fecha de Postulación</label>
+          <input type="date" id="mFechaPostulacion" class="form-control" value="${escapeHtml(vacancy.fecha_postulacion || '')}">
+        </div>
       </div>
 
       <div class="form-group">
@@ -700,6 +1014,32 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="form-group">
         <label class="form-label">Notas de Seguimiento & Estrategia</label>
         <textarea id="mNotas" class="form-control" rows="3">${escapeHtml(vacancy.notas || '')}</textarea>
+      </div>
+
+      <div class="status-log-box">
+        <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-dark-primary);">
+          🕒 Log de Estados &amp; Postulación
+        </div>
+        <div class="status-log-list">
+          ${(() => {
+            const history = Array.isArray(vacancy.status_history) && vacancy.status_history.length > 0
+              ? vacancy.status_history
+              : [{ estado: vacancy.estado, fromEstado: null, fecha: vacancy.fecha || '', timestamp: vacancy.created_at || '', nota: 'Registro inicial' }];
+            return [...history].reverse().map(entry => {
+              const labelTo = getStatusLabel(entry.estado);
+              const labelFrom = entry.fromEstado ? getStatusLabel(entry.fromEstado) : null;
+              const dateDisplay = entry.timestamp
+                ? new Date(entry.timestamp).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })
+                : (entry.fecha || '--');
+              return `
+                <div class="status-log-item">
+                  <span>${labelFrom ? `<strong>${escapeHtml(labelFrom.split('/')[0].trim())}</strong> &rarr; ` : ''}<strong>${escapeHtml(labelTo.split('/')[0].trim())}</strong></span>
+                  <span style="color:var(--text-muted); white-space:nowrap;">${escapeHtml(dateDisplay)}</span>
+                </div>
+              `;
+            }).join('');
+          })()}
+        </div>
       </div>
 
       <div style="background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-lg); margin-top:0.5rem; border:1px solid var(--border-slate);">
@@ -788,6 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
       salario: document.getElementById('mSalario').value.trim(),
       contacto: document.getElementById('mContacto').value.trim(),
       url: document.getElementById('mUrl').value.trim(),
+      fecha_postulacion: document.getElementById('mFechaPostulacion')?.value || null,
       notas: document.getElementById('mNotas').value.trim()
     };
 

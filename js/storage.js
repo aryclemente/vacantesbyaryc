@@ -458,6 +458,7 @@ class StorageService {
     this.syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error' | 'offline'
     this.syncListeners = [];
     this.perfilesTableAvailable = null; // null: desconocido, true: disponible, false: tabla pendiente de crear en Supabase
+    this.vacantesAuditColsAvailable = null; // null: desconocido, true: fecha_postulacion/status_history en Supabase, false: pendiente ALTER TABLE
     this.init();
   }
 
@@ -848,8 +849,20 @@ class StorageService {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        this.cache = data;
-        this.saveLocalVacancies(data);
+        // Preservar historial local / fecha_postulacion si la BD aún no tiene columnas de auditoría
+        const localPrev = this.getLocalVacancies();
+        const localById = new Map((Array.isArray(localPrev) ? localPrev : []).map(v => [v.id, v]));
+        this.cache = data.map(row => {
+          const prev = localById.get(row.id);
+          return {
+            ...row,
+            fecha_postulacion: row.fecha_postulacion || prev?.fecha_postulacion || (row.estado === 'applied' ? row.fecha : null),
+            status_history: (Array.isArray(row.status_history) && row.status_history.length > 0)
+              ? row.status_history
+              : (Array.isArray(prev?.status_history) ? prev.status_history : [])
+          };
+        });
+        this.saveLocalVacancies(this.cache);
       } else if (this.cache && this.cache.length > 0) {
         // El usuario está conectado pero la nube está vacía
         console.info('Cuenta en la nube sin vacantes.');
@@ -1000,10 +1013,25 @@ class StorageService {
   }
 
   addVacancy(vacancy) {
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+
     vacancy.id = vacancy.id || ('vac-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5));
-    vacancy.fecha = vacancy.fecha || new Date().toISOString().split('T')[0];
+    vacancy.fecha = vacancy.fecha || todayStr;
     vacancy.estado = vacancy.estado || 'saved';
     vacancy.prioridad = vacancy.prioridad || 'high';
+    if (vacancy.estado === 'applied' && !vacancy.fecha_postulacion) {
+      vacancy.fecha_postulacion = todayStr;
+    }
+    if (!Array.isArray(vacancy.status_history) || vacancy.status_history.length === 0) {
+      vacancy.status_history = [{
+        estado: vacancy.estado,
+        fromEstado: null,
+        fecha: todayStr,
+        timestamp: nowIso,
+        nota: 'Vacante registrada'
+      }];
+    }
 
     // 1. Actualización optimista local
     if (!Array.isArray(this.cache)) {
@@ -1019,7 +1047,7 @@ class StorageService {
     // 2. Si hay sesión activa en Supabase, guardar en la nube en segundo plano
     if (window.appSupabase && window.appSupabase.isAuthenticated()) {
       const user = window.appSupabase.getUser();
-      const dbRecord = {
+      const baseRecord = {
         id: vacancy.id,
         user_id: user.id,
         empresa: vacancy.empresa,
@@ -1038,15 +1066,32 @@ class StorageService {
         interview_prep: vacancy.interview_prep || null
       };
 
+      const fullRecord = this.vacantesAuditColsAvailable === false
+        ? baseRecord
+        : {
+            ...baseRecord,
+            fecha_postulacion: vacancy.fecha_postulacion || null,
+            status_history: vacancy.status_history
+          };
+
       window.appSupabase.client
         .from('vacantes')
-        .insert([dbRecord])
+        .insert([fullRecord])
         .then(({ error }) => {
           if (error) {
-            console.error('Error insertando vacante en Supabase:', error);
-            this.syncStatus = 'error';
-            this.notifySyncStatus();
+            if (error.code === 'PGRST204' || error.code === '42703' || error.message?.includes('fecha_postulacion') || error.message?.includes('status_history')) {
+              this.vacantesAuditColsAvailable = false;
+              window.appSupabase.client.from('vacantes').insert([baseRecord]).then(({ error: retryErr }) => {
+                this.syncStatus = retryErr ? 'error' : 'synced';
+                this.notifySyncStatus();
+              });
+            } else {
+              console.error('Error insertando vacante en Supabase:', error);
+              this.syncStatus = 'error';
+              this.notifySyncStatus();
+            }
           } else {
+            this.vacantesAuditColsAvailable = true;
             this.syncStatus = 'synced';
             this.notifySyncStatus();
           }
@@ -1057,29 +1102,84 @@ class StorageService {
   }
 
   updateVacancy(id, updatedFields) {
+    if (!Array.isArray(this.cache)) {
+      this.cache = this.getLocalVacancies();
+    }
     const index = this.cache.findIndex(v => v.id === id);
     if (index !== -1) {
+      const prevVac = this.cache[index];
+      const nextFields = { ...updatedFields };
+      const nowIso = new Date().toISOString();
+      const todayStr = nowIso.split('T')[0];
+
+      // Registrar fecha de postulación y log de cambios de estado automáticamente
+      if (nextFields.estado && nextFields.estado !== prevVac.estado) {
+        if (nextFields.estado === 'applied' && !prevVac.fecha_postulacion && !nextFields.fecha_postulacion) {
+          nextFields.fecha_postulacion = todayStr;
+        }
+        const existingHistory = Array.isArray(prevVac.status_history) && prevVac.status_history.length > 0
+          ? [...prevVac.status_history]
+          : [{
+              estado: prevVac.estado,
+              fromEstado: null,
+              fecha: prevVac.fecha || todayStr,
+              timestamp: prevVac.created_at || nowIso,
+              nota: 'Estado inicial registrado'
+            }];
+        existingHistory.push({
+          estado: nextFields.estado,
+          fromEstado: prevVac.estado,
+          fecha: todayStr,
+          timestamp: nowIso,
+          nota: `Cambio de estado`
+        });
+        nextFields.status_history = existingHistory;
+      }
+
       // 1. Actualización optimista local
-      this.cache[index] = { ...this.cache[index], ...updatedFields };
+      this.cache[index] = { ...prevVac, ...nextFields };
       this.saveLocalVacancies(this.cache);
       this.notifySubscribers();
 
       // 2. Actualización en Supabase si está autenticado
       if (window.appSupabase && window.appSupabase.isAuthenticated()) {
-        window.appSupabase.client
-          .from('vacantes')
-          .update(updatedFields)
-          .eq('id', id)
-          .then(({ error }) => {
-            if (error) {
-              console.error('Error actualizando vacante en Supabase:', error);
-              this.syncStatus = 'error';
-              this.notifySyncStatus();
-            } else {
-              this.syncStatus = 'synced';
-              this.notifySyncStatus();
-            }
-          });
+        const dbPayload = { ...nextFields };
+        if (this.vacantesAuditColsAvailable === false) {
+          delete dbPayload.fecha_postulacion;
+          delete dbPayload.status_history;
+        }
+        if (Object.keys(dbPayload).length > 0) {
+          window.appSupabase.client
+            .from('vacantes')
+            .update(dbPayload)
+            .eq('id', id)
+            .then(({ error }) => {
+              if (error) {
+                if (error.code === 'PGRST204' || error.code === '42703' || error.message?.includes('fecha_postulacion') || error.message?.includes('status_history')) {
+                  this.vacantesAuditColsAvailable = false;
+                  const cleanFallback = { ...nextFields };
+                  delete cleanFallback.fecha_postulacion;
+                  delete cleanFallback.status_history;
+                  if (Object.keys(cleanFallback).length > 0) {
+                    window.appSupabase.client.from('vacantes').update(cleanFallback).eq('id', id).then(({ error: retryErr }) => {
+                      this.syncStatus = retryErr ? 'error' : 'synced';
+                      this.notifySyncStatus();
+                    });
+                  } else {
+                    this.syncStatus = 'synced';
+                    this.notifySyncStatus();
+                  }
+                } else {
+                  console.error('Error actualizando vacante en Supabase:', error);
+                  this.syncStatus = 'error';
+                  this.notifySyncStatus();
+                }
+              } else {
+                this.syncStatus = 'synced';
+                this.notifySyncStatus();
+              }
+            });
+        }
       }
 
       return this.cache[index];

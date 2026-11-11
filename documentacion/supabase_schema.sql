@@ -22,13 +22,19 @@ CREATE TABLE IF NOT EXISTS public.vacantes (
     url TEXT,
     contacto TEXT,
     fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_postulacion DATE,
     notas TEXT,
     requisitos TEXT[] DEFAULT '{}',
     estrategia TEXT,
     interview_prep TEXT,
+    status_history JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Migración segura para bases existentes (fecha de postulación y log de estados)
+ALTER TABLE public.vacantes ADD COLUMN IF NOT EXISTS fecha_postulacion DATE;
+ALTER TABLE public.vacantes ADD COLUMN IF NOT EXISTS status_history JSONB DEFAULT '[]'::jsonb;
 
 -- 3. Trigger para actualizar el campo updated_at automáticamente
 CREATE OR REPLACE FUNCTION public.handle_updated_at()

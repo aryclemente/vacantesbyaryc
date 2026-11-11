@@ -13,8 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=2.11.0">
-  <link rel="stylesheet" href="css/styles.css?v=2.11.0">
+  <link rel="stylesheet" href="css/tokens.css?v=2.12.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.12.0">
 </head>
 <body class="auth-guest">
   <!-- Accesibilidad: Enlace de salto rápido al contenido principal -->
@@ -379,20 +379,6 @@
     </div>
 
     <div class="filter-search-wrapper">
-      <select id="filterPriority" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;" aria-label="Filtrar por nivel de prioridad">
-        <option value="all">Todas las prioridades</option>
-        <option value="high">Prioridad Alta</option>
-        <option value="med">Prioridad Media</option>
-        <option value="low">Prioridad Baja</option>
-      </select>
-
-      <select id="filterModality" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.8125rem;" aria-label="Filtrar por modalidad de trabajo">
-        <option value="all">Todas las modalidades</option>
-        <option value="Remoto">Remoto</option>
-        <option value="Híbrido">Híbrido</option>
-        <option value="Presencial">Presencial</option>
-      </select>
-
       <div class="search-input-box">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"></circle>
@@ -401,15 +387,21 @@
         <input type="text" id="searchInput" placeholder="Buscar por puesto, empresa o tecnología..." aria-label="Buscar vacantes por puesto, empresa o tecnología">
       </div>
 
-      <button type="button" class="btn btn-outline btn-archived-toggle" id="btnToggleArchivedCol" title="Mostrar u ocultar carpeta de vacantes archivadas/descartadas" aria-label="Mostrar u ocultar vacantes archivadas" aria-pressed="false" style="padding: 0.5rem 0.85rem; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; flex-shrink: 0;">
-        <svg id="iconToggleArchived" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-          <line x1="2" y1="2" x2="22" y2="22"/>
-        </svg>
-        <span id="labelToggleArchived">Archivadas</span>
-      </button>
+      <div class="filter-actions-row">
+        <div id="activeColumnFiltersPill" class="active-filters-pill" style="display:none;">
+          <span id="activeColumnFiltersText">Filtros activos</span>
+          <button type="button" id="btnClearAllColumnFilters" title="Limpiar todos los filtros de columnas" aria-label="Limpiar filtros">&times;</button>
+        </div>
+        <button type="button" class="btn btn-outline btn-archived-toggle" id="btnToggleArchivedCol" title="Mostrar u ocultar carpeta de vacantes archivadas/descartadas" aria-label="Mostrar u ocultar vacantes archivadas" aria-pressed="false">
+          <svg id="iconToggleArchived" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+            <line x1="2" y1="2" x2="22" y2="22"/>
+          </svg>
+          <span id="labelToggleArchived">Archivadas</span>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -432,12 +424,42 @@
         <table class="data-table" id="vacanciesTable">
           <thead>
             <tr>
-              <th>Empresa</th>
-              <th>Puesto</th>
-              <th>Modalidad</th>
-              <th>Estado</th>
-              <th>Prioridad</th>
-              <th>Fecha</th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="empresa" aria-haspopup="true">
+                  <span>Empresa</span>
+                  <span class="th-filter-ind" data-ind="empresa">▾</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="puesto" aria-haspopup="true">
+                  <span>Puesto</span>
+                  <span class="th-filter-ind" data-ind="puesto">▾</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="modalidad" aria-haspopup="true">
+                  <span>Modalidad</span>
+                  <span class="th-filter-ind" data-ind="modalidad">▾</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="estado" aria-haspopup="true">
+                  <span>Estado</span>
+                  <span class="th-filter-ind" data-ind="estado">▾</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="prioridad" aria-haspopup="true">
+                  <span>Prioridad</span>
+                  <span class="th-filter-ind" data-ind="prioridad">▾</span>
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-filter-btn" data-col-filter="fecha" aria-haspopup="true">
+                  <span>Fecha</span>
+                  <span class="th-filter-ind" data-ind="fecha">▾</span>
+                </button>
+              </th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -446,6 +468,7 @@
           </tbody>
         </table>
       </div>
+      <div id="tableColumnFilterPopover" class="col-filter-popover" style="display:none;" role="dialog" aria-label="Filtro y orden de columna"></div>
     </div>
 
     <!-- View 3: Smart Intake (AI Multimodal) -->
@@ -2001,12 +2024,12 @@
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <!-- Scripts -->
-  <script src="js/supabase-client.js?v=2.11.0"></script>
-  <script src="js/storage.js?v=2.11.0"></script>
-  <script src="js/ai-parser.js?v=2.11.0"></script>
-  <script src="js/job-radar.js?v=2.11.0"></script>
-  <script src="js/onboarding-tour.js?v=2.11.0"></script>
-  <script src="js/app.js?v=2.11.0"></script>
+  <script src="js/supabase-client.js?v=2.12.0"></script>
+  <script src="js/storage.js?v=2.12.0"></script>
+  <script src="js/ai-parser.js?v=2.12.0"></script>
+  <script src="js/job-radar.js?v=2.12.0"></script>
+  <script src="js/onboarding-tour.js?v=2.12.0"></script>
+  <script src="js/app.js?v=2.12.0"></script>
 </body>
 </html>
 
