@@ -1,11 +1,11 @@
 /**
- * onboarding-tour.js - Controlador del Tutorial Interactivo de 7 Pasos
+ * onboarding-tour.js - Controlador del Tutorial Interactivo de 8 Pasos
  * Guía al nuevo usuario después de autenticarse a través de todo el flujo de Vacantes by AryC.
  */
 
 class OnboardingTourController {
   constructor() {
-    this.totalSteps = 7;
+    this.totalSteps = 8;
     this.currentStep = 1;
     this.isActive = false;
     this.highlightedEls = [];
@@ -15,14 +15,13 @@ class OnboardingTourController {
     this.steps = [
       {
         step: 1,
-        badge: 'Paso 1 de 7 • Tu Base',
+        badge: 'Paso 1 de 8 • Tu Base',
         title: '1. Rellena tu Perfil Profesional',
-        description: 'Sube tu CV en PDF, Markdown o TXT (o completa tus datos manualmente). Esta información alimenta el cálculo de compatibilidad ATS y la generación de CVs.',
-        hint: 'Haz clic en "Guardar Perfil" al terminar para avanzar automáticamente al siguiente paso.',
+        description: 'Sube tu CV en PDF, Markdown o TXT (o completa tus datos, formación académica y emoji de perfil). Esta información alimenta el cálculo de compatibilidad ATS y tus CVs.',
+        hint: 'Haz clic en "Guardar Perfil" al terminar, o pulsa "Siguiente →" para cerrar esta ventana y pasar a tus API Keys.',
         primaryBtnText: 'Abrir Mi Perfil',
         highlights: ['#btnOpenProfileModal'],
-        onEnter: (ctx) => {
-          // Si aún no está abierto el modal de perfil, abrirlo para facilitar el paso 1
+        onEnter: () => {
           const profileModal = document.getElementById('profileModal');
           if (profileModal && !profileModal.classList.contains('open')) {
             if (typeof window.openProfileModal === 'function') {
@@ -38,9 +37,28 @@ class OnboardingTourController {
       },
       {
         step: 2,
-        badge: 'Paso 2 de 7 • Ingesta Inteligente',
-        title: '2. Smart Intake o Nueva Vacante',
-        description: '¿Encontraste una oferta interesante? Pega el texto, URL o captura de pantalla aquí en Smart Intake (o usa "+ Nueva Vacante") para que la IA extraiga empresa, puesto, salario y requisitos.',
+        badge: 'Paso 2 de 8 • Potencia IA',
+        title: '2. Rellena la sección de tus API Keys',
+        description: 'Abre Configuración (⚙️) y agrega tu API Key favorita (Google Gemini, OpenAI o Claude) para desbloquear análisis ATS profundos, extracción multimodal en Smart Intake y adaptación avanzada de CVs.',
+        hint: 'También puedes descargar un respaldo JSON de tus vacantes desde allí. Guarda tu clave o continúa al paso 3.',
+        primaryBtnText: 'Configurar API Keys',
+        highlights: ['#btnSettings'],
+        onEnter: (ctx) => {
+          const settingsBtn = document.getElementById('btnSettings');
+          if (settingsBtn) {
+            settingsBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        },
+        onPrimaryAction: () => {
+          const settingsBtn = document.getElementById('btnSettings');
+          if (settingsBtn) settingsBtn.click();
+        }
+      },
+      {
+        step: 3,
+        badge: 'Paso 3 de 8 • Ingesta Inteligente',
+        title: '3. Smart Intake o Nueva Vacante',
+        description: '¿Encontraste una oferta interesante? Pega el texto, URL o captura de pantalla aquí en Smart Intake (o usa "+ Nueva Vacante") para que la IA extraiga empresa, puesto, salario y prioridad automática.',
         hint: 'Puedes probar pegando una vacante o continuar para descubrir el Radar de Empleos.',
         primaryBtnText: 'Ir a Smart Intake',
         highlights: ['#btnOpenIntake', '[data-view="intake"]', '#intakeDropzone'],
@@ -54,10 +72,10 @@ class OnboardingTourController {
         }
       },
       {
-        step: 3,
-        badge: 'Paso 3 de 7 • Descubrimiento',
-        title: '3. Explora el Radar de Empleos',
-        description: 'Busca ofertas reales en Remoto, España y LATAM. Cada tarjeta calcula automáticamente tu Score de Compatibilidad ATS (%) frente a tu perfil.',
+        step: 4,
+        badge: 'Paso 4 de 8 • Descubrimiento',
+        title: '4. Explora el Radar de Empleos',
+        description: 'Busca ofertas reales activas y verificadas en tiempo real. Cada tarjeta calcula automáticamente tu Score de Compatibilidad ATS (%) frente a tu perfil.',
         hint: 'Haz clic en "+ Guardar en Kanban" sobre tu empleo ideal para avanzar al tablero principal.',
         primaryBtnText: 'Buscar en Radar',
         highlights: ['[data-view="jobsearch"]', '#btnRadarSearch'],
@@ -71,10 +89,10 @@ class OnboardingTourController {
         }
       },
       {
-        step: 4,
-        badge: 'Paso 4 de 7 • Gestión y Estrategia',
-        title: '4. Tablero Kanban, Vista Lista y Asesor IA',
-        description: 'Organiza tus postulaciones arrastrando tarjetas en el Tablero Kanban o revisándolas en Vista Lista. Además, el botón "Asesor IA ATS" analiza tu embudo y redacta mensajes para reclutadores.',
+        step: 5,
+        badge: 'Paso 5 de 8 • Gestión y Estrategia',
+        title: '5. Tablero Kanban, Vista Lista y Asesor IA',
+        description: 'Organiza tus postulaciones arrastrando tarjetas en el Tablero Kanban o filtrando por columnas en Vista Lista. El botón flotante "Asesor IA" analiza tu embudo en cualquier momento.',
         hint: 'Alterna entre Kanban y Vista Lista o abre el Asesor IA en la esquina inferior derecha.',
         primaryBtnText: 'Abrir Asesor IA',
         highlights: ['[data-view="kanban"]', '[data-view="list"]', '#btnFloatingCopilot'],
@@ -87,9 +105,9 @@ class OnboardingTourController {
         }
       },
       {
-        step: 5,
-        badge: 'Paso 5 de 7 • CV a la Medida',
-        title: '5. Entra en la Vacante y Adapta tu CV',
+        step: 6,
+        badge: 'Paso 6 de 8 • CV a la Medida',
+        title: '6. Entra en la Vacante y Adapta tu CV',
         description: 'Haz clic en cualquier vacante del tablero para abrir su ficha, o entra aquí al Generador CV, selecciona tu vacante, adapta el contenido con IA y descarga tu PDF optimizado para ATS.',
         hint: 'Pulsa "Descargar PDF" cuando tu currículum esté listo para pasar a los correos y cartas.',
         primaryBtnText: 'Ir a Generador CV',
@@ -104,9 +122,9 @@ class OnboardingTourController {
         }
       },
       {
-        step: 6,
-        badge: 'Paso 6 de 7 • Contacto Efectivo',
-        title: '6. Correos y Cartas de Presentación',
+        step: 7,
+        badge: 'Paso 7 de 8 • Contacto Efectivo',
+        title: '7. Correos y Cartas de Presentación',
         description: 'Ya con tu CV descargado, genera una Carta de Presentación personalizada y un Email de Postulación listo para copiar y enviar a los reclutadores.',
         hint: 'Prueba abrir cualquiera de los dos generadores debajo de la barra del CV.',
         primaryBtnText: 'Generar Email de Postulación',
@@ -121,9 +139,9 @@ class OnboardingTourController {
         }
       },
       {
-        step: 7,
-        badge: 'Paso 7 de 7 • Cierre Exitoso',
-        title: '7. Sesión de Entrevistas con IA',
+        step: 8,
+        badge: 'Paso 8 de 8 • Cierre Exitoso',
+        title: '8. Sesión de Entrevistas con IA',
         description: 'Prepárate para destacar antes de la llamada: genera preguntas frecuentes técnicas y de RRHH según la vacante y practica en el simulador de entrevista interactivo.',
         hint: '¡Último paso! Puedes abrir el simulador ahora o finalizar el tutorial.',
         primaryBtnText: 'Abrir Simulador de Entrevista',
@@ -243,27 +261,52 @@ class OnboardingTourController {
       }
     });
 
-    window.addEventListener('aryc:vacancy-added', () => {
+    window.addEventListener('aryc:settings-saved', () => {
       if (!this.isActive) return;
       if (this.currentStep === 2) {
         if (typeof this.callbacks?.showToast === 'function') {
-          this.callbacks.showToast('¡Primera vacante guardada! Ahora conoce el Radar de Empleos.', 'success');
+          this.callbacks.showToast('¡Configuración de IA guardada! Ahora conoce Smart Intake.', 'success');
         }
         this.goToStep(3);
-      } else if (this.currentStep === 3) {
+      }
+    });
+
+    window.addEventListener('aryc:vacancy-added', () => {
+      if (!this.isActive) return;
+      if (this.currentStep === 3) {
+        if (typeof this.callbacks?.showToast === 'function') {
+          this.callbacks.showToast('¡Primera vacante guardada! Ahora conoce el Radar de Empleos.', 'success');
+        }
+        this.goToStep(4);
+      } else if (this.currentStep === 4) {
         if (typeof this.callbacks?.showToast === 'function') {
           this.callbacks.showToast('¡Excelente! Vacante añadida. Veamos tu Tablero Kanban y Asesor IA.', 'success');
         }
-        this.goToStep(4);
+        this.goToStep(5);
       }
     });
 
     window.addEventListener('aryc:cv-downloaded', () => {
       if (!this.isActive) return;
-      if (this.currentStep === 5) {
-        this.goToStep(6);
+      if (this.currentStep === 6) {
+        this.goToStep(7);
       }
     });
+  }
+
+  closeOpenModalsForStep(stepNumber) {
+    if (stepNumber !== 1) {
+      const profileModal = document.getElementById('profileModal');
+      if (profileModal && profileModal.classList.contains('open')) {
+        profileModal.classList.remove('open');
+      }
+    }
+    if (stepNumber !== 2) {
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal && settingsModal.classList.contains('open')) {
+        settingsModal.classList.remove('open');
+      }
+    }
   }
 
   startIfNeeded() {
@@ -295,7 +338,7 @@ class OnboardingTourController {
     if (!hasProfileData) {
       initialStep = 1;
     } else if (initialStep === 1 && hasProfileData) {
-      initialStep = vacancies.length > 0 ? 4 : 2;
+      initialStep = vacancies.length > 0 ? 5 : 2;
     }
 
     this.startTour(initialStep, false);
@@ -319,6 +362,7 @@ class OnboardingTourController {
     const def = this.steps.find(s => s.step === clamped);
     if (!def) return;
 
+    this.closeOpenModalsForStep(clamped);
     this.clearHighlights();
     if (typeof def.onEnter === 'function') {
       try {

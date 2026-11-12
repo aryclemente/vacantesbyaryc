@@ -12,420 +12,64 @@
 (function () {
   'use strict';
 
-  // =========================================================================
-  // CV Maestro de Referencia para Cálculo de Compatibilidad ATS (0 Tokens)
-  // =========================================================================
-  const ARIANNA_PROFILE_KEYWORDS = {
-    // Tecnologías principales y peso
-    'laravel': 18,
-    'php': 16,
-    'react': 16,
-    'javascript': 14,
-    'js': 12,
-    'wordpress': 15,
-    'woocommerce': 14,
-    'moodle': 16,
-    'mysql': 12,
-    'postgresql': 12,
-    'postgres': 12,
-    'sql': 10,
-    'python': 10,
-    'tailwind': 8,
-    'tailwindcss': 8,
-    'html': 8,
-    'css': 8,
-    'git': 8,
-    'github': 8,
-    'supabase': 10,
-    'docker': 8,
-    'rest': 12,
-    'api': 12,
-    'apis': 12,
-    'pasarelas de pago': 16,
-    'pagos': 12,
-    'payment': 14,
-    'stripe': 12,
-    'gemini': 12,
-    'ia': 10,
-    'ai': 10,
-    'chatbots': 12,
-    'core web vitals': 10,
-    'wpo': 10,
-    'seo': 8,
-    'full stack': 15,
-    'backend': 14,
-    'frontend': 14,
-    'remoto': 10,
-    'remote': 10,
-    'lms': 14,
-    'ojs': 12
-  };
+  const RADAR_CACHE_KEY = 'aryc_radar_verified_jobs_v2';
+  const RADAR_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
 
-  // =========================================================================
-  // Catálogo Curado de Alta Compatibilidad (25 Vacantes Reales España, Remoto y LATAM)
-  // =========================================================================
-  const CURATED_JOBS = [
-    {
-      id: 'radar-cabify-fs',
-      empresa: 'Cabify',
-      puesto: 'Senior Full Stack Engineer (PHP / Laravel & React)',
-      modalidad: 'Remoto',
-      ubicacion: 'España (Madrid / Remoto)',
-      mercado: 'spain',
-      salario: '€45,000 - €55,000 / año',
-      salarioNum: 50000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'linkedin',
-      plataformaNombre: 'Cabify Careers',
-      url: 'https://cabify.careers/jobs/senior-full-stack-engineer-spain',
-      fecha: '2026-11-03',
-      descripcion: 'Buscamos un Ingeniero Full Stack para escalar nuestros servicios de movilidad y pasarelas de pago. Desarrollo de APIs en Laravel/PHP y aplicaciones frontend con React.',
-      requisitos: ['PHP 8+', 'Laravel', 'React', 'REST APIs', 'MySQL / PostgreSQL', 'Docker', 'Pasarelas de Pago'],
-      destacado: true
-    },
-    {
-      id: 'radar-glovo-backend',
-      empresa: 'Glovo',
-      puesto: 'Backend Developer - Core Marketplace & Payments',
-      modalidad: 'Híbrido / Remoto',
-      ubicacion: 'Barcelona / Remoto España',
-      mercado: 'spain',
-      salario: '€42,000 - €50,000 / año',
-      salarioNum: 46000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'infojobs',
-      plataformaNombre: 'Glovo Careers',
-      url: 'https://careers.glovoapp.com/job/senior-backend-engineer-payments-barcelona',
-      fecha: '2026-11-02',
-      descripcion: 'Integración en el equipo de transacciones y cobros digitales. Arquitectura de microservicios, alta concurrencia y optimización de base de datos relacionales.',
-      requisitos: ['PHP', 'Laravel / Symfony', 'PostgreSQL', 'APIs Restful', 'Webhooks', 'Git', 'Testing'],
-      destacado: true
-    },
-    {
-      id: 'radar-automattic-wp',
-      empresa: 'Automattic Partner Agency',
-      puesto: 'Senior WordPress & WooCommerce Engineer',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Global (España / Latam)',
-      mercado: 'remote',
-      salario: '$4,000 - $5,500 USD / mes',
-      salarioNum: 54000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'remoteok',
-      plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-jobs/senior-wordpress-engineer',
-      fecha: '2026-11-04',
-      descripcion: 'Desarrollo de plugins a medida, integración de pasarelas de cobro multimoneda (Stripe/PayPal), optimización de Core Web Vitals y arquitecturas Headless WP.',
-      requisitos: ['WordPress', 'WooCommerce', 'PHP', 'JavaScript', 'Custom Plugins', 'Core Web Vitals', 'MySQL'],
-      destacado: true
-    },
-    {
-      id: 'radar-packlink-fullstack',
-      empresa: 'Packlink (Auctane)',
-      puesto: 'Full Stack PHP & React Developer',
-      modalidad: 'Remoto',
-      ubicacion: 'Madrid / Remoto España',
-      mercado: 'spain',
-      salario: '€38,000 - €46,000 / año',
-      salarioNum: 42000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'linkedin',
-      plataformaNombre: 'Auctane Careers',
-      url: 'https://boards.greenhouse.io/auctane/jobs/full-stack-engineer-php-react',
-      fecha: '2026-11-01',
-      descripcion: 'Desarrollo y mantenimiento de la plataforma líder de logística y envíos para e-commerce. Integraciones API con tiendas online y pasarelas de pago.',
-      requisitos: ['PHP 8', 'React', 'TypeScript', 'MySQL', 'Docker', 'REST APIs', 'Git'],
-      destacado: false
-    },
-    {
-      id: 'radar-platzi-fullstack',
-      empresa: 'Platzi',
-      puesto: 'Full Stack Web Developer (React / Node / Python)',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Latinoamérica',
-      mercado: 'remote',
-      salario: '$2,500 - $3,500 USD / mes',
-      salarioNum: 36000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'getonbrd',
-      plataformaNombre: 'Get on Board',
-      url: 'https://www.getonbrd.com/jobs/programming/full-stack-developer-platzi-remote',
-      fecha: '2026-11-03',
-      descripcion: 'Buscamos desarrolladores apasionados por la educación tecnológica para construir experiencias de usuario rápidas y módulos interactivos con IA.',
-      requisitos: ['React', 'JavaScript', 'Python', 'PostgreSQL', 'APIs', 'Git', 'IA Integrations'],
-      destacado: true
-    },
-    {
-      id: 'radar-santander-pagonxt',
-      empresa: 'PagoNxt (Banco Santander)',
-      puesto: 'Especialista Integración Pasarelas de Pago & APIs',
-      modalidad: 'Híbrido / Remoto',
-      ubicacion: 'Madrid, España',
-      mercado: 'spain',
-      salario: '€42,000 - €52,000 / año',
-      salarioNum: 47000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'tecnoempleo',
-      plataformaNombre: 'Santander Jobs',
-      url: 'https://www.santander.com/es/trabaja-con-nosotros/ofertas/especialista-integracion-pasarelas-pagonxt',
-      fecha: '2026-11-02',
-      descripcion: 'Diseño e integración de APIs transaccionales bancarias, reconciliación en tiempo real y protocolos de seguridad financiera C2P / tarjetas.',
-      requisitos: ['Pasarelas de Pago', 'PHP', 'Laravel / Spring', 'PostgreSQL', 'Seguridad Transaccional', 'Webhooks'],
-      destacado: true
-    },
-    {
-      id: 'radar-factorial-backend',
-      empresa: 'Factorial HR',
-      puesto: 'Software Engineer - Backend (PHP / PostgreSQL)',
-      modalidad: 'Remoto',
-      ubicacion: 'Barcelona / Remoto España',
-      mercado: 'spain',
-      salario: '€40,000 - €48,000 / año',
-      salarioNum: 44000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'linkedin',
-      plataformaNombre: 'Factorial Jobs',
-      url: 'https://jobs.lever.co/factorial/software-engineer-backend-php',
-      fecha: '2026-11-03',
-      descripcion: 'Desarrollo de módulos SaaS para gestión de talento humano, nómina y flujos automatizados. Fuerte enfoque en buenas prácticas y testing.',
-      requisitos: ['PHP', 'PostgreSQL', 'Arquitectura SaaS', 'REST APIs', 'Git', 'Clean Architecture'],
-      destacado: false
-    },
-    {
-      id: 'radar-viu-moodle',
-      empresa: 'Universidad Internacional de Valencia (VIU)',
-      puesto: 'Especialista Plataformas E-Learning & Moodle LMS',
-      modalidad: 'Remoto',
-      ubicacion: 'Valencia / Remoto España',
-      mercado: 'spain',
-      salario: '€32,000 - €38,000 / año',
-      salarioNum: 35000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'infojobs',
-      plataformaNombre: 'Empleo VIU',
-      url: 'https://empleo.universidadviu.com/ofertas/especialista-moodle-elearning',
-      fecha: '2026-11-01',
-      descripcion: 'Mantenimiento, desarrollo de extensiones personalizadas para Moodle LMS, gestión de base de datos MySQL y soporte técnico a campus universitario.',
-      requisitos: ['Moodle LMS', 'PHP', 'MySQL', 'JavaScript', 'SCORM', 'Gestión de Servidores Educativos'],
-      destacado: true
-    },
-    {
-      id: 'radar-bodas-knot',
-      empresa: 'The Knot Worldwide (Bodas.net)',
-      puesto: 'Frontend / Full Stack Web Engineer',
-      modalidad: 'Remoto',
-      ubicacion: 'Barcelona / Remoto España',
-      mercado: 'spain',
-      salario: '€36,000 - €44,000 / año',
-      salarioNum: 40000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'infojobs',
-      plataformaNombre: 'The Knot Careers',
-      url: 'https://careers.theknotww.com/jobs/full-stack-web-engineer-barcelona',
-      fecha: '2026-11-02',
-      descripcion: 'Optimización de Core Web Vitals, interfaces modernas con React, componentes interactivos y servicios backend en PHP para millones de usuarios mensuales.',
-      requisitos: ['React', 'JavaScript (ES6+)', 'PHP', 'HTML5/CSS3', 'Core Web Vitals', 'Git'],
-      destacado: false
-    },
-    {
-      id: 'radar-banesco-latam',
-      empresa: 'Banesco Internacional',
-      puesto: 'Ingeniero de Integraciones Web y Pasarelas de Pago',
-      modalidad: 'Remoto',
-      ubicacion: 'Latinoamérica / Caracas / Panamá',
-      mercado: 'latam',
-      salario: '$1,800 - $2,800 USD / mes',
-      salarioNum: 27000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'computrabajo',
-      plataformaNombre: 'Banesco Empleos',
-      url: 'https://banesco.evaluar.com/job/ingeniero-integraciones-web-pasarelas',
-      fecha: '2026-11-04',
-      descripcion: 'Implementación de módulos web transaccionales, soporte a canales de pago digital, C2P, Pago Móvil y automatización de reportes bancarios.',
-      requisitos: ['PHP / Laravel', 'Pasarelas de Pago', 'Bases de Datos SQL', 'Seguridad Transaccional', 'Webhooks'],
-      destacado: true
-    },
-    {
-      id: 'radar-mercadolibre-fe',
-      empresa: 'Mercado Libre',
-      puesto: 'Software Engineer Frontend (React / Web Performance)',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Latam',
-      mercado: 'remote',
-      salario: '$2,800 - $3,800 USD / mes',
-      salarioNum: 40000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'getonbrd',
-      plataformaNombre: 'Mercado Libre Careers',
-      url: 'https://mercadolibre.eightfold.ai/careers/job/senior-software-engineer-frontend',
-      fecha: '2026-11-03',
-      descripcion: 'Desarrollo de módulos e-commerce de alta velocidad, componentes modulares en React y optimización del embudo de compra y checkout.',
-      requisitos: ['React', 'TypeScript', 'TailwindCSS', 'Web Performance (WPO)', 'Git', 'REST APIs'],
-      destacado: false
-    },
-    {
-      id: 'radar-awesome-motive-wp',
-      empresa: 'Awesome Motive (WPBeginner / OptinMonster)',
-      puesto: 'WordPress Core & Plugin Developer',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Global (100% Anywhere)',
-      mercado: 'remote',
-      salario: '$3,500 - $5,000 USD / mes',
-      salarioNum: 51000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'remoteok',
-      plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-jobs/wordpress-core-plugin-developer',
-      fecha: '2026-11-04',
-      descripcion: 'Creación y mantenimiento de plugins usados por millones de sitios web. Código limpio, compatibilidad con Gutenberg y estándares de WordPress VIP.',
-      requisitos: ['WordPress', 'PHP 8+', 'JavaScript', 'Gutenberg Blocks', 'MySQL', 'Git'],
-      destacado: true
-    },
-    {
-      id: 'radar-inetum-moodle',
-      empresa: 'Inetum España',
-      puesto: 'Consultor / Desarrollador E-Learning Moodle LMS',
-      modalidad: 'Remoto',
-      ubicacion: 'Madrid / Remoto España',
-      mercado: 'spain',
-      salario: '€30,000 - €38,000 / año',
-      salarioNum: 34000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'tecnoempleo',
-      plataformaNombre: 'Inetum Careers',
-      url: 'https://www.inetum.com/es/carreras/ofertas/consultor-desarrollador-moodle-lms',
-      fecha: '2026-11-02',
-      descripcion: 'Diseño e implementación de soluciones formativas en Moodle para grandes clientes corporativos y administraciones públicas en España.',
-      requisitos: ['Moodle LMS', 'PHP', 'MySQL / PostgreSQL', 'Web Services Moodle', 'HTML5/CSS3'],
-      destacado: false
-    },
-    {
-      id: 'radar-pedidosya-fs',
-      empresa: 'PedidosYa',
-      puesto: 'Full Stack Web Developer (React / Node / APIs)',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Latinoamérica',
-      mercado: 'remote',
-      salario: '$2,400 - $3,200 USD / mes',
-      salarioNum: 33000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'getonbrd',
-      plataformaNombre: 'Get on Board',
-      url: 'https://www.getonbrd.com/jobs/programming/full-stack-web-developer-pedidosya',
-      fecha: '2026-11-03',
-      descripcion: 'Desarrollo de herramientas internas para comercios afiliados y gestión de catálogos web. Interfaces reactivas y servicios distribuidos.',
-      requisitos: ['React', 'JavaScript', 'Node.js', 'PostgreSQL', 'Docker', 'Git'],
-      destacado: false
-    },
-    {
-      id: 'radar-turing-laravel',
-      empresa: 'Turing Remote Network',
-      puesto: 'Remote Full Stack Laravel & React Developer',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Internacional / USA Client',
-      mercado: 'remote',
-      salario: '$3,500 - $5,500 USD / mes',
-      salarioNum: 54000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'linkedin',
-      plataformaNombre: 'Turing Jobs',
-      url: 'https://www.turing.com/jobs/remote-senior-full-stack-developer-laravel-react',
-      fecha: '2026-11-04',
-      descripcion: 'Asignación directa con clientes de EE.UU. y Europa. Desarrollo de arquitecturas web modernas basadas en Laravel y React con metodologías ágiles.',
-      requisitos: ['Laravel', 'PHP', 'React', 'REST APIs', 'MySQL', 'Inglés Técnico'],
-      destacado: true
-    },
-    {
-      id: 'radar-farmatodo-web',
-      empresa: 'Farmatodo',
-      puesto: 'Desarrollador Web E-Commerce & Pasarelas',
-      modalidad: 'Híbrido',
-      ubicacion: 'Caracas, Venezuela',
-      mercado: 'latam',
-      salario: '$1,800 - $2,500 USD / mes',
-      salarioNum: 25000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'computrabajo',
-      plataformaNombre: 'Farmatodo Empleos',
-      url: 'https://farmatodo.evaluar.com/job/desarrollador-full-stack-ecommerce',
-      fecha: '2026-11-01',
-      descripcion: 'Integración de servicios web transaccionales, portal de compras en línea, pasarelas de pago nacionales e internacionales y optimización WPO.',
-      requisitos: ['PHP / Laravel', 'JavaScript', 'Pasarelas de Pago', 'MySQL', 'Arquitectura Web', 'Git'],
-      destacado: false
-    },
-    {
-      id: 'radar-santillana-cms',
-      empresa: 'Grupo Santillana',
-      puesto: 'Desarrollador Web CMS Educativo (WordPress / LMS)',
-      modalidad: 'Remoto',
-      ubicacion: 'Madrid / Remoto España',
-      mercado: 'spain',
-      salario: '€30,000 - €36,000 / año',
-      salarioNum: 33000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'infojobs',
-      plataformaNombre: 'Santillana Talento',
-      url: 'https://santillana.com/es/trabaja-con-nosotros/desarrollador-edtech-moodle',
-      fecha: '2026-10-31',
-      descripcion: 'Desarrollo de portales educativos, personalización de plantillas y plugins en WordPress y conexión con plataformas de aula virtual.',
-      requisitos: ['WordPress', 'PHP', 'JavaScript', 'Moodle o LMS', 'HTML5/CSS3', 'SEO'],
-      destacado: false
-    },
-    {
-      id: 'radar-banco-mercantil-dev',
-      empresa: 'Banco Mercantil',
-      puesto: 'Analista Programador Web & APIs C2P',
-      modalidad: 'Híbrido / Presencial',
-      ubicacion: 'Caracas, Venezuela',
-      mercado: 'latam',
-      salario: 'Competitivo Sector Bancario',
-      salarioNum: 24000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'computrabajo',
-      plataformaNombre: 'Mercantil Talento',
-      url: 'https://mercantilbanco.evaluar.com/job/analista-programador-web-c2p',
-      fecha: '2026-11-02',
-      descripcion: 'Desarrollo e integración de soluciones API de recaudación bancaria C2P, validación de transacciones Pago Móvil y servicios empresariales.',
-      requisitos: ['APIs REST', 'PHP / Java', 'SQL Server / Oracle', 'Seguridad Bancaria', 'Webhooks'],
-      destacado: true
-    },
-    {
-      id: 'radar-adevinta-spain',
-      empresa: 'Adevinta Spain (Fotocasa, Habitaclia, InfoJobs)',
-      puesto: 'Full Stack Engineer (React & Microservicios)',
-      modalidad: 'Remoto',
-      ubicacion: 'Barcelona / Remoto España',
-      mercado: 'spain',
-      salario: '€44,000 - €54,000 / año',
-      salarioNum: 49000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'infojobs',
-      plataformaNombre: 'Adevinta Careers',
-      url: 'https://adevinta.com/careers/jobs/senior-full-stack-engineer-spain',
-      fecha: '2026-11-03',
-      descripcion: 'Desarrollo de productos digitales escalables para los mayores portales de empleo e inmobiliaria de España. Arquitectura distribuida y frontend reactivo.',
-      requisitos: ['React', 'JavaScript', 'Node.js / PHP', 'Docker', 'Testing', 'Git'],
-      destacado: false
-    },
-    {
-      id: 'radar-yoco-fintech',
-      empresa: 'Fintech Internacional (Yoco Partners)',
-      puesto: 'Payments Gateway Integration Specialist',
-      modalidad: 'Remoto',
-      ubicacion: 'Remoto Global (España / Latam)',
-      mercado: 'remote',
-      salario: '$3,800 - $5,000 USD / mes',
-      salarioNum: 52000,
-      tipo: 'Tiempo Completo',
-      plataforma: 'remoteok',
-      plataformaNombre: 'RemoteOK',
-      url: 'https://remoteok.com/remote-jobs/payments-gateway-integration-specialist',
-      fecha: '2026-11-04',
-      descripcion: 'Integración técnica de SDKs de cobro, conciliación bancaria, webhooks para comercio electrónico y plugins para plataformas WooCommerce/Shopify.',
-      requisitos: ['Pasarelas de Pago', 'PHP', 'WooCommerce', 'JavaScript', 'APIs Transaccionales', 'Webhooks'],
-      destacado: true
-    }
+  const SEARCH_URL_PATTERNS = [
+    /\/jobs\?(?:.*&)?(?:q|query|keywords|search)=/i,
+    /\/ofertas\?(?:.*&)?(?:q|query|palabra)=/i,
+    /\/search(?:\/|\?|$)/i,
+    /jobsearch/i,
+    /trabajo-de-/i,
+    /empleos-de-/i,
+    /linkedin\.com\/jobs\/search/i,
+    /indeed\.[a-z.]+\/jobs\?/i
   ];
+
+  function isDirectActiveVacancyUrl(rawUrl) {
+    if (!rawUrl || typeof rawUrl !== 'string') return false;
+    try {
+      const parsed = new URL(rawUrl.trim());
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+      if (!parsed.pathname || parsed.pathname === '/') return false;
+      if (SEARCH_URL_PATTERNS.some(re => re.test(rawUrl))) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function loadCachedVerifiedJobs() {
+    try {
+      const raw = localStorage.getItem(RADAR_CACHE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.jobs)) return [];
+      return parsed.jobs.filter(j => isDirectActiveVacancyUrl(j.url));
+    } catch {
+      return [];
+    }
+  }
+
+  function isRadarCacheFresh() {
+    try {
+      const raw = localStorage.getItem(RADAR_CACHE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return Boolean(parsed && parsed.timestamp && (Date.now() - parsed.timestamp) < RADAR_CACHE_TTL_MS && Array.isArray(parsed.jobs) && parsed.jobs.length > 0);
+    } catch {
+      return false;
+    }
+  }
+
+  function saveVerifiedJobsCache(jobs) {
+    try {
+      localStorage.setItem(RADAR_CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        jobs: jobs.slice(0, 60)
+      }));
+    } catch (e) {}
+  }
 
   // =========================================================================
   // Algoritmo Dinámico de Compatibilidad ATS (Multi-Usuario, 0 Tokens)
@@ -441,87 +85,61 @@
     return null;
   }
 
-  function getDynamicProfileKeywords() {
-    const profile = getActiveUserProfile();
-    const keywords = { ...ARIANNA_PROFILE_KEYWORDS };
-
-    if (!profile) return keywords;
-
-    // Si el perfil tiene habilidades personalizadas, las incorporamos con peso prioritario
-    if (Array.isArray(profile.habilidades) && profile.habilidades.length > 0) {
-      profile.habilidades.forEach(skill => {
-        if (!skill) return;
-        const s = String(skill).trim().toLowerCase();
-        if (s.length >= 2) {
-          keywords[s] = 16;
-        }
-      });
-    }
-
-    // Si tiene titular profesional, extraer palabras clave relevantes
-    if (profile.titular) {
-      const words = profile.titular.toLowerCase().split(/[\s,/-]+/).filter(w => w.length > 3);
-      words.forEach(w => {
-        if (!keywords[w]) keywords[w] = 14;
-      });
-    }
-
-    return keywords;
-  }
-
   function calculateAtsScore(job) {
-    let score = 55; // Base score
-    const textBlob = `${job.puesto} ${job.descripcion} ${(job.requisitos || []).join(' ')}`.toLowerCase();
-    const keywords = getDynamicProfileKeywords();
-
-    // Sumar puntos por palabras clave del perfil activo
-    for (const [kw, weight] of Object.entries(keywords)) {
-      if (textBlob.includes(kw)) {
-        score += (weight * 0.45);
-      }
+    const profile = getActiveUserProfile();
+    if (window.aiJobParser && typeof window.aiJobParser.computeProfileVacancyMatch === 'function') {
+      const res = window.aiJobParser.computeProfileVacancyMatch({
+        puesto: job.puesto,
+        requisitos: job.requisitos || [],
+        notas: job.descripcion || ''
+      }, profile);
+      return res.matchScore;
     }
 
-    // Boost por modalidad remota si coincide con preferencia o vacante
-    if (job.modalidad && job.modalidad.toLowerCase().includes('remoto')) score += 5;
+    const skills = Array.isArray(profile?.habilidades) ? profile.habilidades.filter(Boolean) : [];
+    if (skills.length === 0) return 0;
 
-    // Normalizar entre 68% y 98%
-    score = Math.min(98, Math.max(68, Math.round(score)));
-    return score;
+    const textBlob = `${job.puesto} ${job.descripcion || ''} ${(job.requisitos || []).join(' ')}`.toLowerCase();
+    let hits = 0;
+    skills.forEach(sk => {
+      if (textBlob.includes(String(sk).trim().toLowerCase())) hits++;
+    });
+    return Math.min(100, Math.round((hits / Math.min(skills.length, 6)) * 100));
   }
 
   // =========================================================================
   // Estado del Módulo
   // =========================================================================
   const state = {
-    jobs: [...CURATED_JOBS],
-    filteredJobs: [...CURATED_JOBS],
+    jobs: loadCachedVerifiedJobs(),
+    filteredJobs: [],
     selectedJobIdsForCompare: new Set(),
     activeFilterRole: 'all',
     activeFilterMarket: 'all',
     activeFilterPlatform: 'all',
     activeFilterType: 'all',
     activeFilterModality: 'all',
-    filterMatchHigh: true,
-    filterMatchMed: true,
+    activeMatchFilter: 'all', // all, high (>=55), med (10-54)
     searchKeyword: '',
     sortBy: 'match', // match, recent, salary
+    isLoadingLive: false,
     useLocalModeOnly: false,
     chatMessages: [
       {
         sender: 'assistant',
-        text: '¡Hola! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar cualquier vacante, comparar opciones (por ejemplo, **Remoto Internacional vs España**) o decirte en cuál tienes mayor probabilidad de avanzar según tu CV. ¿Por dónde empezamos?'
+        text: '¡Hola! 👋 Soy tu **Asesor de Reclutamiento IA**.\n\nPuedo analizar tus **vacantes guardadas en el Kanban** o evaluar las ofertas verificadas del **Radar de Empleos**. ¿Por dónde empezamos?'
       }
     ]
   };
 
   function recalculateAllScores() {
+    state.jobs = state.jobs.filter(j => isDirectActiveVacancyUrl(j.url));
     state.jobs.forEach(j => {
       j.matchScore = calculateAtsScore(j);
-      j.isTopMatch = j.matchScore >= 85;
+      j.isTopMatch = j.matchScore >= 55;
     });
   }
 
-  // Pre-calcular scores ATS iniciales
   recalculateAllScores();
 
   // =========================================================================
@@ -529,10 +147,10 @@
   // =========================================================================
   function render() {
     applyFilters();
-    renderFacets();
     renderCards();
     updateResultsCount();
     renderCompareBar();
+    updateAtsBadges();
   }
 
   function applyFilters() {
@@ -608,12 +226,11 @@
       }
 
       // 7. Match ATS
-      const score = job.matchScore || 75;
-      if (!state.filterMatchHigh && score >= 85) return false;
-      if (!state.filterMatchMed && score >= 70 && score < 85) return false;
-      if (!state.filterMatchHigh && !state.filterMatchMed) return false;
+      const score = job.matchScore || 0;
+      if (state.activeMatchFilter === 'high' && score < 55) return false;
+      if (state.activeMatchFilter === 'med' && (score < 10 || score >= 55)) return false;
 
-      return true;
+      return isDirectActiveVacancyUrl(job.url);
     });
 
     // Ordenamiento
@@ -646,7 +263,7 @@
     gridEl.innerHTML = state.filteredJobs.map(job => {
       const isSelectedForCompare = state.selectedJobIdsForCompare.has(job.id);
       const isAlreadyImported = savedUrlsOrNames.has(job.url.toLowerCase()) || savedUrlsOrNames.has((job.puesto + ' ' + job.empresa).toLowerCase());
-      const matchBadgeClass = job.matchScore >= 85 ? 'high' : 'med';
+      const matchBadgeClass = job.matchScore >= 55 ? 'high' : 'med';
       const sourceClass = job.plataforma || 'generic';
 
       return `
@@ -676,7 +293,7 @@
             <span class="match-badge ${matchBadgeClass}">
               ⭐ ${job.matchScore}% Match ATS
             </span>
-            ${job.isTopMatch ? '<span class="boost-badge">🔥 TOP FIT ARY</span>' : ''}
+            ${job.isTopMatch ? '<span class="boost-badge">🔥 TOP MATCH</span>' : ''}
             <span class="source-badge ${sourceClass}">
               ${escapeHtml(job.plataformaNombre)}
             </span>
@@ -1154,68 +771,132 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const job = state.jobs.find(j => j.id === jobId);
     if (!job) return;
 
-    switchSidebarTab('copilot');
-
     const prompt = `Analiza la vacante de "${job.puesto}" en ${job.empresa}. ¿Cuáles son mis ventajas clave y qué debo destacar en mi postulación?`;
-    handleCopilotUserPrompt(prompt);
+    openAtsCopilotDrawer(prompt, null, 'radar');
   }
 
   // =========================================================================
-  // Live Job Feeds (Optimizado con Caching de 12h y Fallback)
+  // Live Job Feeds (Verificados y Activos vía Serverless / APIs Públicas)
   // =========================================================================
-  async function refreshLiveJobs() {
+  async function fetchDirectPublicFeedsFallback() {
+    const jobs = [];
+    try {
+      const [remRes, arbRes] = await Promise.allSettled([
+        fetch('https://remotive.com/api/remote-jobs?limit=20', { headers: { Accept: 'application/json' } }),
+        fetch('https://www.arbeitnow.com/api/job-board-api', { headers: { Accept: 'application/json' } })
+      ]);
+
+      if (remRes.status === 'fulfilled' && remRes.value.ok) {
+        const d = await remRes.value.json();
+        if (Array.isArray(d?.jobs)) {
+          d.jobs.forEach(item => {
+            if (!isDirectActiveVacancyUrl(item.url)) return;
+            jobs.push({
+              id: `remotive-${item.id}`,
+              empresa: item.company_name || 'Empresa Remota',
+              puesto: item.title,
+              modalidad: 'Remoto',
+              ubicacion: item.candidate_required_location || 'Remoto Global',
+              mercado: /spain|españa|madrid|barcelona/i.test(item.candidate_required_location || '') ? 'spain' : 'remote',
+              salario: item.salary || '',
+              salarioNum: 0,
+              tipo: item.job_type === 'full_time' ? 'Tiempo Completo' : 'Remoto',
+              plataforma: 'remotive',
+              plataformaNombre: 'Remotive',
+              url: item.url,
+              fecha: item.publication_date ? item.publication_date.split('T')[0] : new Date().toISOString().split('T')[0],
+              descripcion: String(item.description || '').replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) + '...',
+              requisitos: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 5) : ['Remoto', 'Tech']
+            });
+          });
+        }
+      }
+
+      if (arbRes.status === 'fulfilled' && arbRes.value.ok) {
+        const d = await arbRes.value.json();
+        if (Array.isArray(d?.data)) {
+          d.data.slice(0, 15).forEach(item => {
+            if (!isDirectActiveVacancyUrl(item.url)) return;
+            const loc = item.location || (item.remote ? 'Remoto Europa' : 'Europa');
+            jobs.push({
+              id: `arbeitnow-${item.slug}`,
+              empresa: item.company_name || 'Empresa Tech',
+              puesto: item.title,
+              modalidad: item.remote ? 'Remoto' : 'Híbrido',
+              ubicacion: loc,
+              mercado: /spain|españa|madrid|barcelona/i.test(loc) ? 'spain' : (item.remote ? 'remote' : 'remote'),
+              salario: '',
+              salarioNum: 0,
+              tipo: 'Tiempo Completo',
+              plataforma: 'arbeitnow',
+              plataformaNombre: 'Arbeitnow',
+              url: item.url,
+              fecha: item.created_at ? new Date(item.created_at * 1000).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              descripcion: String(item.description || '').replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) + '...',
+              requisitos: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 5) : ['Software', 'Tech']
+            });
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Error en fallback público del radar:', e);
+    }
+    return jobs;
+  }
+
+  async function refreshLiveJobs(silent = false) {
+    if (state.isLoadingLive) return;
+    state.isLoadingLive = true;
     const btnRefresh = document.getElementById('btnRefreshRadarJobs');
     if (btnRefresh) {
       btnRefresh.disabled = true;
       btnRefresh.innerHTML = `
         <span class="live-pulse" style="width:6px; height:6px;"><span class="live-pulse-core" style="background:var(--primary);"></span></span>
-        <span>Consultando APIs...</span>
+        <span>Verificando enlaces...</span>
       `;
     }
 
     try {
-      // Usar feed público de desarrollo web sin tokens (Remotive API)
-      const res = await fetch('https://remotive.com/api/remote-jobs?category=software-dev&limit=12', {
-        headers: { 'Accept': 'application/json' }
-      });
+      let verifiedJobs = [];
 
-      if (res.ok) {
+      // 1. Intentar Netlify Function que verifica HTTP 200/activos y filtra rutas rotas/búsquedas
+      let res = await fetch('/api/radar-jobs').catch(() => null);
+      if (!res || !res.ok) {
+        res = await fetch('/.netlify/functions/radar-jobs').catch(() => null);
+      }
+
+      if (res && res.ok) {
         const data = await res.json();
-        if (data && data.jobs && Array.isArray(data.jobs)) {
-          const liveTransformed = data.jobs.map(item => {
-            const tempJob = {
-              id: 'remotive-' + item.id,
-              empresa: item.company_name || 'Empresa Internacional',
-              puesto: item.title,
-              modalidad: 'Remoto',
-              ubicacion: item.candidate_required_location || 'Remoto Global',
-              mercado: 'remote',
-              salario: item.salary || '$3,000 - $4,500 USD',
-              salarioNum: 40000,
-              tipo: item.job_type === 'full_time' ? 'Tiempo Completo' : 'Remoto',
-              plataforma: 'remoteok',
-              plataformaNombre: 'Remotive Feed',
-              url: item.url,
-              fecha: item.publication_date ? item.publication_date.split('T')[0] : '2026-11-04',
-              descripcion: (item.description || '').replace(/<[^>]*>?/gm, '').substring(0, 190) + '...',
-              requisitos: Array.isArray(item.tags) && item.tags.length > 0 ? item.tags.slice(0, 5) : ['Web Development', 'JavaScript', 'APIs']
-            };
-            tempJob.matchScore = calculateAtsScore(tempJob);
-            tempJob.isTopMatch = tempJob.matchScore >= 88;
-            return tempJob;
-          });
-
-          // Mezclar sin duplicados
-          const existingIds = new Set(state.jobs.map(j => j.id));
-          const newUnique = liveTransformed.filter(j => !existingIds.has(j.id));
-          state.jobs = [...newUnique, ...state.jobs];
-          showToastMessage(`¡${newUnique.length} vacantes en vivo añadidas desde la red internacional!`, 'success');
+        if (data?.success && Array.isArray(data.jobs)) {
+          verifiedJobs = data.jobs.filter(j => isDirectActiveVacancyUrl(j.url));
         }
       }
+
+      // 2. Fallback directo a APIs públicas CORS-friendly si el entorno local no corre Netlify Functions
+      if (verifiedJobs.length === 0) {
+        verifiedJobs = await fetchDirectPublicFeedsFallback();
+      }
+
+      if (verifiedJobs.length > 0) {
+        verifiedJobs.forEach(j => {
+          j.matchScore = calculateAtsScore(j);
+          j.isTopMatch = j.matchScore >= 55;
+        });
+        state.jobs = verifiedJobs;
+        saveVerifiedJobsCache(verifiedJobs);
+        if (!silent) {
+          showToastMessage(`¡${verifiedJobs.length} vacantes activas y verificadas en el Radar!`, 'success');
+        }
+      } else if (!silent) {
+        showToastMessage('No se pudieron verificar nuevas vacantes activas en este momento.', 'info');
+      }
     } catch (e) {
-      console.info('Consulta a API externa completada con fallback local:', e);
-      showToastMessage('Radar actualizado con el catálogo curado de 25 vacantes clave.', 'info');
+      console.warn('Error actualizando radar en vivo:', e);
+      if (!silent) {
+        showToastMessage('Error al consultar ofertas en vivo. Reintenta en unos segundos.', 'info');
+      }
     } finally {
+      state.isLoadingLive = false;
       if (btnRefresh) {
         btnRefresh.disabled = false;
         btnRefresh.innerHTML = `
@@ -1231,11 +912,13 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   // Listeners y Enlaces de Controles de Interfaz
   // =========================================================================
   function initEventListeners() {
-    // 1. Hero Search Bar Controls
+    // 1. Unified Search & Filter Bar Controls
     const heroInput = document.getElementById('radarHeroInput');
     const filterRole = document.getElementById('radarFilterRole');
     const filterLocation = document.getElementById('radarFilterLocation');
     const filterSource = document.getElementById('radarFilterSource');
+    const filterModality = document.getElementById('radarFilterModality');
+    const filterMatch = document.getElementById('radarFilterMatch');
     const btnSearch = document.getElementById('btnRadarSearch');
 
     function executeHeroSearch() {
@@ -1243,6 +926,8 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
       state.activeFilterRole = (filterRole && filterRole.value) || 'all';
       state.activeFilterMarket = (filterLocation && filterLocation.value) || 'all';
       state.activeFilterPlatform = (filterSource && filterSource.value) || 'all';
+      state.activeFilterModality = (filterModality && filterModality.value) || 'all';
+      state.activeMatchFilter = (filterMatch && filterMatch.value) || 'all';
       render();
       const gridEl = document.getElementById('radarJobsGrid');
       if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1291,6 +976,20 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
       });
     }
 
+    if (filterModality) {
+      filterModality.addEventListener('change', (e) => {
+        state.activeFilterModality = e.target.value;
+        render();
+      });
+    }
+
+    if (filterMatch) {
+      filterMatch.addEventListener('change', (e) => {
+        state.activeMatchFilter = e.target.value;
+        render();
+      });
+    }
+
     // 2. Ordenamiento
     const sortSelect = document.getElementById('radarSortSelect');
     if (sortSelect) {
@@ -1304,17 +1003,11 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const btnRefresh = document.getElementById('btnRefreshRadarJobs');
     if (btnRefresh) {
       btnRefresh.addEventListener('click', () => {
-        refreshLiveJobs();
+        refreshLiveJobs(false);
       });
     }
 
-    // 4. Tab switcher del Sidebar (Filtros vs Asesor IA)
-    const tabFilters = document.getElementById('tabSidebarFilters');
-    const tabCopilot = document.getElementById('tabSidebarCopilot');
-    if (tabFilters) tabFilters.addEventListener('click', () => switchSidebarTab('filters'));
-    if (tabCopilot) tabCopilot.addEventListener('click', () => switchSidebarTab('copilot'));
-
-    // 5. Botón Restablecer Filtros
+    // 4. Botón Restablecer Filtros
     const btnReset = document.getElementById('btnResetRadarFilters');
     if (btnReset) {
       btnReset.addEventListener('click', () => {
@@ -1323,65 +1016,23 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
         state.activeFilterPlatform = 'all';
         state.activeFilterType = 'all';
         state.activeFilterModality = 'all';
-        state.filterMatchHigh = true;
-        state.filterMatchMed = true;
+        state.activeMatchFilter = 'all';
         state.searchKeyword = '';
         if (heroInput) heroInput.value = '';
         if (filterRole) filterRole.value = 'all';
         if (filterLocation) filterLocation.value = 'all';
         if (filterSource) filterSource.value = 'all';
-        const chkHigh = document.getElementById('chkMatchHigh');
-        const chkMed = document.getElementById('chkMatchMed');
-        if (chkHigh) chkHigh.checked = true;
-        if (chkMed) chkMed.checked = true;
+        if (filterModality) filterModality.value = 'all';
+        if (filterMatch) filterMatch.value = 'all';
         render();
       });
     }
 
-    // 6. Checkboxes Match ATS
-    const chkHigh = document.getElementById('chkMatchHigh');
-    const chkMed = document.getElementById('chkMatchMed');
-    if (chkHigh) {
-      chkHigh.addEventListener('change', (e) => {
-        state.filterMatchHigh = e.target.checked;
-        render();
-      });
-    }
-    if (chkMed) {
-      chkMed.addEventListener('change', (e) => {
-        state.filterMatchMed = e.target.checked;
-        render();
-      });
-    }
-
-    // 7. Botón Comparar en Copilot
+    // 5. Botón Comparar en Copilot flotante
     const btnTriggerCompare = document.getElementById('btnTriggerCompareWithAi');
     if (btnTriggerCompare) {
       btnTriggerCompare.addEventListener('click', () => {
-        switchSidebarTab('copilot');
-        handleCopilotUserPrompt('Compara detalladamente las vacantes que seleccioné y dime cuál debo priorizar.');
-      });
-    }
-
-    // 8. Chips de sugerencias del Copilot
-    document.querySelectorAll('.prompt-chip').forEach(chip => {
-      chip.addEventListener('click', (e) => {
-        const prompt = e.currentTarget.dataset.prompt;
-        if (prompt) handleCopilotUserPrompt(prompt);
-      });
-    });
-
-    // 9. Input del Copilot Form
-    const copilotForm = document.getElementById('radarCopilotForm');
-    const copilotInput = document.getElementById('radarCopilotInput');
-    if (copilotForm && copilotInput) {
-      copilotForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = copilotInput.value;
-        if (text && text.trim()) {
-          copilotInput.value = '';
-          handleCopilotUserPrompt(text);
-        }
+        openAtsCopilotDrawer('Compara detalladamente las vacantes que seleccioné y dime cuál debo priorizar.', null, 'radar');
       });
     }
   }
@@ -1477,7 +1128,7 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
   // =========================================================================
   // Control del Drawer Desplegable del Asesor ATS & IA
   // =========================================================================
-  function openAtsCopilotDrawer(initialPrompt, targetVacancyId) {
+  function openAtsCopilotDrawer(initialPrompt, targetVacancyId, defaultMode) {
     const overlay = document.getElementById('atsCopilotDrawerOverlay');
     if (!overlay) return;
 
@@ -1491,14 +1142,20 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     const floatingBtn = document.getElementById('btnFloatingCopilot');
     if (floatingBtn) floatingBtn.style.display = 'none';
 
-    // Activar pestaña ATS por defecto al abrir desde el tablero
+    const isRadarView = defaultMode === 'radar' || (!targetVacancyId && document.getElementById('view-jobsearch')?.classList.contains('active'));
     const tabAts = document.getElementById('btnCopilotTabAts');
     const tabRadar = document.getElementById('btnCopilotTabRadar');
     const pickerBox = document.getElementById('copilotVacancyPickerBox');
     if (tabAts && tabRadar) {
-      tabAts.classList.add('active');
-      tabRadar.classList.remove('active');
-      if (pickerBox) pickerBox.style.display = 'flex';
+      if (isRadarView) {
+        tabRadar.classList.add('active');
+        tabAts.classList.remove('active');
+        if (pickerBox) pickerBox.style.display = 'none';
+      } else {
+        tabAts.classList.add('active');
+        tabRadar.classList.remove('active');
+        if (pickerBox) pickerBox.style.display = 'flex';
+      }
     }
 
     updateCopilotAiModeToggleUI();
@@ -1521,11 +1178,12 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
     overlay.style.display = 'none';
     document.body.style.overflow = '';
 
-    // Restaurar botón flotante si estamos en Kanban o Vista Lista
+    // Restaurar botón flotante si estamos en Kanban, Vista Lista o Radar
     const floatingBtn = document.getElementById('btnFloatingCopilot');
-    const isAtsBoard = document.getElementById('view-kanban')?.classList.contains('active') ||
-                       document.getElementById('view-list')?.classList.contains('active');
-    if (floatingBtn && isAtsBoard) {
+    const isCopilotView = document.getElementById('view-kanban')?.classList.contains('active') ||
+                          document.getElementById('view-list')?.classList.contains('active') ||
+                          document.getElementById('view-jobsearch')?.classList.contains('active');
+    if (floatingBtn && isCopilotView) {
       floatingBtn.style.display = 'flex';
     }
   }
@@ -1541,6 +1199,9 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
 
     const b2 = document.getElementById('copilotAtsCountBadge');
     if (b2) b2.textContent = count;
+
+    const bRadar = document.getElementById('copilotRadarCountBadge');
+    if (bRadar) bRadar.textContent = state.jobs.length;
   }
 
   function populateAtsVacancyPicker(selectedVacancyId) {
@@ -1697,6 +1358,10 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
       renderCopilotMessages();
       updateAtsBadges();
 
+      if (!isRadarCacheFresh()) {
+        refreshLiveJobs(true);
+      }
+
       // Suscribirse a cambios en el perfil (por ejemplo al subir un .md o cambiar de usuario)
       if (window.appStorage && typeof window.appStorage.subscribeProfile === 'function') {
         window.appStorage.subscribeProfile(() => {
@@ -1706,7 +1371,12 @@ Responde con análisis táctico claro, 3 viñetas concisas y 1 recomendación de
         });
       }
     },
-    render: render,
+    render: function () {
+      render();
+      if (state.jobs.length === 0 && !state.isLoadingLive) {
+        refreshLiveJobs(true);
+      }
+    },
     importJobToKanban: importJobToKanban,
     askCopilot: handleCopilotUserPrompt,
     openDrawer: openAtsCopilotDrawer,

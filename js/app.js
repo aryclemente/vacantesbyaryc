@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentView = 'kanban';
   let searchQuery = '';
-  let selectedPriorityFilter = 'all';
-  let selectedModalityFilter = 'all';
+  let includedPriorities = new Set();
+  let excludedPriorities = new Set();
+  let includedModalities = new Set();
+  let excludedModalities = new Set();
   let includedStatuses = new Set();
   let excludedStatuses = new Set();
   let tableSort = { field: null, dir: 'asc' };
@@ -270,13 +272,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // El Asesor IA flotante opera contextualmente en Kanban y Vista Lista
+    // El Asesor IA flotante opera contextualmente en Kanban, Vista Lista y Radar de Empleos
     const isAtsBoardView = (viewName === 'kanban' || viewName === 'list');
+    const showFloatingCopilot = isAtsBoardView || viewName === 'jobsearch';
     const floatingCopilotBtn = document.getElementById('btnFloatingCopilot');
     const archivedToggleBtn = document.getElementById('btnToggleArchivedCol');
 
     if (floatingCopilotBtn) {
-      floatingCopilotBtn.style.display = isAtsBoardView ? 'flex' : 'none';
+      floatingCopilotBtn.style.display = showFloatingCopilot ? 'flex' : 'none';
     }
     if (archivedToggleBtn) {
       archivedToggleBtn.style.display = isAtsBoardView ? 'inline-flex' : 'none';
@@ -331,6 +334,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // Filter Logic
   // =========================================================================
+  function getNormalizedModalityKey(rawModality) {
+    const m = (rawModality || '').toLowerCase();
+    if (m.includes('remot')) return 'Remoto';
+    if (m.includes('híbrid') || m.includes('hibrid')) return 'Híbrido';
+    if (m.includes('presenc') || m.includes('on-site') || m.includes('onsite')) return 'Presencial';
+    return rawModality ? rawModality.trim() : 'Otro';
+  }
+
   function getFilteredVacancies() {
     const all = window.appStorage.getVacancies();
     return all.filter(v => {
@@ -347,16 +358,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matchesSearch) return false;
       }
 
-      // Priority filter
-      if (selectedPriorityFilter !== 'all') {
-        if (v.prioridad !== selectedPriorityFilter) return false;
+      // Priority multi-include & exclude filters
+      const prio = v.prioridad || 'low';
+      if (excludedPriorities.has(prio)) {
+        return false;
+      }
+      if (includedPriorities.size > 0 && !includedPriorities.has(prio)) {
+        return false;
       }
 
-      // Modality filter
-      if (selectedModalityFilter !== 'all') {
-        if (!v.modalidad || !v.modalidad.toLowerCase().includes(selectedModalityFilter.toLowerCase())) {
-          return false;
-        }
+      // Modality multi-include & exclude filters
+      const modKey = getNormalizedModalityKey(v.modalidad);
+      if (excludedModalities.has(modKey)) {
+        return false;
+      }
+      if (includedModalities.size > 0 && !includedModalities.has(modKey)) {
+        return false;
       }
 
       // Status multi-include & exclude filters
@@ -545,10 +562,45 @@ document.addEventListener('DOMContentLoaded', () => {
     return col ? col.label : statusId;
   }
 
+  const COLUMN_IE_SETS = {
+    modalidad: { inc: includedModalities, exc: excludedModalities },
+    prioridad: { inc: includedPriorities, exc: excludedPriorities },
+    estado: { inc: includedStatuses, exc: excludedStatuses }
+  };
+
+  function buildIncludeExcludePopoverHtml(colKey, title, items, emptyMsg) {
+    const sets = COLUMN_IE_SETS[colKey];
+    if (!sets) return '';
+    return `
+      <div class="col-filter-title">
+        <span>${title}</span>
+        <button type="button" class="btn btn-outline" data-ie-clear="${colKey}" style="padding:0.1rem 0.4rem; font-size:0.65rem;">Limpiar</button>
+      </div>
+      <div class="col-filter-list">
+        ${items.length === 0 ? `<div style="font-size:0.78rem; color:var(--text-muted); padding:0.35rem;">${emptyMsg}</div>` : items.map(item => {
+          const isInc = sets.inc.has(item.val);
+          const isExc = sets.exc.has(item.val);
+          return `
+            <div class="status-filter-row">
+              <span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:600; min-width:0;">
+                ${item.dotHtml || ''}
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.label}</span>
+              </span>
+              <div class="status-filter-actions">
+                <button type="button" class="status-mode-pill include ${isInc ? 'active' : ''}" data-ie-col="${colKey}" data-ie-inc="${item.val}" title="Incluir en la vista">+ Incluir</button>
+                <button type="button" class="status-mode-pill exclude ${isExc ? 'active' : ''}" data-ie-col="${colKey}" data-ie-exc="${item.val}" title="Excluir de la vista">− Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
   function updateColumnFilterIndicators() {
     const activeCount =
-      (selectedPriorityFilter !== 'all' ? 1 : 0) +
-      (selectedModalityFilter !== 'all' ? 1 : 0) +
+      (includedPriorities.size > 0 || excludedPriorities.size > 0 ? 1 : 0) +
+      (includedModalities.size > 0 || excludedModalities.size > 0 ? 1 : 0) +
       (includedStatuses.size > 0 || excludedStatuses.size > 0 ? 1 : 0) +
       (tableSort.field ? 1 : 0);
 
@@ -574,15 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
           isActive = true;
           symbol = tableSort.dir === 'asc' ? '↑' : '↓';
         }
-      } else if (col === 'modalidad' && selectedModalityFilter !== 'all') {
-        isActive = true;
-        symbol = '●';
-      } else if (col === 'prioridad' && selectedPriorityFilter !== 'all') {
-        isActive = true;
-        symbol = '●';
-      } else if (col === 'estado' && (includedStatuses.size > 0 || excludedStatuses.size > 0)) {
-        isActive = true;
-        symbol = `(${includedStatuses.size + excludedStatuses.size})`;
+      } else if (COLUMN_IE_SETS[col]) {
+        const totalCol = COLUMN_IE_SETS[col].inc.size + COLUMN_IE_SETS[col].exc.size;
+        if (totalCol > 0) {
+          isActive = true;
+          symbol = `(${totalCol})`;
+        }
       }
 
       btn.classList.toggle('is-filtered', isActive);
@@ -643,74 +692,50 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
     } else if (colName === 'modalidad') {
-      const modalities = ['all', 'Remoto', 'Híbrido', 'Presencial'];
-      html = `
-        <div class="col-filter-title"><span>Filtrar Modalidad</span></div>
-        <div class="col-filter-list">
-          ${modalities.map(m => {
-            const label = m === 'all' ? 'Todas las modalidades' : m;
-            const active = selectedModalityFilter === m;
-            return `
-              <button type="button" class="col-filter-option ${active ? 'active' : ''}" data-filter-mod="${m}">
-                <span>${label}</span>
-                <span>${active ? '✓' : ''}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      `;
+      const countsByMod = {};
+      allVacancies.forEach(v => {
+        const key = getNormalizedModalityKey(v.modalidad);
+        countsByMod[key] = (countsByMod[key] || 0) + 1;
+      });
+      const baseMods = ['Remoto', 'Híbrido', 'Presencial'];
+      const extraMods = Object.keys(countsByMod).filter(k => !baseMods.includes(k));
+      const allModKeys = [...baseMods, ...extraMods].filter(k =>
+        (countsByMod[k] || 0) > 0 || includedModalities.has(k) || excludedModalities.has(k)
+      );
+      html = buildIncludeExcludePopoverHtml(
+        'modalidad',
+        'Filtrar Modalidad',
+        allModKeys.map(m => ({ val: m, label: `${m} (${countsByMod[m] || 0})` })),
+        'Sin modalidades disponibles aún.'
+      );
     } else if (colName === 'prioridad') {
-      const priorities = [
-        { val: 'all', label: 'Todas las prioridades' },
-        { val: 'high', label: 'Prioridad Alta (55%-100%)' },
-        { val: 'med', label: 'Prioridad Media (10%-54%)' },
-        { val: 'low', label: 'Prioridad Baja (0%-9%)' }
+      const countsByPrio = {};
+      allVacancies.forEach(v => {
+        const pr = v.prioridad || 'low';
+        countsByPrio[pr] = (countsByPrio[pr] || 0) + 1;
+      });
+      const prioItems = [
+        { val: 'high', label: `Alta (55%-100%) (${countsByPrio.high || 0})`, dotHtml: '<span class="col-dot" style="background:#ef4444;"></span>' },
+        { val: 'med', label: `Media (10%-54%) (${countsByPrio.med || 0})`, dotHtml: '<span class="col-dot" style="background:#f59e0b;"></span>' },
+        { val: 'low', label: `Baja (0%-9%) (${countsByPrio.low || 0})`, dotHtml: '<span class="col-dot" style="background:#94a3b8;"></span>' }
       ];
-      html = `
-        <div class="col-filter-title"><span>Filtrar Prioridad</span></div>
-        <div class="col-filter-list">
-          ${priorities.map(p => {
-            const active = selectedPriorityFilter === p.val;
-            return `
-              <button type="button" class="col-filter-option ${active ? 'active' : ''}" data-filter-prio="${p.val}">
-                <span>${p.label}</span>
-                <span>${active ? '✓' : ''}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      `;
+      html = buildIncludeExcludePopoverHtml('prioridad', 'Filtrar Prioridad', prioItems, 'Sin prioridades disponibles.');
     } else if (colName === 'estado') {
       const countsByStatus = {};
       allVacancies.forEach(v => {
         countsByStatus[v.estado] = (countsByStatus[v.estado] || 0) + 1;
       });
       const availableCols = COLUMNS.filter(c => (countsByStatus[c.id] || 0) > 0 || includedStatuses.has(c.id) || excludedStatuses.has(c.id));
-      html = `
-        <div class="col-filter-title">
-          <span>Estados disponibles</span>
-          <button type="button" class="btn btn-outline" data-status-clear="1" style="padding:0.1rem 0.4rem; font-size:0.65rem;">Limpiar</button>
-        </div>
-        <div class="col-filter-list">
-          ${availableCols.length === 0 ? `<div style="font-size:0.78rem; color:var(--text-muted); padding:0.35rem;">Sin estados disponibles aún.</div>` : availableCols.map(c => {
-            const isInc = includedStatuses.has(c.id);
-            const isExc = excludedStatuses.has(c.id);
-            const cnt = countsByStatus[c.id] || 0;
-            return `
-              <div class="status-filter-row">
-                <span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:600; min-width:0;">
-                  <span class="col-dot ${c.dotClass}"></span>
-                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.label.split('/')[0].trim()} (${cnt})</span>
-                </span>
-                <div class="status-filter-actions">
-                  <button type="button" class="status-mode-pill include ${isInc ? 'active' : ''}" data-status-inc="${c.id}" title="Incluir en la vista">+ Incluir</button>
-                  <button type="button" class="status-mode-pill exclude ${isExc ? 'active' : ''}" data-status-exc="${c.id}" title="Excluir de la vista">− Excluir</button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
+      html = buildIncludeExcludePopoverHtml(
+        'estado',
+        'Estados disponibles',
+        availableCols.map(c => ({
+          val: c.id,
+          label: `${c.label.split('/')[0].trim()} (${countsByStatus[c.id] || 0})`,
+          dotHtml: `<span class="col-dot ${c.dotClass}"></span>`
+        })),
+        'Sin estados disponibles aún.'
+      );
     }
 
     tableColumnFilterPopover.innerHTML = html;
@@ -739,55 +764,48 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable();
       });
     });
-    tableColumnFilterPopover.querySelectorAll('[data-filter-mod]').forEach(btn => {
+    tableColumnFilterPopover.querySelectorAll('[data-ie-inc]').forEach(btn => {
       btn.addEventListener('click', () => {
-        selectedModalityFilter = btn.dataset.filterMod;
-        closeColumnFilterPopover();
-        renderKanban();
-        renderTable();
-      });
-    });
-    tableColumnFilterPopover.querySelectorAll('[data-filter-prio]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedPriorityFilter = btn.dataset.filterPrio;
-        closeColumnFilterPopover();
-        renderKanban();
-        renderTable();
-      });
-    });
-    tableColumnFilterPopover.querySelectorAll('[data-status-inc]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const st = btn.dataset.statusInc;
-        if (includedStatuses.has(st)) {
-          includedStatuses.delete(st);
+        const colKey = btn.dataset.ieCol;
+        const val = btn.dataset.ieInc;
+        const sets = COLUMN_IE_SETS[colKey];
+        if (!sets) return;
+        if (sets.inc.has(val)) {
+          sets.inc.delete(val);
         } else {
-          includedStatuses.add(st);
-          excludedStatuses.delete(st);
+          sets.inc.add(val);
+          sets.exc.delete(val);
         }
-        renderColumnFilterPopover('estado', anchorEl);
+        renderColumnFilterPopover(colKey, anchorEl);
         renderKanban();
         renderTable();
       });
     });
-    tableColumnFilterPopover.querySelectorAll('[data-status-exc]').forEach(btn => {
+    tableColumnFilterPopover.querySelectorAll('[data-ie-exc]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const st = btn.dataset.statusExc;
-        if (excludedStatuses.has(st)) {
-          excludedStatuses.delete(st);
+        const colKey = btn.dataset.ieCol;
+        const val = btn.dataset.ieExc;
+        const sets = COLUMN_IE_SETS[colKey];
+        if (!sets) return;
+        if (sets.exc.has(val)) {
+          sets.exc.delete(val);
         } else {
-          excludedStatuses.add(st);
-          includedStatuses.delete(st);
+          sets.exc.add(val);
+          sets.inc.delete(val);
         }
-        renderColumnFilterPopover('estado', anchorEl);
+        renderColumnFilterPopover(colKey, anchorEl);
         renderKanban();
         renderTable();
       });
     });
-    tableColumnFilterPopover.querySelectorAll('[data-status-clear]').forEach(btn => {
+    tableColumnFilterPopover.querySelectorAll('[data-ie-clear]').forEach(btn => {
       btn.addEventListener('click', () => {
-        includedStatuses.clear();
-        excludedStatuses.clear();
-        renderColumnFilterPopover('estado', anchorEl);
+        const colKey = btn.dataset.ieClear;
+        const sets = COLUMN_IE_SETS[colKey];
+        if (!sets) return;
+        sets.inc.clear();
+        sets.exc.clear();
+        renderColumnFilterPopover(colKey, anchorEl);
         renderKanban();
         renderTable();
       });
@@ -817,8 +835,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnClearAllColumnFilters = document.getElementById('btnClearAllColumnFilters');
   if (btnClearAllColumnFilters) {
     btnClearAllColumnFilters.addEventListener('click', () => {
-      selectedPriorityFilter = 'all';
-      selectedModalityFilter = 'all';
+      includedPriorities.clear();
+      excludedPriorities.clear();
+      includedModalities.clear();
+      excludedModalities.clear();
       includedStatuses.clear();
       excludedStatuses.clear();
       tableSort = { field: null, dir: 'asc' };
@@ -3673,15 +3693,14 @@ ${email}`;
       const profile = (window.appStorage && window.appStorage.getProfile()) || {};
       const headerUserName = document.getElementById('headerUserName');
       const headerUserAvatar = document.getElementById('headerUserAvatar');
+      const avatarEmoji = profile.avatar_emoji || profile.foto_config?.avatar_emoji || '🚀';
 
       if (headerUserName) {
         headerUserName.textContent = profile.nombre ? profile.nombre.split(' ')[0] : 'Mi Perfil';
       }
       if (headerUserAvatar) {
-        const initials = profile.nombre
-          ? profile.nombre.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
-          : '--';
-        headerUserAvatar.textContent = initials;
+        headerUserAvatar.textContent = avatarEmoji;
+        headerUserAvatar.classList.add('is-emoji');
       }
     }
 
@@ -3741,6 +3760,9 @@ ${email}`;
           });
           showToast(apiKey ? 'Configuración guardada y API Key cifrada en la nube' : 'Configuración de IA guardada', 'success');
           if (settingsModal) settingsModal.classList.remove('open');
+          try {
+            window.dispatchEvent(new CustomEvent('aryc:settings-saved', { detail: { provider, hasKey: !!apiKey } }));
+          } catch (e) {}
         } catch (err) {
           console.error('Error cifrando/guardando configuración:', err);
           showToast('Error guardando configuración: ' + (err.message || 'intenta de nuevo'), 'error');
@@ -3813,6 +3835,9 @@ ${email}`;
     const profGithub = document.getElementById('profGithub');
     const profResumen = document.getElementById('profResumen');
     const profHabilidades = document.getElementById('profHabilidades');
+    const profAvatarEmoji = document.getElementById('profAvatarEmoji');
+    const profAvatarEmojiPicker = document.getElementById('profAvatarEmojiPicker');
+    const profAvatarEmojiPreviewLabel = document.getElementById('profAvatarEmojiPreviewLabel');
     const profSkillsChips = document.getElementById('profSkillsChips');
     const profExpList = document.getElementById('profExpList');
     const profExpCount = document.getElementById('profExpCount');
@@ -3822,6 +3847,27 @@ ${email}`;
 
     let currentFormExperiences = [];
     let currentFormEducation = [];
+
+    function setSelectedAvatarEmoji(emoji) {
+      const chosen = emoji || '🚀';
+      if (profAvatarEmoji) profAvatarEmoji.value = chosen;
+      if (profAvatarEmojiPreviewLabel) profAvatarEmojiPreviewLabel.textContent = `Seleccionado: ${chosen}`;
+      if (profAvatarEmojiPicker) {
+        profAvatarEmojiPicker.querySelectorAll('.emoji-choice-btn').forEach(btn => {
+          const isMatch = btn.dataset.emoji === chosen;
+          btn.classList.toggle('active', isMatch);
+          btn.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+        });
+      }
+    }
+
+    if (profAvatarEmojiPicker) {
+      profAvatarEmojiPicker.addEventListener('click', (e) => {
+        const btn = e.target.closest('.emoji-choice-btn');
+        if (!btn) return;
+        setSelectedAvatarEmoji(btn.dataset.emoji);
+      });
+    }
 
     function populateProfileForm(profile) {
       if (!profile) return;
@@ -3834,6 +3880,7 @@ ${email}`;
       if (profGithub) profGithub.value = profile.enlaces?.github || '';
       if (profResumen) profResumen.value = profile.resumen || '';
       if (profHabilidades) profHabilidades.value = (profile.habilidades || []).join(', ');
+      setSelectedAvatarEmoji(profile.avatar_emoji || profile.foto_config?.avatar_emoji || '🚀');
 
       renderFormSkillsChips(profile.habilidades || []);
 
@@ -4346,6 +4393,8 @@ ${email}`;
         const rawSkills = profHabilidades ? profHabilidades.value.split(',').map(s => s.trim()).filter(Boolean) : [];
         const prevProfile = window.appStorage.getProfile() || {};
 
+        const chosenEmoji = profAvatarEmoji ? profAvatarEmoji.value : (prevProfile.avatar_emoji || prevProfile.foto_config?.avatar_emoji || '🚀');
+
         const updatedProfile = {
           ...prevProfile,
           nombre: profNombre ? profNombre.value.trim() : 'Usuario',
@@ -4362,6 +4411,11 @@ ${email}`;
           habilidades: rawSkills,
           educacion: currentFormEducation,
           experiencias: currentFormExperiences,
+          avatar_emoji: chosenEmoji,
+          foto_config: {
+            ...(prevProfile.foto_config || {}),
+            avatar_emoji: chosenEmoji
+          },
           onboarding_completed: true
         };
 
